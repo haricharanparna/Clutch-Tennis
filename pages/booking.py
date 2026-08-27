@@ -57,6 +57,7 @@ if submitted:
                 "Email": email,
                 "Lesson Type": lesson_type,
                 "Preferred Date": str(preferred_date),
+                "Preferred Time": str(preferred_time)
                 "Notes": notes
             }
 
