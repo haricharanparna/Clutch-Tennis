@@ -11,6 +11,7 @@ st.write("Fill out the form below to request your lesson.")
 
 with st.form("booking_form"):
     name = st.text_input("Full Name")
+    preferred_time = st.time_input("Preferred Time")
     email = st.text_input("Your Email Address")
 
     lesson_type = st.selectbox(
