@@ -13,6 +13,7 @@ supabase = create_client(
 
 st.header("Create Your Account")
 
+nameinput = st.text_input("Enter Your Full Name")
 emailinput = st.text_input("Enter Your Email")
 passwordinput = st.text_input(
     "Enter Your Password",
