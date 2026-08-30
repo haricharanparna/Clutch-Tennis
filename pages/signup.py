@@ -22,11 +22,6 @@ passinput = st.text_input(
 
 loginbutton = st.button("Login")
 
-signup_button = st.button("Create an Account")
-
-if signup_button:
-    st.switch_page("pages/signup.py")
-
 
 if loginbutton:
     if not emailinput or not passinput:
