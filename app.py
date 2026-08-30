@@ -13,19 +13,16 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
-# Check for an existing Supabase session
-session = supabase.auth.get_session()
-
-if not session:
+# Redirect to login if the user is not logged in
+if not st.session_state.get("logged_in", False):
     st.switch_page("pages/login.py")
 
+# Get logged-in user
+user = st.session_state.get("user")
 
-# Get the logged-in user
-user = session.user
-
-full_name = user.user_metadata.get("full_name", "Player")
-
-st.success(f"Welcome, {full_name}! 🎾")
+if user:
+    full_name = user.user_metadata.get("full_name", "Player")
+    st.success(f"Welcome, {full_name}! 🎾")
 
 
 st.title("Clutch Tennis")
