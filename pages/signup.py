@@ -27,12 +27,9 @@ confirmpassword = st.text_input(
 )
 
 createacc = st.button("Create Account")
-login_button = st.button("Back to Login")
-    if login_button:
-        st.switch_page("pages/login.py")
 
 if createacc:
-    if not nameinput or not emailinput or not passwordinput or not confirmpassword:
+    if not emailinput or not passwordinput or not confirmpassword:
         st.error("Please fill out all fields.")
 
     elif passwordinput != confirmpassword:
@@ -42,12 +39,7 @@ if createacc:
         try:
             data = supabase.auth.sign_up({
                 "email": emailinput,
-                "password": passwordinput,
-                "options": {
-                    "data": {
-                        "full_name": nameinput
-                    }
-                }
+                "password": passwordinput
             })
 
             if data.user:
@@ -57,3 +49,9 @@ if createacc:
 
         except Exception:
             st.error("Something went wrong. Please try again.")
+
+
+back_login = st.button("Back to Login")
+
+if back_login:
+    st.switch_page("pages/login.py")
