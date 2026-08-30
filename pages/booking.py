@@ -9,7 +9,6 @@ st.set_page_config(
 st.title("Book Your Tennis Session")
 st.write("Fill out the form below to request your lesson.")
 
-# Apps Script Web App URL
 availability_url = "https://script.google.com/macros/s/AKfycbxclfNHxhTVJeXhwsN14---f3qdq0fGedhzZANjNZ4b3dp202xyVzhx5FGqVDha5aKBhQ/exec"
 
 times = [
@@ -26,8 +25,33 @@ times = [
     "7:00 PM"
 ]
 
+# Date is outside the form so changing it updates the available times
+preferred_date = st.date_input("Preferred Date")
+
+# Check Google Sheet for booked times
+try:
+    availability_response = requests.get(
+        availability_url,
+        params={"date": str(preferred_date)},
+        timeout=10
+    )
+
+    if availability_response.status_code == 200:
+        booked_times = availability_response.json().get("bookedTimes", [])
+    else:
+        booked_times = []
+
+except Exception:
+    booked_times = []
+
+available_times = [
+    time for time in times
+    if time not in booked_times
+]
+
 with st.form("booking_form"):
     name = st.text_input("Full Name")
+
     email = st.text_input("Your Email Address")
 
     lesson_type = st.selectbox(
@@ -39,29 +63,6 @@ with st.form("booking_form"):
             "Match Play & Strategy"
         ]
     )
-
-    preferred_date = st.date_input("Preferred Date")
-
-    # Check Google Sheet for booked times
-    try:
-        availability_response = requests.get(
-            availability_url,
-            params={"date": str(preferred_date)},
-            timeout=10
-        )
-
-        if availability_response.status_code == 200:
-            booked_times = availability_response.json().get("bookedTimes", [])
-        else:
-            booked_times = []
-
-    except Exception:
-        booked_times = []
-
-    available_times = [
-        time for time in times
-        if time not in booked_times
-    ]
 
     if available_times:
         preferred_time = st.selectbox(
@@ -78,7 +79,6 @@ with st.form("booking_form"):
         "Submit Booking Request",
         use_container_width=True
     )
-
 
 if submitted:
     if not name or not email:
