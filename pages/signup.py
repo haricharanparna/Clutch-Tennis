@@ -50,7 +50,6 @@ if createacc:
         except Exception:
             st.error("Something went wrong. Please try again.")
 
-
 back_login = st.button("Back to Login")
 
 if back_login:
