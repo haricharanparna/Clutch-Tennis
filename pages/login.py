@@ -14,7 +14,10 @@ supabase = create_client(
 st.header("Welcome Back")
 
 emailinput = st.text_input("Enter Your Email")
-passinput = st.text_input("Enter Your Password", type="password")
+passinput = st.text_input(
+    "Enter Your Password",
+    type="password"
+)
 
 loginbutton = st.button("Login")
 
@@ -29,7 +32,11 @@ if loginbutton:
             })
 
             if data.user:
+                st.session_state["logged_in"] = True
+                st.session_state["user"] = data.user
+
                 st.success("Login successful! 🎾")
+
                 st.switch_page("app.py")
             else:
                 st.error("Login failed.")
