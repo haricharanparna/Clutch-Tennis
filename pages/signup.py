@@ -27,6 +27,9 @@ confirmpassword = st.text_input(
 )
 
 createacc = st.button("Create Account")
+login_button = st.button("Back to Login")
+    if login_button:
+        st.switch_page("pages/login.py")
 
 if createacc:
     if not nameinput or not emailinput or not passwordinput or not confirmpassword:
