@@ -13,13 +13,13 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
-# Check for logged-in user
-session = supabase.auth.get_session()
+# Check if user is logged in
+if st.session_state.get("logged_in"):
+    user = st.session_state.get("user")
 
-if session:
-    user = session.user
-    full_name = user.user_metadata.get("full_name", "Player")
-    st.write(f"Welcome, {full_name}! 🎾")
+    if user:
+        full_name = user.user_metadata.get("full_name", "Player")
+        st.success(f"Welcome, {full_name}! 🎾")
 
 
 st.title("Clutch Tennis")
