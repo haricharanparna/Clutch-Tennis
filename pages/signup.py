@@ -2,7 +2,7 @@ import streamlit as st
 from supabase import create_client
 
 st.set_page_config(
-    page_title="Clutch Tennis | Sign Up",
+    page_title="Clutch Tennis | Login",
     page_icon="🎾"
 )
 
@@ -11,46 +11,44 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
-st.header("Create Your Account")
+st.header("Welcome Back")
 
-nameinput = st.text_input("Enter Your Full Name")
 emailinput = st.text_input("Enter Your Email")
 
-passwordinput = st.text_input(
+passinput = st.text_input(
     "Enter Your Password",
     type="password"
 )
 
-confirmpassword = st.text_input(
-    "Confirm Password",
-    type="password"
-)
+loginbutton = st.button("Login")
 
-createacc = st.button("Create Account")
+signup_button = st.button("Create an Account")
 
-if createacc:
-    if not emailinput or not passwordinput or not confirmpassword:
-        st.error("Please fill out all fields.")
+if signup_button:
+    st.switch_page("pages/signup.py")
 
-    elif passwordinput != confirmpassword:
-        st.error("Passwords do not match.")
+
+if loginbutton:
+    if not emailinput or not passinput:
+        st.error("Please enter both your email and password.")
 
     else:
         try:
-            data = supabase.auth.sign_up({
+            data = supabase.auth.sign_in_with_password({
                 "email": emailinput,
-                "password": passwordinput
+                "password": passinput
             })
 
             if data.user:
-                st.success("Account created successfully! 🎾")
+                st.session_state["logged_in"] = True
+                st.session_state["user"] = data.user
+
+                st.success("Login successful! 🎾")
+
+                st.switch_page("app.py")
+
             else:
-                st.error("Account could not be created.")
+                st.error("Login failed.")
 
         except Exception:
-            st.error("Something went wrong. Please try again.")
-
-back_login = st.button("Back to Login")
-
-if back_login:
-    st.switch_page("pages/login.py")
+            st.error("Incorrect email or password.")
