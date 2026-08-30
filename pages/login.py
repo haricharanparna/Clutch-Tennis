@@ -32,8 +32,8 @@ if loginbutton:
             })
 
             if data.user:
-                st.session_state["logged_in"] = True
                 st.session_state["user"] = data.user
+                st.session_state["access_token"] = data.session.access_token
 
                 st.success("Login successful! 🎾")
 
