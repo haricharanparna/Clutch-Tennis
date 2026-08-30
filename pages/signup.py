@@ -15,10 +15,12 @@ st.header("Create Your Account")
 
 nameinput = st.text_input("Enter Your Full Name")
 emailinput = st.text_input("Enter Your Email")
+
 passwordinput = st.text_input(
     "Enter Your Password",
     type="password"
 )
+
 confirmpassword = st.text_input(
     "Confirm Password",
     type="password"
@@ -27,7 +29,7 @@ confirmpassword = st.text_input(
 createacc = st.button("Create Account")
 
 if createacc:
-    if not emailinput or not passwordinput or not confirmpassword:
+    if not nameinput or not emailinput or not passwordinput or not confirmpassword:
         st.error("Please fill out all fields.")
 
     elif passwordinput != confirmpassword:
@@ -37,7 +39,12 @@ if createacc:
         try:
             data = supabase.auth.sign_up({
                 "email": emailinput,
-                "password": passwordinput
+                "password": passwordinput,
+                "options": {
+                    "data": {
+                        "full_name": nameinput
+                    }
+                }
             })
 
             if data.user:
