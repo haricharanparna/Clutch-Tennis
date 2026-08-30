@@ -27,7 +27,9 @@ confirmpassword = st.text_input(
 )
 
 createacc = st.button("Create Account")
+
 login_button = st.button("Back to Login")
+
 if login_button:
     st.switch_page("pages/login.py")
 
@@ -52,8 +54,3 @@ if createacc:
 
         except Exception:
             st.error("Something went wrong. Please try again.")
-
-back_login = st.button("Back to Login")
-
-if back_login:
-    st.switch_page("pages/login.py")
