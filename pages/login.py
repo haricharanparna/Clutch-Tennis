@@ -30,6 +30,7 @@ if loginbutton:
 
             if data.user:
                 st.success("Login successful! 🎾")
+                st.switch_page("app.py")
             else:
                 st.error("Login failed.")
 
