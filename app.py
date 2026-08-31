@@ -8,20 +8,30 @@ st.set_page_config(
     layout="wide"
 )
 
+# -----------------------------
+# LOGIN PROTECTION
+# -----------------------------
 if not st.session_state.get("logged_in", False):
     st.switch_page("pages/login.py")
 
+# -----------------------------
+# SUPABASE
+# -----------------------------
 supabase = create_client(
     st.secrets["SUPABASE_URL"],
     st.secrets["SUPABASE_KEY"]
 )
 
+# Get logged-in user
 user = st.session_state.get("user")
 
 if user:
     full_name = user.user_metadata.get("full_name", "Player")
     st.success(f"Welcome, {full_name}! 🎾")
 
+# -----------------------------
+# PAGE CONTENT
+# -----------------------------
 st.title("Clutch Tennis")
 st.subheader("Train Hard. Play Clutch")
 
@@ -30,6 +40,9 @@ st.write(
     "building confidence, and helping you perform when it matters most."
 )
 
+# -----------------------------
+# CSS
+# -----------------------------
 st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] {
@@ -86,6 +99,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# -----------------------------
+# GOOGLE SHEET
+# -----------------------------
 sheet_url = (
     "https://docs.google.com/spreadsheets/d/e/"
     "2PACX-1vSgtx-vuVX2vg5vG-NfSGzB9LyzYXFwQ6or-y0GjdpAWwYCwvh89ueQStE8OYVcbaGgoFsH0IISrNr-/"
@@ -102,6 +118,9 @@ df = pd.read_csv(cache_bust_url)
 
 df.columns = df.columns.str.strip()
 
+# -----------------------------
+# SERVICE CARDS
+# -----------------------------
 st.markdown("""
 <div class="card-grid">
 """, unsafe_allow_html=True)
@@ -120,6 +139,9 @@ for _, row in df.iterrows():
 
 st.markdown("</div>", unsafe_allow_html=True)
 
+# -----------------------------
+# BOOKING BUTTONS
+# -----------------------------
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -150,10 +172,12 @@ with col4:
     ):
         st.switch_page("pages/booking.py")
 
+# -----------------------------
+# LOGOUT
+# -----------------------------
 st.divider()
 
 if st.button("Log Out"):
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
     st.switch_page("pages/login.py")
-```
