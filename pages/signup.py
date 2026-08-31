@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 from supabase import create_client
 
 st.set_page_config(
@@ -43,8 +44,7 @@ with st.form("signup_form"):
         type="password"
     )
 
-    # This works when the user clicks Create Account
-    # or presses Enter
+    # Works when clicking Create Account or pressing Enter
     createacc = st.form_submit_button(
         "Create Account",
         use_container_width=True
@@ -56,14 +56,14 @@ login_button = st.button(
     use_container_width=True
 )
 
-# Send the user back to the login page
+# Send the user back to Login
 if login_button:
     st.switch_page("pages/login.py")
 
 # Create the account
 if createacc:
 
-    # Make sure every field is filled out
+    # Make sure all fields are filled out
     if (
         not nameinput
         or not emailinput
@@ -72,18 +72,25 @@ if createacc:
     ):
         st.error("Please fill out all fields.")
 
-    # Check that both passwords match
+    # Check if the email has a valid format
+    elif not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        emailinput
+    ):
+        st.error("Please enter a valid email address.")
+
+    # Check that the passwords match
     elif passwordinput != confirmpassword:
         st.error("Passwords do not match.")
 
-    # Make sure the password is long enough
+    # Check password length
     elif len(passwordinput) < 6:
         st.error("Password must be at least 6 characters.")
 
     else:
 
         try:
-            # Create the Supabase account
+            # Create the account in Supabase
             data = supabase.auth.sign_up({
                 "email": emailinput,
                 "password": passwordinput,
@@ -105,7 +112,6 @@ if createacc:
                     "You can now log in with your email and password."
                 )
 
-                # Send the user to Login
                 st.switch_page("pages/login.py")
 
             else:
@@ -113,7 +119,7 @@ if createacc:
                     "Account could not be created."
                 )
 
-        except Exception:
+        except Exception as e:
             st.error(
                 "Something went wrong. Please try again."
             )
