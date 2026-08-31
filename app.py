@@ -4,26 +4,23 @@ from supabase import create_client
 
 st.set_page_config(
     page_title="Clutch Tennis",
-    page_icon="🔬",
+    page_icon="🎾",
     layout="wide"
 )
+
+if not st.session_state.get("logged_in", False):
+    st.switch_page("pages/login.py")
 
 supabase = create_client(
     st.secrets["SUPABASE_URL"],
     st.secrets["SUPABASE_KEY"]
 )
 
-# Redirect to login if the user is not logged in
-if not st.session_state.get("logged_in", False):
-    st.switch_page("pages/login.py")
-
-# Get logged-in user
 user = st.session_state.get("user")
 
 if user:
     full_name = user.user_metadata.get("full_name", "Player")
     st.success(f"Welcome, {full_name}! 🎾")
-
 
 st.title("Clutch Tennis")
 st.subheader("Train Hard. Play Clutch")
@@ -32,10 +29,6 @@ st.write(
     "Personalized tennis coaching focused on improving your skills, "
     "building confidence, and helping you perform when it matters most."
 )
-
-if st.button("Book a Lesson"):
-    st.success("Unavailable")
-
 
 st.markdown("""
 <style>
@@ -93,7 +86,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 sheet_url = (
     "https://docs.google.com/spreadsheets/d/e/"
     "2PACX-1vSgtx-vuVX2vg5vG-NfSGzB9LyzYXFwQ6or-y0GjdpAWwYCwvh89ueQStE8OYVcbaGgoFsH0IISrNr-/"
@@ -110,8 +102,6 @@ df = pd.read_csv(cache_bust_url)
 
 df.columns = df.columns.str.strip()
 
-
-# Service Cards
 st.markdown("""
 <div class="card-grid">
 """, unsafe_allow_html=True)
@@ -130,8 +120,6 @@ for _, row in df.iterrows():
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-
-# Booking Buttons
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -161,3 +149,11 @@ with col4:
         use_container_width=True
     ):
         st.switch_page("pages/booking.py")
+
+st.divider()
+
+if st.button("Log Out"):
+    st.session_state["logged_in"] = False
+    st.session_state["user"] = None
+    st.switch_page("pages/login.py")
+```
