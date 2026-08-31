@@ -22,20 +22,19 @@ st.header("Welcome Back")
 
 st.write("Log in to continue.")
 
-# Login form
-# Pressing Enter inside the form will submit it
-with st.form("login_form"):
+# Email input OUTSIDE the form
+emailinput = st.text_input(
+    "Enter Your Email"
+)
 
-    emailinput = st.text_input(
-        "Enter Your Email"
-    )
+# Login form
+with st.form("login_form"):
 
     passinput = st.text_input(
         "Enter Your Password",
         type="password"
     )
 
-    # Works when clicking Login or pressing Enter
     loginbutton = st.form_submit_button(
         "Login",
         use_container_width=True
@@ -128,14 +127,13 @@ if loginbutton:
                 # Save user information
                 st.session_state["user"] = data.user
 
-                # Send the user to the main app
+                # Send user to the main app
                 st.switch_page("app.py")
 
             else:
                 st.error("Login failed.")
 
         except Exception:
-            # Show an error if the email or password is incorrect
             st.error(
                 "Incorrect email or password."
             )
