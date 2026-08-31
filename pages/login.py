@@ -41,6 +41,12 @@ with st.form("login_form"):
         use_container_width=True
     )
 
+# Forgot password button
+forgotpassword = st.button(
+    "Forgot Password?",
+    use_container_width=True
+)
+
 # Create account button
 signup_button = st.button(
     "Create an Account",
@@ -50,6 +56,41 @@ signup_button = st.button(
 # Send the user to the signup page
 if signup_button:
     st.switch_page("pages/signup.py")
+
+# Password reset
+if forgotpassword:
+
+    if not emailinput:
+        st.error(
+            "Please enter your email address first."
+        )
+
+    elif not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        emailinput
+    ):
+        st.error(
+            "Please enter a valid email address."
+        )
+
+    else:
+
+        try:
+            # Send a password reset email through Supabase
+            supabase.auth.reset_password_for_email(
+                emailinput
+            )
+
+            st.success(
+                "Password reset email sent! "
+                "Check your inbox for the reset link."
+            )
+
+        except Exception:
+            st.error(
+                "Unable to send the password reset email. "
+                "Please try again."
+            )
 
 # Check login information
 if loginbutton:
@@ -87,7 +128,7 @@ if loginbutton:
                 # Save user information
                 st.session_state["user"] = data.user
 
-                # Send user to the main app
+                # Send the user to the main app
                 st.switch_page("app.py")
 
             else:
