@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 from supabase import create_client
 
 st.set_page_config(
@@ -34,7 +35,7 @@ with st.form("login_form"):
         type="password"
     )
 
-    # This works when the user clicks Login OR presses Enter
+    # Works when clicking Login or pressing Enter
     loginbutton = st.form_submit_button(
         "Login",
         use_container_width=True
@@ -46,7 +47,7 @@ signup_button = st.button(
     use_container_width=True
 )
 
-# Send user to the signup page
+# Send the user to the signup page
 if signup_button:
     st.switch_page("pages/signup.py")
 
@@ -56,7 +57,16 @@ if loginbutton:
     # Make sure both fields are filled out
     if not emailinput or not passinput:
         st.error(
-            "Please enter both your email and your password."
+            "Please enter both your email and password."
+        )
+
+    # Check if the email has a valid format
+    elif not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        emailinput
+    ):
+        st.error(
+            "Please enter a valid email address."
         )
 
     else:
@@ -71,13 +81,13 @@ if loginbutton:
             # If login was successful
             if data.user:
 
-                # Save the login status
+                # Save login status
                 st.session_state["logged_in"] = True
 
-                # Save the user's information
+                # Save user information
                 st.session_state["user"] = data.user
 
-                # Send the user to the main website
+                # Send user to the main app
                 st.switch_page("app.py")
 
             else:
@@ -85,4 +95,6 @@ if loginbutton:
 
         except Exception:
             # Show an error if the email or password is incorrect
-            st.error("Incorrect email or password.")
+            st.error(
+                "Incorrect email or password."
+            )
