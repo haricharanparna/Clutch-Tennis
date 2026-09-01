@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import re
 
 st.set_page_config(
     page_title="Book a Lesson | Clutch Tennis",
@@ -135,6 +136,16 @@ if submitted:
 
         st.error(
             "Please fill out both your name and email address."
+        )
+
+    # Check if the email has a valid format
+    elif not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        email
+    ):
+
+        st.error(
+            "Please enter a valid email address."
         )
 
     elif not preferred_time:
