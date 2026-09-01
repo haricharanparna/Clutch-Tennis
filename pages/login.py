@@ -22,20 +22,20 @@ st.header("Welcome Back")
 
 st.write("Log in to continue.")
 
-# Login form
-# Pressing Enter inside the form will submit it
-with st.form("login_form"):
+# Email input
+# This is outside the form so Forgot Password can use it
+emailinput = st.text_input(
+    "Enter Your Email"
+)
 
-    emailinput = st.text_input(
-        "Enter Your Email"
-    )
+# Login form
+with st.form("login_form"):
 
     passinput = st.text_input(
         "Enter Your Password",
         type="password"
     )
 
-    # Works when clicking Login or pressing Enter
     loginbutton = st.form_submit_button(
         "Login",
         use_container_width=True
@@ -53,11 +53,18 @@ signup_button = st.button(
     use_container_width=True
 )
 
-# Send the user to the signup page
+# -----------------------------
+# CREATE ACCOUNT
+# -----------------------------
 if signup_button:
-    st.switch_page("pages/signup.py")
 
-# Password reset
+    st.switch_page(
+        "pages/signup.py"
+    )
+
+# -----------------------------
+# FORGOT PASSWORD
+# -----------------------------
 if forgotpassword:
 
     if not emailinput:
@@ -102,17 +109,17 @@ if forgotpassword:
                 "Please try again."
             )
 
-# Check login information
+# -----------------------------
+# LOGIN
+# -----------------------------
 if loginbutton:
 
-    # Make sure both fields are filled out
     if not emailinput or not passinput:
 
         st.error(
             "Please enter both your email and password."
         )
 
-    # Check if the email has a valid format
     elif not re.match(
         r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
         emailinput
@@ -135,14 +142,13 @@ if loginbutton:
             # If login was successful
             if data.user:
 
-                # Save login status
                 st.session_state["logged_in"] = True
 
-                # Save user information
                 st.session_state["user"] = data.user
 
-                # Send user to the main app
-                st.switch_page("app.py")
+                st.switch_page(
+                    "app.py"
+                )
 
             else:
 
@@ -152,7 +158,6 @@ if loginbutton:
 
         except Exception:
 
-            # Show an error if the email or password is incorrect
             st.error(
                 "Incorrect email or password."
             )
