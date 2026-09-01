@@ -22,19 +22,20 @@ st.header("Welcome Back")
 
 st.write("Log in to continue.")
 
-# Email input OUTSIDE the form
-emailinput = st.text_input(
-    "Enter Your Email"
-)
-
 # Login form
+# Pressing Enter inside the form will submit it
 with st.form("login_form"):
+
+    emailinput = st.text_input(
+        "Enter Your Email"
+    )
 
     passinput = st.text_input(
         "Enter Your Password",
         type="password"
     )
 
+    # Works when clicking Login or pressing Enter
     loginbutton = st.form_submit_button(
         "Login",
         use_container_width=True
@@ -60,6 +61,7 @@ if signup_button:
 if forgotpassword:
 
     if not emailinput:
+
         st.error(
             "Please enter your email address first."
         )
@@ -68,6 +70,7 @@ if forgotpassword:
         r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
         emailinput
     ):
+
         st.error(
             "Please enter a valid email address."
         )
@@ -75,9 +78,16 @@ if forgotpassword:
     else:
 
         try:
-            # Send a password reset email through Supabase
+
+            # Send password reset email
             supabase.auth.reset_password_for_email(
-                emailinput
+                emailinput,
+                options={
+                    "redirect_to": (
+                        "https://clutch-tennis-6yc8kmr8cduasgptdslws4"
+                        ".streamlit.app/reset_password"
+                    )
+                }
             )
 
             st.success(
@@ -86,6 +96,7 @@ if forgotpassword:
             )
 
         except Exception:
+
             st.error(
                 "Unable to send the password reset email. "
                 "Please try again."
@@ -96,6 +107,7 @@ if loginbutton:
 
     # Make sure both fields are filled out
     if not emailinput or not passinput:
+
         st.error(
             "Please enter both your email and password."
         )
@@ -105,6 +117,7 @@ if loginbutton:
         r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
         emailinput
     ):
+
         st.error(
             "Please enter a valid email address."
         )
@@ -112,6 +125,7 @@ if loginbutton:
     else:
 
         try:
+
             # Try to log the user into Supabase
             data = supabase.auth.sign_in_with_password({
                 "email": emailinput,
@@ -131,9 +145,14 @@ if loginbutton:
                 st.switch_page("app.py")
 
             else:
-                st.error("Login failed.")
+
+                st.error(
+                    "Login failed."
+                )
 
         except Exception:
+
+            # Show an error if the email or password is incorrect
             st.error(
                 "Incorrect email or password."
             )
