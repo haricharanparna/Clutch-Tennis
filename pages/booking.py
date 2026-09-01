@@ -105,30 +105,39 @@ available_times = [
 # -----------------------------
 # RED BORDER CSS
 # -----------------------------
-st.markdown(
-    """
-    <style>
 
-    /* Red border for Full Name */
-    div[data-testid="stTextInput"]:has(
-        input[aria-label="Full Name"]
-    ) input {
-        border: 2px solid red !important;
-        box-shadow: 0 0 0 1px red !important;
-    }
+if st.session_state["name_error"]:
 
-    /* Red border for Email */
-    div[data-testid="stTextInput"]:has(
-        input[aria-label="Your Email Address"]
-    ) input {
-        border: 2px solid red !important;
-        box-shadow: 0 0 0 1px red !important;
-    }
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Full Name"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
+if st.session_state["email_error"]:
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Your Email Address"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # -----------------------------
@@ -201,7 +210,6 @@ if submitted:
 
     # Check time
     time_error = not preferred_time
-
 
     # Save errors
     st.session_state["name_error"] = name_error
