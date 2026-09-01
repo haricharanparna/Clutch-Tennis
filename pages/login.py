@@ -36,6 +36,7 @@ with st.form("login_form"):
         type="password"
     )
 
+    # Works when clicking Login or pressing Enter
     loginbutton = st.form_submit_button(
         "Login",
         use_container_width=True
