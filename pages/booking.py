@@ -42,7 +42,21 @@ times = [
     "7:00 PM"
 ]
 
-# Date is outside the form so changing it updates available times
+# -----------------------------
+# SESSION STATE
+# -----------------------------
+if "name_error" not in st.session_state:
+    st.session_state["name_error"] = False
+
+if "email_error" not in st.session_state:
+    st.session_state["email_error"] = False
+
+if "time_error" not in st.session_state:
+    st.session_state["time_error"] = False
+
+# -----------------------------
+# DATE
+# -----------------------------
 preferred_date = st.date_input(
     "Preferred Date"
 )
@@ -81,16 +95,54 @@ available_times = [
 ]
 
 # -----------------------------
+# RED BORDER CSS
+# -----------------------------
+
+if st.session_state["name_error"]:
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Full Name"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+if st.session_state["email_error"]:
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Your Email Address"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# -----------------------------
 # BOOKING FORM
 # -----------------------------
 with st.form("booking_form"):
 
     name = st.text_input(
-        "Full Name"
+        "Full Name",
+        key="booking_name"
     )
 
     email = st.text_input(
-        "Your Email Address"
+        "Your Email Address",
+        key="booking_email"
     )
 
     lesson_type = st.selectbox(
@@ -107,7 +159,8 @@ with st.form("booking_form"):
 
         preferred_time = st.selectbox(
             "Preferred Time",
-            available_times
+            available_times,
+            key="booking_time"
         )
 
     else:
@@ -128,52 +181,57 @@ with st.form("booking_form"):
     )
 
 # -----------------------------
-# VALIDATE FORM
+# VALIDATION
 # -----------------------------
 if submitted:
 
-    valid = True
+    # Check name
+    name_error = not name.strip()
 
-    # Full Name
-    if not name.strip():
+    # Check email
+    email_error = (
+        not email.strip()
+        or not re.match(
+            r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+            email
+        )
+    )
+
+    # Check time
+    time_error = not preferred_time
+
+    # Save errors
+    st.session_state["name_error"] = name_error
+    st.session_state["email_error"] = email_error
+    st.session_state["time_error"] = time_error
+
+    # -----------------------------
+    # ERROR MESSAGES
+    # -----------------------------
+
+    if name_error:
 
         st.error(
             "❌ Full Name: Please enter your name."
         )
 
-        valid = False
-
-    # Email
-    if not email.strip():
-
-        st.error(
-            "❌ Email: Please enter your email address."
-        )
-
-        valid = False
-
-    elif not re.match(
-        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-        email
-    ):
+    if email_error:
 
         st.error(
             "❌ Email: Please enter a valid email address."
         )
 
-        valid = False
-
-    # Preferred Time
-    if not preferred_time:
+    if time_error:
 
         st.error(
             "❌ Preferred Time: Please choose an available time."
         )
 
-        valid = False
+    # -----------------------------
+    # SUBMIT IF VALID
+    # -----------------------------
 
-    # Only submit if everything is valid
-    if valid:
+    if not name_error and not email_error and not time_error:
 
         with st.spinner(
             "Saving your booking request..."
@@ -208,6 +266,11 @@ if submitted:
                     st.success(
                         "Booking request submitted successfully! 🎾"
                     )
+
+                    # Clear errors after successful submission
+                    st.session_state["name_error"] = False
+                    st.session_state["email_error"] = False
+                    st.session_state["time_error"] = False
 
                 else:
 
