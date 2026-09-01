@@ -1,5 +1,6 @@
 import streamlit as st
-import requests import re
+import requests
+import re
 
 st.set_page_config(
     page_title="Book a Lesson | Clutch Tennis",
@@ -12,13 +13,11 @@ st.set_page_config(
 if not st.session_state.get("logged_in", False):
     st.switch_page("pages/login.py")
 
-
 # -----------------------------
 # PAGE
 # -----------------------------
 st.title("Book Your Tennis Session")
 st.write("Fill out the form below to request your lesson.")
-
 
 # -----------------------------
 # AVAILABILITY
@@ -42,7 +41,6 @@ times = [
     "6:00 PM",
     "7:00 PM"
 ]
-
 
 # -----------------------------
 # SESSION STATE
@@ -81,7 +79,6 @@ try:
     if availability_response.status_code == 200:
 
         try:
-
             booked_times = (
                 availability_response
                 .json()
@@ -89,15 +86,12 @@ try:
             )
 
         except ValueError:
-
             booked_times = []
 
     else:
-
         booked_times = []
 
 except Exception:
-
     booked_times = []
 
 
@@ -106,6 +100,44 @@ available_times = [
     for time in times
     if time not in booked_times
 ]
+
+
+# -----------------------------
+# RED BORDER CSS
+# -----------------------------
+
+if st.session_state["name_error"]:
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Full Name"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+if st.session_state["email_error"]:
+
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stTextInput"]:has(
+            input[aria-label="Your Email Address"]
+        ) input {
+            border: 2px solid red !important;
+            box-shadow: 0 0 0 1px red !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # -----------------------------
@@ -184,6 +216,7 @@ if submitted:
     st.session_state["email_error"] = email_error
     st.session_state["time_error"] = time_error
 
+
     # -----------------------------
     # ERROR MESSAGES
     # -----------------------------
@@ -207,51 +240,9 @@ if submitted:
         )
 
 
-# -----------------------------
-# RED BORDER CSS
-# -----------------------------
-# IMPORTANT:
-# This is AFTER validation so the
-# border appears immediately.
-
-if st.session_state["name_error"]:
-
-    st.markdown(
-        """
-        <style>
-
-        input[aria-label="Full Name"] {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-if st.session_state["email_error"]:
-
-    st.markdown(
-        """
-        <style>
-
-        input[aria-label="Your Email Address"] {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-# -----------------------------
-# SUBMIT IF VALID
-# -----------------------------
-if submitted:
+    # -----------------------------
+    # SUBMIT IF VALID
+    # -----------------------------
 
     if not name_error and not email_error and not time_error:
 
@@ -289,7 +280,7 @@ if submitted:
                         "Booking request submitted successfully! 🎾"
                     )
 
-                    # Clear errors
+                    # Clear errors after successful submission
                     st.session_state["name_error"] = False
                     st.session_state["email_error"] = False
                     st.session_state["time_error"] = False
