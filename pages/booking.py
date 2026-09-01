@@ -54,12 +54,14 @@ if "email_error" not in st.session_state:
 if "time_error" not in st.session_state:
     st.session_state["time_error"] = False
 
+
 # -----------------------------
 # DATE
 # -----------------------------
 preferred_date = st.date_input(
     "Preferred Date"
 )
+
 
 # -----------------------------
 # CHECK GOOGLE SHEET
@@ -76,11 +78,15 @@ try:
 
     if availability_response.status_code == 200:
 
-        booked_times = (
-            availability_response
-            .json()
-            .get("bookedTimes", [])
-        )
+        try:
+            booked_times = (
+                availability_response
+                .json()
+                .get("bookedTimes", [])
+            )
+
+        except ValueError:
+            booked_times = []
 
     else:
         booked_times = []
@@ -88,47 +94,42 @@ try:
 except Exception:
     booked_times = []
 
+
 available_times = [
     time
     for time in times
     if time not in booked_times
 ]
 
+
 # -----------------------------
 # RED BORDER CSS
 # -----------------------------
+st.markdown(
+    """
+    <style>
 
-if st.session_state["name_error"]:
+    /* Red border for Full Name */
+    div[data-testid="stTextInput"]:has(
+        input[aria-label="Full Name"]
+    ) input {
+        border: 2px solid red !important;
+        box-shadow: 0 0 0 1px red !important;
+    }
 
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stTextInput"]:has(
-            input[aria-label="Full Name"]
-        ) input {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    /* Red border for Email */
+    div[data-testid="stTextInput"]:has(
+        input[aria-label="Your Email Address"]
+    ) input {
+        border: 2px solid red !important;
+        box-shadow: 0 0 0 1px red !important;
+    }
 
-if st.session_state["email_error"]:
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stTextInput"]:has(
-            input[aria-label="Your Email Address"]
-        ) input {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
 # -----------------------------
 # BOOKING FORM
@@ -180,6 +181,7 @@ with st.form("booking_form"):
         use_container_width=True
     )
 
+
 # -----------------------------
 # VALIDATION
 # -----------------------------
@@ -200,10 +202,12 @@ if submitted:
     # Check time
     time_error = not preferred_time
 
+
     # Save errors
     st.session_state["name_error"] = name_error
     st.session_state["email_error"] = email_error
     st.session_state["time_error"] = time_error
+
 
     # -----------------------------
     # ERROR MESSAGES
@@ -226,6 +230,7 @@ if submitted:
         st.error(
             "❌ Preferred Time: Please choose an available time."
         )
+
 
     # -----------------------------
     # SUBMIT IF VALID
