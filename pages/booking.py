@@ -128,33 +128,52 @@ with st.form("booking_form"):
     )
 
 # -----------------------------
-# SUBMIT BOOKING
+# VALIDATE FORM
 # -----------------------------
 if submitted:
 
-    if not name or not email:
+    valid = True
+
+    # Full Name
+    if not name.strip():
 
         st.error(
-            "Please fill out both your name and email address."
+            "❌ Full Name: Please enter your name."
         )
 
-    # Check if the email has a valid format
+        valid = False
+
+    # Email
+    if not email.strip():
+
+        st.error(
+            "❌ Email: Please enter your email address."
+        )
+
+        valid = False
+
     elif not re.match(
         r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
         email
     ):
 
         st.error(
-            "Please enter a valid email address."
+            "❌ Email: Please enter a valid email address."
         )
 
-    elif not preferred_time:
+        valid = False
+
+    # Preferred Time
+    if not preferred_time:
 
         st.error(
-            "Please choose an available time."
+            "❌ Preferred Time: Please choose an available time."
         )
 
-    else:
+        valid = False
+
+    # Only submit if everything is valid
+    if valid:
 
         with st.spinner(
             "Saving your booking request..."
