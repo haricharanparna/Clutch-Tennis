@@ -1,7 +1,7 @@
 import streamlit as st
 import re
 from supabase import create_client
-from datetime import datetime, timedelta, timezone
+import extra_streamlit_components as stx
 
 # ============================================================
 # PAGE CONFIG
@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CONNECT TO SUPABASE
+# CONNECT TO SUPABASE & COOKIE MANAGER
 # ============================================================
 
 supabase = create_client(
@@ -23,57 +23,43 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
+# Initialize Cookie Manager
+cookie_manager = stx.CookieManager()
+
+COOKIE_NAME = "clutch_tennis_auth"
+FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60  # 432,000 seconds
+
+
 # ============================================================
-# SESSION SETTINGS
+# SESSION MANAGEMENT (PERSISTENT COOKIES)
 # ============================================================
 
-SESSION_DURATION = timedelta(days=5)
-
-
-def create_local_session(user):
+def restore_session_from_cookie():
     """
-    Store the user's login information in Streamlit session state
-    and record when the 5-day session expires.
+    Checks for a valid session token stored in browser cookies
+    and restores the Supabase session on page refresh.
     """
-    st.session_state["logged_in"] = True
-    st.session_state["user"] = user
-    st.session_state["session_expires"] = (
-        datetime.now(timezone.utc) + SESSION_DURATION
-    ).isoformat()
-
-
-def session_is_valid():
-    """
-    Check whether the current Streamlit session is still valid.
-    """
-    if not st.session_state.get("logged_in", False):
-        return False
-
-    expires_at = st.session_state.get("session_expires")
-
-    if not expires_at:
-        return False
-
-    try:
-        expiration = datetime.fromisoformat(expires_at)
-
-        if datetime.now(timezone.utc) >= expiration:
-            # Session expired
+    token = cookie_manager.get(cookie=COOKIE_NAME)
+    
+    if token and not st.session_state.get("logged_in", False):
+        try:
+            # Restore Supabase session using stored refresh token
+            res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
+            if res.user:
+                st.session_state["logged_in"] = True
+                st.session_state["user"] = res.user
+                return True
+        except Exception:
+            # Remove invalid or expired cookie
+            cookie_manager.delete(COOKIE_NAME)
             st.session_state.clear()
             return False
 
-        return True
-
-    except Exception:
-        st.session_state.clear()
-        return False
+    return st.session_state.get("logged_in", False)
 
 
-# ============================================================
-# CHECK EXISTING SESSION
-# ============================================================
-
-if session_is_valid():
+# Attempt to restore session immediately on page load
+if restore_session_from_cookie():
     st.switch_page("app.py")
 
 
@@ -182,6 +168,15 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     transform: translateY(-1px);
 }
 
+/* Secondary Buttons */
+
+.secondary-btn-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -224,6 +219,7 @@ with st.form("login_form", clear_on_submit=False):
         "Sign In",
         use_container_width=True
     )
+
 
 # ============================================================
 # SECONDARY ACTIONS
@@ -291,7 +287,7 @@ if forgotpassword:
 
 
 # ============================================================
-# LOGIN HANDLER
+# LOGIN HANDLER WITH 5-DAY PERSISTENCE
 # ============================================================
 
 if loginbutton:
@@ -317,10 +313,20 @@ if loginbutton:
                 "password": passinput
             })
 
-            if data.user:
+            if data.user and data.session:
 
-                # Save login information
-                create_local_session(data.user)
+                # Save tokens in a 5-day browser cookie
+                cookie_manager.set(
+                    cookie=COOKIE_NAME,
+                    val={
+                        "access_token": data.session.access_token,
+                        "refresh_token": data.session.refresh_token
+                    },
+                    max_age=FIVE_DAYS_IN_SECONDS
+                )
+
+                st.session_state["logged_in"] = True
+                st.session_state["user"] = data.user
 
                 # Go to main application
                 st.switch_page("app.py")
