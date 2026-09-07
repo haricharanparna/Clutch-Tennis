@@ -182,15 +182,6 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     transform: translateY(-1px);
 }
 
-/* Secondary Buttons */
-
-.secondary-btn-container {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -233,7 +224,6 @@ with st.form("login_form", clear_on_submit=False):
         "Sign In",
         use_container_width=True
     )
-
 
 # ============================================================
 # SECONDARY ACTIONS
