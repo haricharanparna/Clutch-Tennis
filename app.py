@@ -284,16 +284,19 @@ div.stButton > button:hover {
     transform: translateY(-1px);
 }
 
-/* COMPACT PAGINATION DOT BUTTONS */
+/* EXTRA SMALL PAGINATION DOT BUTTONS */
 .dot-btn-container div.stButton > button {
-    min-height: 28px !important;
-    height: 28px !important;
+    min-height: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
     padding: 0 !important;
-    font-size: 0.65rem !important;
-    border-radius: 20px !important;
+    font-size: 0.5rem !important;
+    line-height: 1 !important;
+    border-radius: 50% !important;
     background: #E4E9E4 !important;
     color: #0B3D2E !important;
     border: none !important;
+    margin: 0 auto !important;
 }
 
 .dot-btn-container div.stButton > button:hover {
@@ -445,7 +448,7 @@ reviews = [
 
 
 # -----------------------------
-# REVIEWS SECTION (INDENTATION FIX)
+# REVIEWS SECTION
 # -----------------------------
 st.markdown(
     """
@@ -466,7 +469,7 @@ total_pages = (len(reviews) + items_per_page - 1) // items_per_page
 start_idx = st.session_state.review_page * items_per_page
 current_reviews = reviews[start_idx:start_idx + items_per_page]
 
-# Build single-line HTML strings to prevent Streamlit from creating code blocks
+# Build clean single-line HTML cards
 card_items = []
 for rev in current_reviews:
     card_html = (
@@ -484,8 +487,6 @@ for rev in current_reviews:
     card_items.append(card_html)
 
 carousel_html = f'<div class="carousel-container">{"".join(card_items)}</div>'
-
-# Render pure HTML without indentation artifacts
 st.markdown(carousel_html, unsafe_allow_html=True)
 
 # Compact Pagination Dots Bar
