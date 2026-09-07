@@ -1,8 +1,7 @@
 import streamlit as st
 import re
-import time
 from supabase import create_client
-import extra_streamlit_components as stx
+from cookies_controller import CookieController
 
 # ============================================================
 # PAGE CONFIG
@@ -16,7 +15,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CONNECT TO SUPABASE & COOKIE MANAGER
+# CONNECT TO SUPABASE & COOKIES
 # ============================================================
 
 supabase = create_client(
@@ -24,40 +23,27 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
-# Initialize Cookie Manager
-cookie_manager = stx.CookieManager()
-
+controller = CookieController()
 COOKIE_NAME = "clutch_tennis_auth"
-FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60  # 432,000 seconds
-
+FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60
 
 # ============================================================
-# PERSISTENT SESSION RESTORATION (HANDLES ASYNC LOAD)
+# CHECK & RESTORE PERSISTENT SESSION
 # ============================================================
 
-# 1. Check if already active in current memory
-if st.session_state.get("logged_in", False):
-    st.switch_page("app.py")
+# Fetch existing cookie
+token = controller.get(COOKIE_NAME)
 
-# 2. Retrieve cookies safely
-cookies = cookie_manager.get_all()
-
-# If the cookie manager hasn't finished loading in the browser, pause execution briefly
-if cookies is None:
-    st.stop()
-
-token = cookies.get(COOKIE_NAME)
-
-# 3. Restore session if cookie exists
 if token:
     try:
+        # Re-authenticate with Supabase using stored tokens
         res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
         if res.user:
             st.session_state["logged_in"] = True
             st.session_state["user"] = res.user
             st.switch_page("app.py")
     except Exception:
-        cookie_manager.delete(COOKIE_NAME)
+        controller.remove(COOKIE_NAME)
 
 
 # ============================================================
@@ -248,7 +234,7 @@ if forgotpassword:
 
 
 # ============================================================
-# LOGIN HANDLER WITH COOKIE SAVE
+# LOGIN HANDLER
 # ============================================================
 
 if loginbutton:
@@ -264,10 +250,10 @@ if loginbutton:
             })
 
             if data.user and data.session:
-                # Store credentials in a 5-day cookie
-                cookie_manager.set(
-                    cookie=COOKIE_NAME,
-                    val={
+                # Set 5-day browser cookie
+                controller.set(
+                    COOKIE_NAME,
+                    {
                         "access_token": data.session.access_token,
                         "refresh_token": data.session.refresh_token
                     },
@@ -276,9 +262,6 @@ if loginbutton:
 
                 st.session_state["logged_in"] = True
                 st.session_state["user"] = data.user
-                
-                # Brief pause so the component writes the cookie before redirecting
-                time.sleep(0.5)
                 st.switch_page("app.py")
             else:
                 st.error("Login failed. Please try again.")
