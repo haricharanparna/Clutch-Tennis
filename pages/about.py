@@ -151,11 +151,9 @@ div.stButton > button {
 st.markdown("""
 <div class="page-hero">
     <div class="kicker">About Clutch Tennis</div>
-
     <div class="page-title">
         More than tennis.
     </div>
-
     <div class="page-subtitle">
         We help players develop the skills, confidence, and mindset
         needed to compete at their best.
@@ -175,49 +173,49 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("""
-    <div class="info-card">
-        <h3>🎾 Skill</h3>
-        <p>
-            Build strong fundamentals and develop the technical
-            skills needed to become a better tennis player.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="info-card">
+    <h3>🎾 Skill</h3>
+    <p>
+        Build strong fundamentals and develop the technical
+        skills needed to become a better tennis player.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class="info-card">
-        <h3>🧠 Mindset</h3>
-        <p>
-            Develop confidence, focus, and mental toughness for
-            challenging moments on the court.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="info-card">
+    <h3>🧠 Mindset</h3>
+    <p>
+        Develop confidence, focus, and mental toughness for
+        challenging moments on the court.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 col3, col4 = st.columns(2)
 
 with col3:
     st.markdown("""
-    <div class="info-card">
-        <h3>🏆 Competition</h3>
-        <p>
-            Practice strategies and match situations that prepare
-            players for competitive tennis.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="info-card">
+    <h3>🏆 Competition</h3>
+    <p>
+        Practice strategies and match situations that prepare
+        players for competitive tennis.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 with col4:
     st.markdown("""
-    <div class="info-card">
-        <h3>💪 Confidence</h3>
-        <p>
-            Learn to trust your preparation and your abilities
-            when matches become challenging.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="info-card">
+    <h3>💪 Confidence</h3>
+    <p>
+        Learn to trust your preparation and your abilities
+        when matches become challenging.
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
 # -----------------------------
 # COACHES
@@ -280,26 +278,21 @@ for column, coach in zip(coach_columns, coaches):
 
         st.markdown(
             f"""
-            <div class="coach-card">
-
-                <div class="coach-number">
-                    {number}
-                </div>
-
-                <div class="coach-name">
-                    {name}
-                </div>
-
-                <div class="coach-role">
-                    {role}
-                </div>
-
-                <ul class="coach-list">
-                    {qualifications_html}
-                </ul>
-
-            </div>
-            """,
+<div class="coach-card">
+    <div class="coach-number">
+        {number}
+    </div>
+    <div class="coach-name">
+        {name}
+    </div>
+    <div class="coach-role">
+        {role}
+    </div>
+    <ul class="coach-list">
+        {qualifications_html}
+    </ul>
+</div>
+""",
             unsafe_allow_html=True
         )
 
@@ -313,19 +306,14 @@ st.markdown(
 
 st.markdown("""
 <div class="info-card">
-
 <p>🎯 <strong>Personalized Training</strong><br>
 Training is built around each player's individual goals.</p>
-
 <p>💪 <strong>Confidence</strong><br>
 Develop the confidence to trust your skills during matches.</p>
-
 <p>🧠 <strong>Mental Toughness</strong><br>
 Stay focused and composed in competitive situations.</p>
-
 <p>🏆 <strong>Match Preparation</strong><br>
 Practice strategies that translate directly to competitive tennis.</p>
-
 </div>
 """, unsafe_allow_html=True)
 
