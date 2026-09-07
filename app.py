@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
 from supabase import create_client
+from cookies_controller import CookieController
 
+# -----------------------------
+# PAGE CONFIG
+# -----------------------------
 st.set_page_config(
     page_title="Clutch Tennis",
     page_icon="🎾",
@@ -10,23 +14,47 @@ st.set_page_config(
 )
 
 # -----------------------------
-# LOGIN PROTECTION
-# -----------------------------
-if not st.session_state.get("logged_in", False):
-    st.switch_page("pages/login.py")
-
-# -----------------------------
-# SUPABASE
+# SUPABASE & COOKIE INIT
 # -----------------------------
 supabase = create_client(
     st.secrets["SUPABASE_URL"],
     st.secrets["SUPABASE_KEY"]
 )
 
+controller = CookieController()
+COOKIE_NAME = "clutch_tennis_auth"
+
+# -----------------------------
+# LOGIN & SESSION RESTORATION GUARD
+# -----------------------------
+# 1. If not logged in via in-memory state, check the browser cookie
+if not st.session_state.get("logged_in", False):
+    token = controller.get(COOKIE_NAME)
+    
+    if token and isinstance(token, dict) and "access_token" in token and "refresh_token" in token:
+        try:
+            # Restore session using saved tokens
+            res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
+            if res.user:
+                st.session_state["logged_in"] = True
+                st.session_state["user"] = res.user
+            else:
+                controller.remove(COOKIE_NAME)
+                st.switch_page("pages/login.py")
+        except Exception:
+            controller.remove(COOKIE_NAME)
+            st.switch_page("pages/login.py")
+    else:
+        # No valid cookie found, redirect to login page
+        st.switch_page("pages/login.py")
+
+# -----------------------------
+# USER METADATA
+# -----------------------------
 user = st.session_state.get("user")
 full_name = "Player"
 
-if user:
+if user and hasattr(user, "user_metadata") and user.user_metadata:
     full_name = user.user_metadata.get("full_name", "Player")
 
 # -----------------------------
@@ -832,8 +860,13 @@ if st.button(
     "Log Out",
     use_container_width=True
 ):
+    # Clear active session state
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
+    
+    # Delete the stored cookie from the client browser
+    controller.remove(COOKIE_NAME)
+    
     st.switch_page("pages/login.py")
 
 
