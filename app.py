@@ -408,13 +408,15 @@ div.stButton > button:hover {
     font-size: 0.9rem;
 }
 
-/* FOOTER STYLING */
-.site-footer {
+/* FOOTER STYLING (RENAMED TO PREVENT HIDING) */
+.footer-wrapper {
     background: linear-gradient(135deg, #082D22 0%, #0B3D2E 50%, #145A43 100%);
     color: #FFFFFF;
     border-radius: 24px 24px 0 0;
-    padding: 50px 40px 20px 40px;
-    margin-top: 60px;
+    padding: 50px 40px 30px 40px;
+    margin-top: 50px;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .footer-grid {
@@ -843,10 +845,10 @@ if st.button(
 
 
 # -----------------------------
-# FOOTER
+# FOOTER (USING DIV WRAPPER TO PREVENT STREAMLIT HIDING)
 # -----------------------------
 st.markdown("""
-<footer class="site-footer">
+<div class="footer-wrapper">
     <div class="footer-grid">
         <div>
             <div class="footer-brand">🎾 TENNIS<span>DNA</span></div>
@@ -887,5 +889,5 @@ st.markdown("""
     <div class="footer-bottom">
         © 2026 Tennis DNA. All rights reserved.
     </div>
-</footer>
+</div>
 """, unsafe_allow_html=True)
