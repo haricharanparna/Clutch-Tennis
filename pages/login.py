@@ -191,12 +191,6 @@ st.markdown("""
         🎾 CLUTCH<span>TENNIS</span>
     </div>
 
-    <div class="login-subtitle">
-        Welcome back! Please enter your details.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 
 # ============================================================
 # LOGIN FORM
