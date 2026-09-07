@@ -92,20 +92,20 @@ div[data-testid="stVerticalBlock"] {
     border: 1px solid #EFEFEF;
 }
 
-/* LOGO STYLING */
+/* LOGO STYLING (GREEN & LIGHT GREEN) */
 .nav-logo {
     display: flex;
     align-items: center;
     font-weight: 800;
     font-size: 1.3rem;
-    color: #1F4E89;
+    color: #0B3D2E; /* Dark Green */
     text-decoration: none;
     letter-spacing: -0.5px;
 }
 
 .nav-logo span {
-    color: #38A169;
-    margin-left: 3px;
+    color: #88C425; /* Light Green */
+    margin-left: 4px;
 }
 
 /* NAV LINKS */
@@ -119,7 +119,7 @@ div[data-testid="stVerticalBlock"] {
 }
 
 .nav-item {
-    color: #1F4E89;
+    color: #0B3D2E;
     font-weight: 600;
     font-size: 0.95rem;
     text-decoration: none;
@@ -128,16 +128,16 @@ div[data-testid="stVerticalBlock"] {
 }
 
 .nav-item.active {
-    border-bottom: 3px solid #38A169;
+    border-bottom: 3px solid #88C425;
 }
 
 .nav-item:hover {
-    color: #38A169;
+    color: #88C425;
 }
 
 /* CTA BUTTON */
 .nav-cta-btn {
-    background-color: #2B6CB0;
+    background-color: #0B3D2E;
     color: #FFFFFF !important;
     padding: 10px 22px;
     border-radius: 20px;
@@ -148,7 +148,7 @@ div[data-testid="stVerticalBlock"] {
 }
 
 .nav-cta-btn:hover {
-    background-color: #1C4ED8;
+    background-color: #145A43;
 }
 
 /* HERO */
@@ -408,7 +408,7 @@ div.stButton > button:hover {
     font-size: 0.9rem;
 }
 
-/* FOOTER STYLING (RENAMED TO PREVENT HIDING) */
+/* FOOTER STYLING */
 .footer-wrapper {
     background: linear-gradient(135deg, #082D22 0%, #0B3D2E 50%, #145A43 100%);
     color: #FFFFFF;
@@ -547,15 +547,13 @@ div.stButton > button:hover {
 st.markdown("""
 <div class="floating-navbar">
     <div class="nav-logo">
-        🎾 TENNIS<span>DNA</span>
+        🎾 CLUTCH<span>TENNIS</span>
     </div>
     <div class="nav-links">
         <a href="#" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Locations</a>
-        <a href="#" class="nav-item">Events</a>
-        <a href="#" class="nav-item">Blog</a>
-        <a href="#" class="nav-item">About us</a>
-        <a href="#" class="nav-item">FAQs</a>
+        <a href="#" class="nav-item">Location</a>
+        <a href="#" class="nav-item">About Us</a>
+        <a href="#" class="nav-item">FAQ</a>
         <a href="#" class="nav-item">Contact</a>
         <a href="#" class="nav-cta-btn">Book a Free Trial</a>
     </div>
@@ -692,7 +690,7 @@ with event_col:
     </div>
     <div class="info-card">
         <span class="event-date-badge">Dec 20</span>
-        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Black Program Elite Tennis | Tennis DNA Summer Camp 2026 DC</p>
+        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Black Program Elite Tennis | Clutch Tennis Summer Camp 2026 DC</p>
         <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
     </div>
     """, unsafe_allow_html=True)
@@ -845,17 +843,17 @@ if st.button(
 
 
 # -----------------------------
-# FOOTER (USING DIV WRAPPER TO PREVENT STREAMLIT HIDING)
+# FOOTER
 # -----------------------------
 st.markdown("""
 <div class="footer-wrapper">
     <div class="footer-grid">
         <div>
-            <div class="footer-brand">🎾 TENNIS<span>DNA</span></div>
+            <div class="footer-brand">🎾 CLUTCH<span>TENNIS</span></div>
             <div class="footer-tagline">
                 The premier tennis academy in the DC metropolitan area.
             </div>
-            <div class="footer-contact-item">✉️ admin@tennis-dna.com</div>
+            <div class="footer-contact-item">✉️ admin@clutch-tennis.com</div>
             <div class="footer-contact-item">📞 (703) 965-3992</div>
         </div>
         <div>
@@ -887,7 +885,7 @@ st.markdown("""
         </div>
     </div>
     <div class="footer-bottom">
-        © 2026 Tennis DNA. All rights reserved.
+        © 2026 Clutch Tennis. All rights reserved.
     </div>
 </div>
 """, unsafe_allow_html=True)
