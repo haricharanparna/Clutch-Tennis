@@ -59,7 +59,7 @@ html, body, [class*="css"] {
 .block-container {
     max-width: 1200px;
     padding-top: 1rem;
-    padding-bottom: 4rem;
+    padding-bottom: 0rem;
 }
 
 #MainMenu, footer {
@@ -408,6 +408,133 @@ div.stButton > button:hover {
     font-size: 0.9rem;
 }
 
+/* FOOTER STYLING */
+.site-footer {
+    background: linear-gradient(135deg, #082D22 0%, #0B3D2E 50%, #145A43 100%);
+    color: #FFFFFF;
+    border-radius: 24px 24px 0 0;
+    padding: 50px 40px 20px 40px;
+    margin-top: 60px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.footer-brand {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 12px;
+}
+
+.footer-brand span {
+    color: #C9E86A;
+}
+
+.footer-tagline {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 20px;
+    max-width: 280px;
+    line-height: 1.5;
+}
+
+.footer-contact-item {
+    font-size: 0.9rem;
+    color: #C9E86A;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.footer-col-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C9E86A;
+    margin-bottom: 18px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: #FFFFFF;
+}
+
+.social-icons {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.social-icon:hover {
+    background: #C9E86A;
+    color: #082D22;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* EVENT & LOCATION CARDS */
+.info-card {
+    background: white;
+    border: 1px solid #E4E9E4;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(23,32,28,0.03);
+    margin-bottom: 15px;
+}
+
+.event-date-badge {
+    background: #EEF5D9;
+    color: #0B3D2E;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -530,6 +657,43 @@ if not df.empty:
 """,
                 unsafe_allow_html=True
             )
+
+
+# -----------------------------
+# LOCATIONS & EVENTS SECTION
+# -----------------------------
+loc_col, event_col = st.columns(2)
+
+with loc_col:
+    st.markdown("""
+    <div class="section-header">
+        <div class="section-kicker">Academy Venue</div>
+        <div class="section-title">Location Details</div>
+    </div>
+    <div class="info-card">
+        <p style="font-size: 1.1rem; font-weight: 700; color: #0B3D2E; margin-bottom: 8px;">📍 McLean Tennis Center</p>
+        <p style="color: #59635E; margin-bottom: 12px;">1472 Chain Bridge Rd, McLean, VA 22101</p>
+        <p style="font-size: 0.9rem; color: #69736E; margin: 0;">🎾 Indoor courts — year-round training</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with event_col:
+    st.markdown("""
+    <div class="section-header">
+        <div class="section-kicker">Schedule</div>
+        <div class="section-title">Upcoming Events</div>
+    </div>
+    <div class="info-card">
+        <span class="event-date-badge">Dec 29</span>
+        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">8U Red - Orange Tennis Summer Camp 2026 | McLean VA</p>
+        <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
+    </div>
+    <div class="info-card">
+        <span class="event-date-badge">Dec 20</span>
+        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Black Program Elite Tennis | Tennis DNA Summer Camp 2026 DC</p>
+        <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # -----------------------------
@@ -676,3 +840,52 @@ if st.button(
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
     st.switch_page("pages/login.py")
+
+
+# -----------------------------
+# FOOTER
+# -----------------------------
+st.markdown("""
+<footer class="site-footer">
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand">🎾 TENNIS<span>DNA</span></div>
+            <div class="footer-tagline">
+                The premier tennis academy in the DC metropolitan area.
+            </div>
+            <div class="footer-contact-item">✉️ admin@tennis-dna.com</div>
+            <div class="footer-contact-item">📞 (703) 965-3992</div>
+        </div>
+        <div>
+            <div class="footer-col-title">About Us</div>
+            <ul class="footer-links">
+                <li><a href="#">Our Story</a></li>
+                <li><a href="#">Coaches</a></li>
+                <li><a href="#">Locations</a></li>
+                <li><a href="#">Testimonials</a></li>
+                <li><a href="#">Work with us</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Resources</div>
+            <ul class="footer-links">
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Event Calendar</a></li>
+                <li><a href="#">Contact Us</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-col-title">Follow Us</div>
+            <div class="social-icons">
+                <a href="#" class="social-icon">f</a>
+                <a href="#" class="social-icon">in</a>
+                <a href="#" class="social-icon">ig</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        © 2026 Tennis DNA. All rights reserved.
+    </div>
+</footer>
+""", unsafe_allow_html=True)
