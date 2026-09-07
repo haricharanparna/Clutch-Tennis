@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import re
+from datetime import datetime
 import streamlit.components.v1 as components
 
 st.set_page_config(
@@ -58,9 +59,6 @@ if "email_error" not in st.session_state:
 if "time_error" not in st.session_state:
     st.session_state["time_error"] = False
 
-if "disclaimer_agreed" not in st.session_state:
-    st.session_state["disclaimer_agreed"] = False
-
 
 # -----------------------------
 # DATE
@@ -71,7 +69,7 @@ preferred_date = st.date_input(
 
 
 # -----------------------------
-# CHECK GOOGLE SHEET
+# CHECK GOOGLE SHEET AVAILABILITY
 # -----------------------------
 try:
 
@@ -188,93 +186,96 @@ components.html(
         </h3>
 
         <p>
-            Tennis coaching involves physical activity, exercise, movement,
-            and participation in tennis-related drills and activities.
-            Physical activity involves inherent risks, including the
-            possibility of accidents or injuries.
+            Tennis coaching involves physical activity, exercise,
+            movement, and participation in tennis-related drills
+            and activities. Physical activity involves inherent
+            risks, including the possibility of accidents or injuries.
         </p>
 
         <p>
-            By requesting a Clutch Tennis session, you acknowledge that
-            tennis and physical activity may involve risks such as falls,
-            collisions, strains, sprains, soreness, or other injuries.
-            You understand that these risks cannot always be completely
-            eliminated even when reasonable safety precautions are taken.
+            By requesting a Clutch Tennis session, you acknowledge
+            that tennis and physical activity may involve risks such
+            as falls, collisions, strains, sprains, soreness, or
+            other injuries. You understand that these risks cannot
+            always be completely eliminated even when reasonable
+            safety precautions are taken.
         </p>
 
         <p>
             You agree to follow the instructions, rules, and safety
             guidelines provided by the coach during your session.
-            You understand that the coach may modify, pause, or stop an
-            activity when the coach believes doing so is appropriate for
-            safety, weather, court conditions, or training purposes.
+            You understand that the coach may modify, pause, or stop
+            an activity when the coach believes doing so is appropriate
+            for safety, weather, court conditions, or training purposes.
         </p>
 
         <p>
             You agree to communicate with the coach about any physical
-            limitations, injuries, pain, illness, or other concerns that
-            could affect your ability to safely participate in a session.
-            You should immediately notify the coach if you experience
-            significant pain, dizziness, difficulty breathing, or otherwise
-            feel unsafe or unable to continue.
+            limitations, injuries, pain, illness, or other concerns
+            that could affect your ability to safely participate in a
+            session. You should immediately notify the coach if you
+            experience significant pain, dizziness, difficulty breathing,
+            or otherwise feel unsafe or unable to continue.
         </p>
 
         <p>
-            Outdoor tennis sessions may be affected by weather and court
-            conditions. Rain, lightning, extreme temperatures, wet courts,
-            unsafe surfaces, or other environmental conditions may require
-            a session to be modified, postponed, rescheduled, or canceled.
+            Outdoor tennis sessions may be affected by weather and
+            court conditions. Rain, lightning, extreme temperatures,
+            wet courts, unsafe surfaces, or other environmental
+            conditions may require a session to be modified,
+            postponed, rescheduled, or canceled.
         </p>
 
         <p>
-            Participants are expected to use appropriate footwear and
-            clothing and to bring water and any personal tennis equipment
-            that they need for the session, unless other arrangements have
-            been made with the coach.
+            Participants are expected to use appropriate footwear
+            and clothing and to bring water and any personal tennis
+            equipment that they need for the session, unless other
+            arrangements have been made with the coach.
         </p>
 
         <p>
-            Participants agree to use tennis equipment, courts, and other
-            facilities responsibly and to follow any rules established by
-            the facility where the session takes place.
+            Participants agree to use tennis equipment, courts, and
+            other facilities responsibly and to follow any rules
+            established by the facility where the session takes place.
         </p>
 
         <p>
-            Clutch Tennis provides coaching, instruction, practice, and
-            training. Participation in a coaching session does not guarantee
-            a particular athletic, competitive, ranking, or performance
-            result. Player improvement depends on many individual factors,
-            including practice, attendance, effort, experience, physical
-            ability, and consistency.
+            Clutch Tennis provides coaching, instruction, practice,
+            and training. Participation in a coaching session does
+            not guarantee a particular athletic, competitive, ranking,
+            or performance result. Player improvement depends on many
+            individual factors, including practice, attendance, effort,
+            experience, physical ability, and consistency.
         </p>
 
         <p>
             You understand that coaching advice is intended to support
             tennis development and should be followed responsibly.
-            Participants remain responsible for communicating concerns and
-            making reasonable decisions about their own participation.
+            Participants remain responsible for communicating concerns
+            and making reasonable decisions about their own participation.
         </p>
 
         <p>
             If a participant is under 18 years old, a parent or legal
-            guardian should review and approve the participant's involvement
-            in Clutch Tennis activities and any applicable consent or waiver
-            requirements.
+            guardian should review and approve the participant's
+            involvement in Clutch Tennis activities and any applicable
+            consent or waiver requirements.
         </p>
 
         <p>
-            By continuing with the booking process, you acknowledge that
-            you have had an opportunity to read the information above and
-            understand that participation in tennis and physical activity
-            involves inherent risks.
+            By continuing with the booking process, you acknowledge
+            that you have had an opportunity to read the information
+            above and understand that participation in tennis and
+            physical activity involves inherent risks.
         </p>
 
         <p>
-            This agreement is intended to communicate important information
-            about participation and safety. It should not be considered a
-            substitute for professional legal advice, and Clutch Tennis
-            should have the final wording reviewed by a qualified attorney
-            before relying on it as a legal waiver or release.
+            This agreement is intended to communicate important
+            information about participation and safety. It should not
+            be considered a substitute for professional legal advice,
+            and Clutch Tennis should have the final wording reviewed
+            by a qualified attorney before relying on it as a legal
+            waiver or release.
         </p>
 
         <hr>
@@ -331,7 +332,7 @@ components.html(
 
 
 # -----------------------------
-# AGREEMENT CHECKBOX
+# DISCLAIMER AGREEMENT
 # -----------------------------
 st.markdown(
     """
@@ -350,7 +351,10 @@ disclaimer_agreed = st.checkbox(
     "I have read the entire Disclaimer & Booking Agreement and agree to it."
 )
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown(
+    "</div>",
+    unsafe_allow_html=True
+)
 
 
 # ============================================================
@@ -474,9 +478,10 @@ if submitted:
         )
 
 
-    # -----------------------------
-    # SUBMIT IF VALID
-    # -----------------------------
+    # ========================================================
+    # SUBMIT IF EVERYTHING IS VALID
+    # ========================================================
+
     if (
         not name_error
         and not email_error
@@ -488,21 +493,54 @@ if submitted:
             "Saving your booking request..."
         ):
 
+            # -----------------------------
+            # SHEETMONKEY
+            # -----------------------------
             endpoint = (
                 "https://api.sheetmonkey.io/form/"
                 "fQvQ98iNDidpE7BcoVNnmH"
             )
 
+            # -----------------------------
+            # DISCLAIMER TIMESTAMP
+            # -----------------------------
+            disclaimer_date = datetime.now().strftime(
+                "%Y-%m-%d %I:%M:%S %p"
+            )
+
+            # -----------------------------
+            # BOOKING PAYLOAD
+            # -----------------------------
             payload = {
+
                 "Name": name,
+
                 "Email": email,
+
                 "Lesson Type": lesson_type,
-                "Preferred Date": str(preferred_date),
-                "Preferred Time": str(preferred_time),
+
+                "Preferred Date": str(
+                    preferred_date
+                ),
+
+                "Preferred Time": str(
+                    preferred_time
+                ),
+
                 "Notes": notes,
-                "Disclaimer Agreed": "Yes"
+
+                # Disclaimer information
+                "Disclaimer Agreed": "Yes",
+
+                "Disclaimer Date": disclaimer_date,
+
+                "Disclaimer Version": "Version 1.0"
             }
 
+
+            # -----------------------------
+            # SEND TO GOOGLE SHEETS
+            # -----------------------------
             try:
 
                 response = requests.post(
@@ -514,6 +552,9 @@ if submitted:
                     timeout=15
                 )
 
+                # -----------------------------
+                # SUCCESS
+                # -----------------------------
                 if response.status_code in [200, 201]:
 
                     st.success(
@@ -524,11 +565,14 @@ if submitted:
                         "Your booking request has been received."
                     )
 
-                    # Clear errors
+                    # Clear validation errors
                     st.session_state["name_error"] = False
                     st.session_state["email_error"] = False
                     st.session_state["time_error"] = False
 
+                # -----------------------------
+                # FAILED
+                # -----------------------------
                 else:
 
                     st.error(
@@ -536,6 +580,9 @@ if submitted:
                         "Please check your sheet connection."
                     )
 
+            # -----------------------------
+            # NETWORK ERROR
+            # -----------------------------
             except Exception:
 
                 st.error(
