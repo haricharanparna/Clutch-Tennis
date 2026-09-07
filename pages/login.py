@@ -1,5 +1,6 @@
 import streamlit as st
 import re
+import time
 from supabase import create_client
 import extra_streamlit_components as stx
 
@@ -31,40 +32,32 @@ FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60  # 432,000 seconds
 
 
 # ============================================================
-# SESSION MANAGEMENT (PERSISTENT COOKIES)
+# PERSISTENT SESSION RESTORATION (HANDLES ASYNC LOAD)
 # ============================================================
 
-def restore_session_from_cookie():
-    """
-    Checks for a valid session token stored in browser cookies
-    and restores the Supabase session on page refresh without resetting.
-    """
-    # 1. Check if user is already marked active in state
-    if st.session_state.get("logged_in", False):
-        return True
-
-    # 2. Retrieve token from cookie manager
-    token = cookie_manager.get(cookie=COOKIE_NAME)
-
-    # 3. Attempt to restore Supabase session if token exists
-    if token:
-        try:
-            res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
-            if res.user:
-                st.session_state["logged_in"] = True
-                st.session_state["user"] = res.user
-                return True
-        except Exception:
-            cookie_manager.delete(COOKIE_NAME)
-            st.session_state.clear()
-            return False
-
-    return False
-
-
-# Attempt to restore session on load
-if restore_session_from_cookie():
+# 1. Check if already active in current memory
+if st.session_state.get("logged_in", False):
     st.switch_page("app.py")
+
+# 2. Retrieve cookies safely
+cookies = cookie_manager.get_all()
+
+# If the cookie manager hasn't finished loading in the browser, pause execution briefly
+if cookies is None:
+    st.stop()
+
+token = cookies.get(COOKIE_NAME)
+
+# 3. Restore session if cookie exists
+if token:
+    try:
+        res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
+        if res.user:
+            st.session_state["logged_in"] = True
+            st.session_state["user"] = res.user
+            st.switch_page("app.py")
+    except Exception:
+        cookie_manager.delete(COOKIE_NAME)
 
 
 # ============================================================
@@ -102,8 +95,6 @@ html, body, [class*="css"] {
     padding-bottom: 2rem;
 }
 
-/* Card Wrapper Header */
-
 .login-header {
     text-align: center;
     margin-bottom: 25px;
@@ -126,8 +117,6 @@ html, body, [class*="css"] {
     margin-top: 6px;
 }
 
-/* Input Fields */
-
 div[data-baseweb="input"] {
     border-radius: 12px !important;
     background-color: #FFFFFF !important;
@@ -139,8 +128,6 @@ div[data-baseweb="input"]:focus-within {
     box-shadow: 0 0 0 1px #0B3D2E !important;
 }
 
-/* Form Container */
-
 [data-testid="stForm"] {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -148,8 +135,6 @@ div[data-baseweb="input"]:focus-within {
     padding: 30px 25px;
     box-shadow: 0 10px 30px rgba(23,32,28,0.05);
 }
-
-/* Primary Button */
 
 div.stButton > button,
 div[data-testid="stFormSubmitButton"] > button {
@@ -169,15 +154,6 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     background: #145A43 !important;
     color: #FFFFFF !important;
     transform: translateY(-1px);
-}
-
-/* Secondary Buttons */
-
-.secondary-btn-container {
-    margin-top: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -242,11 +218,6 @@ with col2:
         type="secondary"
     )
 
-
-# ============================================================
-# CREATE ACCOUNT
-# ============================================================
-
 if signup_button:
     st.switch_page("pages/signup.py")
 
@@ -256,17 +227,12 @@ if signup_button:
 # ============================================================
 
 if forgotpassword:
-
     if not emailinput:
         st.error("Please enter your email address above first.")
-
     elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", emailinput):
         st.error("Please enter a valid email address.")
-
     else:
-
         try:
-
             supabase.auth.reset_password_for_email(
                 emailinput,
                 options={
@@ -276,47 +242,29 @@ if forgotpassword:
                     )
                 }
             )
-
-            st.success(
-                "Password reset email sent! Check your inbox for the link."
-            )
-
+            st.success("Password reset email sent! Check your inbox for the link.")
         except Exception:
-            st.error(
-                "Unable to send reset email. Please try again."
-            )
+            st.error("Unable to send reset email. Please try again.")
 
 
 # ============================================================
-# LOGIN HANDLER WITH 5-DAY PERSISTENCE
+# LOGIN HANDLER WITH COOKIE SAVE
 # ============================================================
 
 if loginbutton:
-
     if not emailinput or not passinput:
-
-        st.error(
-            "Please enter both your email and your password."
-        )
-
+        st.error("Please enter both your email and your password.")
     elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", emailinput):
-
-        st.error(
-            "Please enter a valid email address."
-        )
-
+        st.error("Please enter a valid email address.")
     else:
-
         try:
-
             data = supabase.auth.sign_in_with_password({
                 "email": emailinput,
                 "password": passinput
             })
 
             if data.user and data.session:
-
-                # Save tokens in a 5-day browser cookie
+                # Store credentials in a 5-day cookie
                 cookie_manager.set(
                     cookie=COOKIE_NAME,
                     val={
@@ -328,18 +276,12 @@ if loginbutton:
 
                 st.session_state["logged_in"] = True
                 st.session_state["user"] = data.user
-
-                # Go to main application
+                
+                # Brief pause so the component writes the cookie before redirecting
+                time.sleep(0.5)
                 st.switch_page("app.py")
-
             else:
-
-                st.error(
-                    "Login failed. Please try again."
-                )
+                st.error("Login failed. Please try again.")
 
         except Exception:
-
-            st.error(
-                "Incorrect email or password."
-            )
+            st.error("Incorrect email or password.")
