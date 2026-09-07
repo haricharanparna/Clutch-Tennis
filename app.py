@@ -667,13 +667,13 @@ loc_col, event_col = st.columns(2)
 with loc_col:
     st.markdown("""
     <div class="section-header">
-        <div class="section-kicker">Academy Venue</div>
+        <div class="section-kicker">Coaching Location</div>
         <div class="section-title">Location Details</div>
     </div>
     <div class="info-card">
-        <p style="font-size: 1.1rem; font-weight: 700; color: #0B3D2E; margin-bottom: 8px;">📍 McLean Tennis Center</p>
-        <p style="color: #59635E; margin-bottom: 12px;">1472 Chain Bridge Rd, McLean, VA 22101</p>
-        <p style="font-size: 0.9rem; color: #69736E; margin: 0;">🎾 Indoor courts — year-round training</p>
+        <p style="font-size: 1.1rem; font-weight: 700; color: #0B3D2E; margin-bottom: 8px;">📍 Coppermill Tennis Court</p>
+        <p style="color: #59635E; margin-bottom: 12px;">13287 Coppermill Dr, Herndon, VA 20171</p>
+        <p style="font-size: 0.9rem; color: #69736E; margin: 0;">🎾 Summer, Fall, and Spring Training</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -684,13 +684,8 @@ with event_col:
         <div class="section-title">Upcoming Events</div>
     </div>
     <div class="info-card">
-        <span class="event-date-badge">Dec 29</span>
-        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">8U Red - Orange Tennis Summer Camp 2026 | McLean VA</p>
-        <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
-    </div>
-    <div class="info-card">
-        <span class="event-date-badge">Dec 20</span>
-        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Black Program Elite Tennis | Clutch Tennis Summer Camp 2026 DC</p>
+        <span class="event-date-badge">September 19</span>
+        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Full Day Introductory Lessons | Herndon VA</p>
         <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
     </div>
     """, unsafe_allow_html=True)
@@ -700,19 +695,19 @@ with event_col:
 # REVIEWS DATA (15 ITEMS)
 # -----------------------------
 reviews = [
-    {"stars": "⭐⭐⭐⭐⭐", "text": "Coach Oliver completely transformed my serve in just three sessions. The tactical focus here is top-tier.", "author": "Alex M.", "role": "Advanced Player"},
-    {"stars": "⭐⭐⭐⭐⭐", "text": "The mental toughness training helped me stay calm during tiebreakers. Highly recommend Clutch Tennis!", "author": "Sarah K.", "role": "Competitive Junior"},
+    {"stars": "⭐⭐⭐⭐☆", "text": "Coach Hari completely transformed my serve in just three sessions. The tactical focus here is top-tier.", "author": "John M.", "role": "Advanced Player"},
+    {"stars": "⭐⭐⭐⭐☆", "text": "The mental toughness training helped me stay calm during tiebreakers. Highly recommend Clutch Tennis!", "author": "Sarah K.", "role": "Competitive Junior"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "Great energy in the group clinics. Excellent balance of skill drills and live match strategy.", "author": "David L.", "role": "Adult Clinic Member"},
-    {"stars": "⭐⭐⭐⭐⭐", "text": "Footwork drills with Coach Santiago made a massive difference in my court coverage and endurance.", "author": "Jason T.", "role": "Varsity Player"},
+    {"stars": "⭐⭐⭐⭐⭐", "text": "Footwork drills with Coach George made a massive difference in my court coverage and endurance.", "author": "Jason T.", "role": "Varsity Player"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "The match analysis feedback was eye-opening. I completely changed how I construct points on key rallies.", "author": "Elena R.", "role": "USTA League Player"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "Best coaching staff in the area! They break down technical flaws in a way that is super easy to understand.", "author": "Marcus B.", "role": "Intermediate Player"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "My son’s confidence on the court skyrocketed after just a month of private lessons. Fantastic mentors.", "author": "Karen W.", "role": "Tennis Parent"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "The small group size in the clinics ensures everyone gets personalized attention and high-volume reps.", "author": "Chris P.", "role": "Adult Beginner"},
-    {"stars": "⭐⭐⭐⭐⭐", "text": "Coach Pedro's focus on net play and doubles strategy gave our team the edge to win our local flight.", "author": "Rachel S.", "role": "Doubles Captain"},
+    {"stars": "⭐⭐⭐⭐☆", "text": "Coach Mayur's's focus on net play and doubles strategy gave our team the edge to win our local flight.", "author": "Rachel S.", "role": "Doubles Captain"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "Top-notch facility and incredibly structured sessions. Every minute on court feels intentional.", "author": "Daniel H.", "role": "Competitive Junior"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "I went from second-guessing my groundstrokes to playing aggressive, winning tennis in big moments.", "author": "Megan C.", "role": "High School Player"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "The mental game coaching is what sets Clutch apart from every other academy. Total game changer.", "author": "Brian F.", "role": "Tournament Player"},
-    {"stars": "⭐⭐⭐⭐⭐", "text": "Awesome coaches who truly care about your long-term growth rather than quick, band-aid fixes.", "author": "Jessica V.", "role": "Adult Clinic Member"},
+    {"stars": "⭐⭐⭐⭐☆", "text": "Awesome coaches who truly care about your long-term growth rather than quick, band-aid fixes.", "author": "Jessica V.", "role": "Adult Clinic Member"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "Rebuilt my backhand technique from scratch. I'm finally hitting with depth and heavy topspin.", "author": "Tom E.", "role": "Intermediate Player"},
     {"stars": "⭐⭐⭐⭐⭐", "text": "Friendly environment, professional coaches, and noticeable results after every single session.", "author": "Olivia G.", "role": "Junior Player"}
 ]
@@ -851,36 +846,32 @@ st.markdown("""
         <div>
             <div class="footer-brand">🎾 CLUTCH<span>TENNIS</span></div>
             <div class="footer-tagline">
-                The premier tennis academy in the DC metropolitan area.
+                Perfect Tennis Academy to get to the Next Level
             </div>
-            <div class="footer-contact-item">✉️ admin@clutch-tennis.com</div>
-            <div class="footer-contact-item">📞 (703) 965-3992</div>
+            <div class="footer-contact-item">✉️ haricharanparna@gmail.com</div>
+            <div class="footer-contact-item">📞 (703) 962 0621</div>
         </div>
         <div>
             <div class="footer-col-title">About Us</div>
             <ul class="footer-links">
+                <li><a href="#">Our Coaches</a></li>
+                <li><a href="#">Our Locations</a></li>
                 <li><a href="#">Our Story</a></li>
-                <li><a href="#">Coaches</a></li>
-                <li><a href="#">Locations</a></li>
-                <li><a href="#">Testimonials</a></li>
-                <li><a href="#">Work with us</a></li>
             </ul>
         </div>
         <div>
             <div class="footer-col-title">Resources</div>
             <ul class="footer-links">
-                <li><a href="#">Blog</a></li>
                 <li><a href="#">FAQs</a></li>
-                <li><a href="#">Event Calendar</a></li>
                 <li><a href="#">Contact Us</a></li>
             </ul>
         </div>
         <div>
             <div class="footer-col-title">Follow Us</div>
             <div class="social-icons">
-                <a href="#" class="social-icon">f</a>
-                <a href="#" class="social-icon">in</a>
-                <a href="#" class="social-icon">ig</a>
+                <a href="#" class="social-icon">G</a>
+                <a href="#" class="social-icon">YT</a>
+                <a href="#" class="social-icon">IN</a>
             </div>
         </div>
     </div>
