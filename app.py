@@ -245,7 +245,15 @@ footer {
     font-size: 0.8rem;
 }
 
-/* BUTTONS */
+/* CAROUSEL DOT CONTROLS */
+.dot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -261,6 +269,12 @@ div.stButton > button:hover {
     border: 0;
     color: white;
     transform: translateY(-1px);
+}
+
+/* Custom styling for pagination buttons */
+div[data-testid="column"] div.stButton > button {
+    padding: 0;
+    min-height: 38px;
 }
 
 /* CTA */
@@ -385,18 +399,8 @@ if not df.empty:
 
 
 # -----------------------------
-# REVIEWS SECTION (OPTION 2)
+# REVIEWS DATA (15 ITEMS)
 # -----------------------------
-st.markdown(
-    """
-<div class="section-header">
-    <div class="section-kicker">Testimonials</div>
-    <div class="section-title">What Players Say</div>
-</div>
-""",
-    unsafe_allow_html=True
-)
-
 reviews = [
     {
         "stars": "⭐⭐⭐⭐⭐",
@@ -415,12 +419,107 @@ reviews = [
         "text": "Great energy in the group clinics. Excellent balance of skill drills and live match strategy.",
         "author": "David L.",
         "role": "Adult Clinic Member"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Footwork drills with Coach Santiago made a massive difference in my court coverage and endurance.",
+        "author": "Jason T.",
+        "role": "Varsity Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "The match analysis feedback was eye-opening. I completely changed how I construct points on key rallies.",
+        "author": "Elena R.",
+        "role": "USTA League Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Best coaching staff in the area! They break down technical flaws in a way that is super easy to understand.",
+        "author": "Marcus B.",
+        "role": "Intermediate Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "My son’s confidence on the court skyrocketed after just a month of private lessons. Fantastic mentors.",
+        "author": "Karen W.",
+        "role": "Tennis Parent"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "The small group size in the clinics ensures everyone gets personalized attention and high-volume reps.",
+        "author": "Chris P.",
+        "role": "Adult Beginner"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Coach Pedro's focus on net play and doubles strategy gave our team the edge to win our local flight.",
+        "author": "Rachel S.",
+        "role": "Doubles Captain"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Top-notch facility and incredibly structured sessions. Every minute on court feels intentional.",
+        "author": "Daniel H.",
+        "role": "Competitive Junior"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "I went from second-guessing my groundstrokes to playing aggressive, winning tennis in big moments.",
+        "author": "Megan C.",
+        "role": "High School Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "The mental game coaching is what sets Clutch apart from every other academy. Total game changer.",
+        "author": "Brian F.",
+        "role": "Tournament Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Awesome coaches who truly care about your long-term growth rather than quick, band-aid fixes.",
+        "author": "Jessica V.",
+        "role": "Adult Clinic Member"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Rebuilt my backhand technique from scratch. I'm finally hitting with depth and heavy topspin.",
+        "author": "Tom E.",
+        "role": "Intermediate Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Friendly environment, professional coaches, and noticeable results after every single session.",
+        "author": "Olivia G.",
+        "role": "Junior Player"
     }
 ]
 
-rev_cols = st.columns(len(reviews))
 
-for col, rev in zip(rev_cols, reviews):
+# -----------------------------
+# REVIEWS CAROUSEL WITH DOTS
+# -----------------------------
+st.markdown(
+    """
+<div class="section-header">
+    <div class="section-kicker">Testimonials</div>
+    <div class="section-title">What Players Say</div>
+</div>
+""",
+    unsafe_allow_html=True
+)
+
+if "review_page" not in st.session_state:
+    st.session_state.review_page = 0
+
+items_per_page = 3
+total_pages = (len(reviews) + items_per_page - 1) // items_per_page
+
+start_idx = st.session_state.review_page * items_per_page
+current_reviews = reviews[start_idx:start_idx + items_per_page]
+
+rev_cols = st.columns(len(current_reviews))
+
+for col, rev in zip(rev_cols, current_reviews):
     with col:
         st.markdown(
             f"""
@@ -433,6 +532,20 @@ for col, rev in zip(rev_cols, reviews):
 """,
             unsafe_allow_html=True
         )
+
+# Pagination Dots Bar
+st.write("")
+nav_spacer_left, nav_center, nav_spacer_right = st.columns([2, 1, 2])
+
+with nav_center:
+    dot_cols = st.columns(total_pages)
+    for page_num in range(total_pages):
+        with dot_cols[page_num]:
+            # Highlight pill indicator for current active page vs inactive dots
+            dot_symbol = "🟢" if page_num == st.session_state.review_page else "⚪"
+            if st.button(dot_symbol, key=f"dot_page_{page_num}", use_container_width=True):
+                st.session_state.review_page = page_num
+                st.rerun()
 
 
 # -----------------------------
