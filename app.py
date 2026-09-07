@@ -58,7 +58,7 @@ html, body, [class*="css"] {
 
 .block-container {
     max-width: 1200px;
-    padding-top: 2rem;
+    padding-top: 1rem;
     padding-bottom: 4rem;
 }
 
@@ -66,11 +66,21 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* FLOATING NAVBAR CONTAINER (STICKY ON SCROLL) */
+/* REMOVE OVERFLOW CONSTRAINTS FOR STICKY NAVBAR */
+[data-testid="stAppViewContainer"] > .main {
+    overflow: visible !important;
+}
+
+div[data-testid="stVerticalBlock"] {
+    overflow: visible !important;
+}
+
+/* FLOATING NAVBAR CONTAINER */
 .floating-navbar {
-    position: sticky;
-    top: 20px;
-    z-index: 999;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 10px !important;
+    z-index: 99999 !important;
     background-color: #FFFFFF;
     border-radius: 40px;
     padding: 12px 30px;
@@ -80,7 +90,6 @@ html, body, [class*="css"] {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
     border: 1px solid #EFEFEF;
-    backdrop-filter: blur(8px);
 }
 
 /* LOGO STYLING */
