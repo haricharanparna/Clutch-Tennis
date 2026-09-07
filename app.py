@@ -66,17 +66,21 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* FLOATING NAVBAR CONTAINER */
+/* FLOATING NAVBAR CONTAINER (STICKY ON SCROLL) */
 .floating-navbar {
+    position: sticky;
+    top: 20px;
+    z-index: 999;
     background-color: #FFFFFF;
     border-radius: 40px;
     padding: 12px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
     border: 1px solid #EFEFEF;
+    backdrop-filter: blur(8px);
 }
 
 /* LOGO STYLING */
