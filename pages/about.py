@@ -281,29 +281,29 @@ with col4:
 st.markdown("""
 <div class="coaches-header-container">
     <div class="coaches-header-line"></div>
-    <div class="coaches-header-title">Meet Our Coaches</div>
+    <div class="coaches-header-title">Our Coaches and Staff</div>
     <div class="coaches-header-line"></div>
 </div>
 """, unsafe_allow_html=True)
 
 coaches = [
     {
-        "name": "Oliver Ou",
-        "role": "Program Director Kentlands & Stonebridge",
+        "name": "Hari Parna",
+        "role": "Founder and CEO",
         "image_url": None,
-        "key": "oliver"
+        "key": "hari"
     },
     {
-        "name": "Santiago Reina",
-        "role": "Program Director Brambleton",
+        "name": "Mayur Parna",
+        "role": "Co-Founder and CTO",
         "image_url": None,
-        "key": "santiago"
+        "key": "mayur"
     },
     {
-        "name": "Pedro Navarro",
-        "role": "Program Director Burke Centre",
+        "name": "Curious George",
+        "role": "Mascot",
         "image_url": None,
-        "key": "pedro"
+        "key": "george"
     }
 ]
 
