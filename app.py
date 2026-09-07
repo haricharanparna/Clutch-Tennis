@@ -66,6 +66,78 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
+/* FLOATING NAVBAR CONTAINER */
+.floating-navbar {
+    background-color: #FFFFFF;
+    border-radius: 40px;
+    padding: 12px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    border: 1px solid #EFEFEF;
+}
+
+/* LOGO STYLING */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #1F4E89;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+}
+
+.nav-logo span {
+    color: #38A169;
+    margin-left: 3px;
+}
+
+/* NAV LINKS */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    color: #1F4E89;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    padding-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.nav-item.active {
+    border-bottom: 3px solid #38A169;
+}
+
+.nav-item:hover {
+    color: #38A169;
+}
+
+/* CTA BUTTON */
+.nav-cta-btn {
+    background-color: #2B6CB0;
+    color: #FFFFFF !important;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.nav-cta-btn:hover {
+    background-color: #1C4ED8;
+}
+
 /* HERO */
 .hero {
     background: linear-gradient(
@@ -324,6 +396,28 @@ div.stButton > button:hover {
 }
 
 </style>
+""", unsafe_allow_html=True)
+
+
+# -----------------------------
+# FLOATING NAVBAR
+# -----------------------------
+st.markdown("""
+<div class="floating-navbar">
+    <div class="nav-logo">
+        🎾 TENNIS<span>DNA</span>
+    </div>
+    <div class="nav-links">
+        <a href="#" class="nav-item active">Home</a>
+        <a href="#" class="nav-item">Locations</a>
+        <a href="#" class="nav-item">Events</a>
+        <a href="#" class="nav-item">Blog</a>
+        <a href="#" class="nav-item">About us</a>
+        <a href="#" class="nav-item">FAQs</a>
+        <a href="#" class="nav-item">Contact</a>
+        <a href="#" class="nav-cta-btn">Book a Free Trial</a>
+    </div>
+</div>
 """, unsafe_allow_html=True)
 
 
