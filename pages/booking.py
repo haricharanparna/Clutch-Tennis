@@ -4,28 +4,132 @@ import re
 from datetime import datetime
 import streamlit.components.v1 as components
 
+# Page Config
 st.set_page_config(
     page_title="Book a Lesson | Clutch Tennis",
-    page_icon="🎾"
+    page_icon="🎾",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# -----------------------------
-# LOGIN PROTECTION
-# -----------------------------
+# Login Protection
 if not st.session_state.get("logged_in", False):
     st.switch_page("pages/login.py")
 
+# Custom Styling (Matches Clutch Tennis Theme)
+st.markdown("""
+<style>
 
-# -----------------------------
-# PAGE
-# -----------------------------
-st.title("Book Your Tennis Session")
-st.write("Fill out the form below to request your lesson.")
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
 
-# -----------------------------
-# AVAILABILITY
-# -----------------------------
+[data-testid="stAppViewContainer"] {
+    background: radial-gradient(circle at 50% 10%, rgba(11,61,46,0.08), transparent 40%), #F7F8F5;
+    color: #17201C;
+}
+
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+#MainMenu, footer {
+    visibility: hidden;
+}
+
+.block-container {
+    max-width: 580px;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* Header Banner */
+.booking-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.booking-brand {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0B3D2E;
+    letter-spacing: -0.5px;
+}
+
+.booking-brand span {
+    color: #88C425;
+}
+
+.booking-subtitle {
+    font-size: 0.95rem;
+    color: #66706B;
+    margin-top: 6px;
+}
+
+/* Form Container Styling */
+[data-testid="stForm"] {
+    background: #FFFFFF;
+    border: 1px solid #E4E9E4;
+    border-radius: 20px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 30px rgba(23,32,28,0.05);
+}
+
+/* Input Fields Styling */
+div[data-baseweb="input"], div[data-baseweb="select"] > div {
+    border-radius: 12px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #E4E9E4 !important;
+}
+
+div[data-baseweb="input"]:focus-within, div[data-baseweb="select"] > div:focus-within {
+    border-color: #0B3D2E !important;
+    box-shadow: 0 0 0 1px #0B3D2E !important;
+}
+
+/* Primary Button Styling */
+div[data-testid="stFormSubmitButton"] > button {
+    background: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    min-height: 48px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+    width: 100% !important;
+    margin-top: 10px;
+}
+
+div[data-testid="stFormSubmitButton"] > button:hover {
+    background: #145A43 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+}
+
+/* Section Card Wrapper */
+.disclaimer-card {
+    background: #FFFFFF;
+    border: 1px solid #E4E9E4;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(23,32,28,0.03);
+}
+
+.section-title {
+    font-weight: 700;
+    color: #0B3D2E;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# Configuration & Constants
 availability_url = (
     "https://script.google.com/macros/s/"
     "AKfycbxclfNHxhTVJeXhwsN14---f3qdq0fGedhzZANjNZ4b3dp202xyVzhx5FGqVDha5aKBhQ/"
@@ -33,23 +137,12 @@ availability_url = (
 )
 
 times = [
-    "9:00 AM",
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "1:00 PM",
-    "2:00 PM",
-    "3:00 PM",
-    "4:00 PM",
-    "5:00 PM",
-    "6:00 PM",
-    "7:00 PM"
+    "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+    "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
+    "5:00 PM", "6:00 PM", "7:00 PM"
 ]
 
-
-# -----------------------------
-# SESSION STATE
-# -----------------------------
+# Session State Initialization
 if "name_error" not in st.session_state:
     st.session_state["name_error"] = False
 
@@ -59,317 +152,109 @@ if "email_error" not in st.session_state:
 if "time_error" not in st.session_state:
     st.session_state["time_error"] = False
 
+# Header Section
+st.markdown("""
+<div class="booking-header">
+    <div class="booking-brand">🎾 CLUTCH<span>TENNIS</span></div>
+    <div class="booking-subtitle">Request a session with your coach and elevate your game.</div>
+</div>
+""", unsafe_allow_html=True)
 
-# -----------------------------
-# DATE
-# -----------------------------
-preferred_date = st.date_input(
-    "Preferred Date"
-)
+# Date Picker Section
+preferred_date = st.date_input("Select Preferred Date")
 
-
-# -----------------------------
-# CHECK GOOGLE SHEET AVAILABILITY
-# -----------------------------
+# Dynamic Availability Fetch
 try:
-
     availability_response = requests.get(
         availability_url,
-        params={
-            "date": str(preferred_date)
-        },
+        params={"date": str(preferred_date)},
         timeout=10
     )
-
     if availability_response.status_code == 200:
-
         try:
-            booked_times = (
-                availability_response
-                .json()
-                .get("bookedTimes", [])
-            )
-
+            booked_times = availability_response.json().get("bookedTimes", [])
         except ValueError:
             booked_times = []
-
     else:
         booked_times = []
-
 except Exception:
     booked_times = []
 
+available_times = [t for t in times if t not in booked_times]
 
-available_times = [
-    time
-    for time in times
-    if time not in booked_times
-]
-
-
-# -----------------------------
-# RED BORDER CSS
-# -----------------------------
+# Validation Error Border Styles
 if st.session_state["name_error"]:
-
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stTextInput"]:has(
-            input[aria-label="Full Name"]
-        ) input {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
+    st.markdown("""
+    <style>
+    div[data-testid="stTextInput"]:has(input[aria-label="Full Name"]) input {
+        border: 2px solid #D9383A !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 if st.session_state["email_error"]:
+    st.markdown("""
+    <style>
+    div[data-testid="stTextInput"]:has(input[aria-label="Your Email Address"]) input {
+        border: 2px solid #D9383A !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <style>
-        div[data-testid="stTextInput"]:has(
-            input[aria-label="Your Email Address"]
-        ) input {
-            border: 2px solid red !important;
-            box-shadow: 0 0 0 1px red !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Disclaimer Box Section
+st.markdown('<div class="section-title">Disclaimer & Booking Agreement</div>', unsafe_allow_html=True)
+st.caption("Please review the agreement below prior to submitting your request.")
 
-
-# ============================================================
-# DISCLAIMER
-# ============================================================
-
-st.markdown(
-    """
-    <h3 style="margin-bottom: 5px;">
-        Disclaimer & Booking Agreement
-    </h3>
-    """,
-    unsafe_allow_html=True
-)
-
-st.write(
-    "Please read the entire agreement below before continuing with your booking."
-)
-
-
-# -----------------------------
-# SCROLLABLE DISCLAIMER BOX
-# -----------------------------
 components.html(
     """
-    <div id="disclaimerBox"
-        style="
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #D1D5DB;
-            border-radius: 12px;
-            padding: 22px;
-            background-color: #FFFFFF;
-            color: #17201C;
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            box-sizing: border-box;
-        ">
-
-        <h3 style="color:#0B3D2E; margin-top:0;">
-            Clutch Tennis Participation & Booking Disclaimer
-        </h3>
-
-        <p>
-            Tennis coaching involves physical activity, exercise,
-            movement, and participation in tennis-related drills
-            and activities. Physical activity involves inherent
-            risks, including the possibility of accidents or injuries.
-        </p>
-
-        <p>
-            By requesting a Clutch Tennis session, you acknowledge
-            that tennis and physical activity may involve risks such
-            as falls, collisions, strains, sprains, soreness, or
-            other injuries. You understand that these risks cannot
-            always be completely eliminated even when reasonable
-            safety precautions are taken.
-        </p>
-
-        <p>
-            You agree to follow the instructions, rules, and safety
-            guidelines provided by the coach during your session.
-            You understand that the coach may modify, pause, or stop
-            an activity when the coach believes doing so is appropriate
-            for safety, weather, court conditions, or training purposes.
-        </p>
-
-        <p>
-            You agree to communicate with the coach about any physical
-            limitations, injuries, pain, illness, or other concerns
-            that could affect your ability to safely participate in a
-            session. You should immediately notify the coach if you
-            experience significant pain, dizziness, difficulty breathing,
-            or otherwise feel unsafe or unable to continue.
-        </p>
-
-        <p>
-            Outdoor tennis sessions may be affected by weather and
-            court conditions. Rain, lightning, extreme temperatures,
-            wet courts, unsafe surfaces, or other environmental
-            conditions may require a session to be modified,
-            postponed, rescheduled, or canceled.
-        </p>
-
-        <p>
-            Participants are expected to use appropriate footwear
-            and clothing and to bring water and any personal tennis
-            equipment that they need for the session, unless other
-            arrangements have been made with the coach.
-        </p>
-
-        <p>
-            Participants agree to use tennis equipment, courts, and
-            other facilities responsibly and to follow any rules
-            established by the facility where the session takes place.
-        </p>
-
-        <p>
-            Clutch Tennis provides coaching, instruction, practice,
-            and training. Participation in a coaching session does
-            not guarantee a particular athletic, competitive, ranking,
-            or performance result. Player improvement depends on many
-            individual factors, including practice, attendance, effort,
-            experience, physical ability, and consistency.
-        </p>
-
-        <p>
-            You understand that coaching advice is intended to support
-            tennis development and should be followed responsibly.
-            Participants remain responsible for communicating concerns
-            and making reasonable decisions about their own participation.
-        </p>
-
-        <p>
-            If a participant is under 18 years old, a parent or legal
-            guardian should review and approve the participant's
-            involvement in Clutch Tennis activities and any applicable
-            consent or waiver requirements.
-        </p>
-
-        <p>
-            By continuing with the booking process, you acknowledge
-            that you have had an opportunity to read the information
-            above and understand that participation in tennis and
-            physical activity involves inherent risks.
-        </p>
-
-        <p>
-            This agreement is intended to communicate important
-            information about participation and safety. It should not
-            be considered a substitute for professional legal advice,
-            and Clutch Tennis should have the final wording reviewed
-            by a qualified attorney before relying on it as a legal
-            waiver or release.
-        </p>
-
-        <hr>
-
-        <p style="
-            text-align:center;
-            color:#0B3D2E;
-            font-weight:bold;
-            margin-bottom:0;
-        ">
-            Please scroll to the bottom of this box to continue.
-        </p>
-
-    </div>
-
-    <script>
-
-        const box = document.getElementById("disclaimerBox");
-
-        function checkScroll() {
-
-            const reachedBottom =
-                box.scrollTop + box.clientHeight >=
-                box.scrollHeight - 5;
-
-            if (reachedBottom) {
-
-                try {
-
-                    window.parent.postMessage(
-                        {
-                            type: "clutch_disclaimer_read",
-                            value: true
-                        },
-                        "*"
-                    );
-
-                } catch (error) {
-                    console.log(error);
-                }
-
-            }
-
-        }
-
-        box.addEventListener("scroll", checkScroll);
-
-        checkScroll();
-
-    </script>
-    """,
-    height=320
-)
-
-
-# -----------------------------
-# DISCLAIMER AGREEMENT
-# -----------------------------
-st.markdown(
-    """
-    <div style="
-        background-color:#F7F8F5;
-        border-radius:10px;
-        padding:12px;
-        margin-top:10px;
-        margin-bottom:15px;
+    <div id="disclaimerBox" style="
+        height: 240px;
+        overflow-y: auto;
+        border: 1px solid #E4E9E4;
+        border-radius: 12px;
+        padding: 18px;
+        background-color: #FFFFFF;
+        color: #17201C;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        box-sizing: border-box;
     ">
+        <h4 style="color:#0B3D2E; margin-top:0; font-size: 1rem; font-weight:700;">
+            Clutch Tennis Participation & Booking Disclaimer
+        </h4>
+        <p>Tennis coaching involves physical activity, movement, and participation in drills. Physical activity involves inherent risks, including the possibility of injury.</p>
+        <p>By requesting a session, you acknowledge these risks and agree to follow all coaching and safety instructions during practice.</p>
+        <p>Participants are expected to communicate any injuries or limitations prior to sessions and bring appropriate court footwear and gear.</p>
+        <p>Outdoor sessions are subject to weather conditions and may be rescheduled due to rain, wet courts, or hazardous conditions.</p>
+        <p>Participation does not guarantee specific athletic outcomes; growth relies on personal effort, consistency, and training.</p>
+        <hr style="border:0; border-top:1px solid #E4E9E4; margin:15px 0;">
+        <p style="text-align:center; color:#0B3D2E; font-weight:700; margin-bottom:0;">
+            Scroll to the bottom to acknowledge agreement.
+        </p>
+    </div>
     """,
-    unsafe_allow_html=True
+    height=260
 )
 
+# Checkbox Confirmation
 disclaimer_agreed = st.checkbox(
-    "I have read the entire Disclaimer & Booking Agreement and agree to it."
+    "I have read and agree to the Participation & Booking Disclaimer."
 )
 
-st.markdown(
-    "</div>",
-    unsafe_allow_html=True
-)
+st.markdown("<br>", unsafe_allow_html=True)
 
-
-# ============================================================
-# BOOKING FORM
-# ============================================================
-
-with st.form("booking_form"):
-
+# Main Booking Form
+with st.form("booking_form", clear_on_submit=False):
     name = st.text_input(
         "Full Name",
+        placeholder="Alex Morgan",
         key="booking_name"
     )
 
     email = st.text_input(
         "Your Email Address",
+        placeholder="player@clutch-tennis.com",
         key="booking_email"
     )
 
@@ -384,23 +269,18 @@ with st.form("booking_form"):
     )
 
     if available_times:
-
         preferred_time = st.selectbox(
             "Preferred Time",
             available_times,
             key="booking_time"
         )
-
     else:
-
-        st.warning(
-            "There are no available times for this date."
-        )
-
+        st.warning("No available time slots for this selected date.")
         preferred_time = None
 
     notes = st.text_area(
-        "Goals or Special Requests"
+        "Goals or Special Requests",
+        placeholder="Tell us what you'd like to focus on during this session..."
     )
 
     submitted = st.form_submit_button(
@@ -408,183 +288,63 @@ with st.form("booking_form"):
         use_container_width=True
     )
 
-
-# ============================================================
-# VALIDATION
-# ============================================================
-
+# Form Validation & Execution
 if submitted:
-
-    # -----------------------------
-    # NAME
-    # -----------------------------
     name_error = not name.strip()
-
-    # -----------------------------
-    # EMAIL
-    # -----------------------------
-    email_error = (
-        not email.strip()
-        or not re.match(
-            r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-            email
-        )
-    )
-
-    # -----------------------------
-    # TIME
-    # -----------------------------
+    email_error = not email.strip() or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email)
     time_error = not preferred_time
-
-    # -----------------------------
-    # DISCLAIMER
-    # -----------------------------
     disclaimer_error = not disclaimer_agreed
 
-    # -----------------------------
-    # SAVE ERRORS
-    # -----------------------------
     st.session_state["name_error"] = name_error
     st.session_state["email_error"] = email_error
     st.session_state["time_error"] = time_error
 
-
-    # -----------------------------
-    # ERROR MESSAGES
-    # -----------------------------
     if name_error:
-
-        st.error(
-            "❌ Full Name: Please enter your name."
-        )
+        st.error("❌ Full Name: Please enter your name.")
 
     if email_error:
-
-        st.error(
-            "❌ Email: Please enter a valid email address."
-        )
+        st.error("❌ Email: Please enter a valid email address.")
 
     if time_error:
-
-        st.error(
-            "❌ Preferred Time: Please choose an available time."
-        )
+        st.error("❌ Preferred Time: Please select an available time.")
 
     if disclaimer_error:
+        st.error("❌ Disclaimer: Please accept the booking agreement above.")
 
-        st.error(
-            "❌ Disclaimer: Please read and agree to the "
-            "Disclaimer & Booking Agreement before submitting."
-        )
+    if not name_error and not email_error and not time_error and not disclaimer_error:
+        with st.spinner("Submitting your booking request..."):
+            endpoint = "https://api.sheetmonkey.io/form/fQvQ98iNDidpE7BcoVNnmH"
+            disclaimer_date = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
 
-
-    # ========================================================
-    # SUBMIT IF EVERYTHING IS VALID
-    # ========================================================
-
-    if (
-        not name_error
-        and not email_error
-        and not time_error
-        and not disclaimer_error
-    ):
-
-        with st.spinner(
-            "Saving your booking request..."
-        ):
-
-            # -----------------------------
-            # SHEETMONKEY
-            # -----------------------------
-            endpoint = (
-                "https://api.sheetmonkey.io/form/"
-                "fQvQ98iNDidpE7BcoVNnmH"
-            )
-
-            # -----------------------------
-            # DISCLAIMER TIMESTAMP
-            # -----------------------------
-            disclaimer_date = datetime.now().strftime(
-                "%Y-%m-%d %I:%M:%S %p"
-            )
-
-            # -----------------------------
-            # BOOKING PAYLOAD
-            # -----------------------------
             payload = {
-
                 "Name": name,
-
                 "Email": email,
-
                 "Lesson Type": lesson_type,
-
-                "Preferred Date": str(
-                    preferred_date
-                ),
-
-                "Preferred Time": str(
-                    preferred_time
-                ),
-
+                "Preferred Date": str(preferred_date),
+                "Preferred Time": str(preferred_time),
                 "Notes": notes,
-
-                # Disclaimer information
                 "Disclaimer Agreed": "Yes",
-
                 "Disclaimer Date": disclaimer_date,
-
                 "Disclaimer Version": "Version 1.0"
             }
 
-
-            # -----------------------------
-            # SEND TO GOOGLE SHEETS
-            # -----------------------------
             try:
-
                 response = requests.post(
                     endpoint,
                     json=payload,
-                    headers={
-                        "Content-Type": "application/json"
-                    },
+                    headers={"Content-Type": "application/json"},
                     timeout=15
                 )
 
-                # -----------------------------
-                # SUCCESS
-                # -----------------------------
                 if response.status_code in [200, 201]:
+                    st.success("Booking request submitted successfully! 🎾")
+                    st.info("Your request has been recorded. We will confirm your session shortly.")
 
-                    st.success(
-                        "Booking request submitted successfully! 🎾"
-                    )
-
-                    st.info(
-                        "Your booking request has been received."
-                    )
-
-                    # Clear validation errors
                     st.session_state["name_error"] = False
                     st.session_state["email_error"] = False
                     st.session_state["time_error"] = False
-
-                # -----------------------------
-                # FAILED
-                # -----------------------------
                 else:
+                    st.error("Submission failed. Please check your network connection and try again.")
 
-                    st.error(
-                        "Submission failed. "
-                        "Please check your sheet connection."
-                    )
-
-            # -----------------------------
-            # NETWORK ERROR
-            # -----------------------------
             except Exception:
-
-                st.error(
-                    "Network error. Please try again."
-                )
+                st.error("Network error encountered. Please try again.")
