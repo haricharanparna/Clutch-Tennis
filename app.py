@@ -44,7 +44,11 @@ html, body, [class*="css"] {
 
 [data-testid="stAppViewContainer"] {
     background:
-        radial-gradient(circle at 90% 5%, rgba(11,61,46,0.08), transparent 25%),
+        radial-gradient(
+            circle at 90% 5%,
+            rgba(11,61,46,0.08),
+            transparent 25%
+        ),
         #F7F8F5;
     color: #17201C;
 }
@@ -68,7 +72,10 @@ footer {
     visibility: hidden;
 }
 
-/* Hero */
+/* -----------------------------
+   HERO
+----------------------------- */
+
 .hero {
     background: linear-gradient(
         135deg,
@@ -134,7 +141,10 @@ footer {
     margin-bottom: 20px;
 }
 
-/* Section headings */
+/* -----------------------------
+   SECTION HEADINGS
+----------------------------- */
+
 .section-header {
     margin-top: 45px;
     margin-bottom: 20px;
@@ -155,7 +165,10 @@ footer {
     color: #17201C;
 }
 
-/* Service cards */
+/* -----------------------------
+   SERVICE CARDS
+----------------------------- */
+
 .service-card {
     background: white;
     border: 1px solid #E4E9E4;
@@ -206,7 +219,10 @@ footer {
     margin-top: 20px;
 }
 
-/* Buttons */
+/* -----------------------------
+   BUTTONS
+----------------------------- */
+
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -224,7 +240,10 @@ div.stButton > button:hover {
     transform: translateY(-1px);
 }
 
-/* Bottom CTA */
+/* -----------------------------
+   CTA
+----------------------------- */
+
 .cta {
     background: #EAF2D5;
     border: 1px solid #D9E7B9;
@@ -246,42 +265,57 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
+
 # -----------------------------
 # HERO
 # -----------------------------
-st.markdown(f"""
-<div class="hero">
 
-    <div class="welcome-pill">
-        Welcome back, {full_name} 👋
+st.markdown(
+    f"""
+    <div class="hero">
+
+        <div class="welcome-pill">
+            Welcome back, {full_name} 👋
+        </div>
+
+        <div class="hero-eyebrow">
+            Clutch Tennis Academy
+        </div>
+
+        <div class="hero-title">
+            Train Hard.<br>
+            <span>Play Clutch.</span>
+        </div>
+
+        <div class="hero-text">
+            Personalized tennis coaching designed to sharpen your skills,
+            build confidence, and help you perform when it matters most.
+        </div>
+
     </div>
+    """,
+    unsafe_allow_html=True
+)
 
-    <div class="hero-eyebrow">
-        Clutch Tennis Academy
-    </div>
-
-    <div class="hero-title">
-        Train Hard.<br>
-        <span>Play Clutch.</span>
-    </div>
-
-    <div class="hero-text">
-        Personalized tennis coaching designed to sharpen your skills,
-        build confidence, and help you perform when it matters most.
-    </div>
-
-</div>
-""", unsafe_allow_html=True)
 
 # -----------------------------
-# SERVICES
+# SERVICES HEADER
 # -----------------------------
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">What We Offer</div>
-    <div class="section-title">Train for your game.</div>
-</div>
-""", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <div class="section-header">
+        <div class="section-kicker">What We Offer</div>
+        <div class="section-title">Train for your game.</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# -----------------------------
+# GOOGLE SHEETS
+# -----------------------------
 
 sheet_url = (
     "https://docs.google.com/spreadsheets/d/e/"
@@ -298,8 +332,14 @@ cache_bust_url = (
 try:
     df = pd.read_csv(cache_bust_url)
     df.columns = df.columns.str.strip()
+
 except Exception:
     df = pd.DataFrame()
+
+
+# -----------------------------
+# SERVICE CARDS
+# -----------------------------
 
 icons = ["🎾", "👥", "🧠", "🏆"]
 
@@ -313,6 +353,10 @@ if not df.empty:
 
             icon = icons[index] if index < len(icons) else "🎾"
 
+            service_name = str(row.get("Service", "Tennis Coaching"))
+            description = str(row.get("Description", ""))
+            price = str(row.get("Price", ""))
+
             st.markdown(
                 f"""
                 <div class="service-card">
@@ -322,15 +366,15 @@ if not df.empty:
                     </div>
 
                     <div class="service-name">
-                        {row["Service"]}
+                        {service_name}
                     </div>
 
                     <div class="service-description">
-                        {row["Description"]}
+                        {description}
                     </div>
 
                     <div class="service-price">
-                        {row["Price"]}
+                        {price}
                     </div>
 
                 </div>
@@ -338,15 +382,25 @@ if not df.empty:
                 unsafe_allow_html=True
             )
 
+
 # -----------------------------
-# BOOKING
+# BOOKING HEADER
 # -----------------------------
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">Start Training</div>
-    <div class="section-title">Ready to get better?</div>
-</div>
-""", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <div class="section-header">
+        <div class="section-kicker">Start Training</div>
+        <div class="section-title">Ready to get better?</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# -----------------------------
+# BOOKING BUTTONS
+# -----------------------------
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -368,24 +422,42 @@ for label, column in buttons:
         ):
             st.switch_page("pages/booking.py")
 
+
 # -----------------------------
 # CTA
 # -----------------------------
-st.markdown("""
-<div class="cta">
-    <h2>Your next level starts here. 🎾</h2>
-    <div class="small-note">
-        Train with purpose. Build confidence. Compete with confidence.
+
+st.markdown(
+    """
+    <div class="cta">
+
+        <h2>Your next level starts here. 🎾</h2>
+
+        <div class="small-note">
+            Train with purpose. Build confidence. Compete with confidence.
+        </div>
+
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
+
+
+# -----------------------------
+# DIVIDER
+# -----------------------------
 
 st.divider()
+
 
 # -----------------------------
 # LOGOUT
 # -----------------------------
-if st.button("Log Out", use_container_width=True):
+
+if st.button(
+    "Log Out",
+    use_container_width=True
+):
 
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
