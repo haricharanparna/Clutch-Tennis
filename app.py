@@ -72,10 +72,7 @@ footer {
     visibility: hidden;
 }
 
-/* -----------------------------
-   HERO
------------------------------ */
-
+/* HERO */
 .hero {
     background: linear-gradient(
         135deg,
@@ -141,10 +138,7 @@ footer {
     margin-bottom: 20px;
 }
 
-/* -----------------------------
-   SECTION HEADINGS
------------------------------ */
-
+/* SECTION HEADINGS */
 .section-header {
     margin-top: 45px;
     margin-bottom: 20px;
@@ -165,10 +159,7 @@ footer {
     color: #17201C;
 }
 
-/* -----------------------------
-   SERVICE CARDS
------------------------------ */
-
+/* SERVICE CARDS */
 .service-card {
     background: white;
     border: 1px solid #E4E9E4;
@@ -219,10 +210,42 @@ footer {
     margin-top: 20px;
 }
 
-/* -----------------------------
-   BUTTONS
------------------------------ */
+/* REVIEWS */
+.review-card {
+    background: white;
+    border: 1px solid #E4E9E4;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+    height: 100%;
+}
 
+.review-stars {
+    color: #F59E0B;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.review-text {
+    color: #59635E;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.review-author {
+    color: #0B3D2E;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.review-role {
+    color: #7A837F;
+    font-size: 0.8rem;
+}
+
+/* BUTTONS */
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -240,10 +263,7 @@ div.stButton > button:hover {
     transform: translateY(-1px);
 }
 
-/* -----------------------------
-   CTA
------------------------------ */
-
+/* CTA */
 .cta {
     background: #EAF2D5;
     border: 1px solid #D9E7B9;
@@ -269,7 +289,6 @@ div.stButton > button:hover {
 # -----------------------------
 # HERO
 # -----------------------------
-
 st.markdown(
     f"""
 <div class="hero">
@@ -296,7 +315,6 @@ st.markdown(
 # -----------------------------
 # SERVICES HEADER
 # -----------------------------
-
 st.markdown(
     """
 <div class="section-header">
@@ -311,7 +329,6 @@ st.markdown(
 # -----------------------------
 # GOOGLE SHEETS
 # -----------------------------
-
 sheet_url = (
     "https://docs.google.com/spreadsheets/d/e/"
     "2PACX-1vSgtx-vuVX2vg5vG-NfSGzB9LyzYXFwQ6or-y0GjdpAWwYCwvh89ueQStE8OYVcbaGgoFsH0IISrNr-/"
@@ -327,7 +344,6 @@ cache_bust_url = (
 try:
     df = pd.read_csv(cache_bust_url)
     df.columns = df.columns.str.strip()
-
 except Exception:
     df = pd.DataFrame()
 
@@ -335,19 +351,14 @@ except Exception:
 # -----------------------------
 # SERVICE CARDS
 # -----------------------------
-
 icons = ["🎾", "👥", "🧠", "🏆"]
 
 if not df.empty:
-
     service_columns = st.columns(len(df))
 
     for index, (_, row) in enumerate(df.iterrows()):
-
         with service_columns[index]:
-
             icon = icons[index] if index < len(icons) else "🎾"
-
             service_name = str(row.get("Service", "Tennis Coaching"))
             description = str(row.get("Description", ""))
             price = str(row.get("Price", ""))
@@ -374,9 +385,59 @@ if not df.empty:
 
 
 # -----------------------------
+# REVIEWS SECTION (OPTION 2)
+# -----------------------------
+st.markdown(
+    """
+<div class="section-header">
+    <div class="section-kicker">Testimonials</div>
+    <div class="section-title">What Players Say</div>
+</div>
+""",
+    unsafe_allow_html=True
+)
+
+reviews = [
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Coach Oliver completely transformed my serve in just three sessions. The tactical focus here is top-tier.",
+        "author": "Alex M.",
+        "role": "Advanced Player"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "The mental toughness training helped me stay calm during tiebreakers. Highly recommend Clutch Tennis!",
+        "author": "Sarah K.",
+        "role": "Competitive Junior"
+    },
+    {
+        "stars": "⭐⭐⭐⭐⭐",
+        "text": "Great energy in the group clinics. Excellent balance of skill drills and live match strategy.",
+        "author": "David L.",
+        "role": "Adult Clinic Member"
+    }
+]
+
+rev_cols = st.columns(len(reviews))
+
+for col, rev in zip(rev_cols, reviews):
+    with col:
+        st.markdown(
+            f"""
+<div class="review-card">
+    <div class="review-stars">{rev['stars']}</div>
+    <div class="review-text">"{rev['text']}"</div>
+    <div class="review-author">{rev['author']}</div>
+    <div class="review-role">{rev['role']}</div>
+</div>
+""",
+            unsafe_allow_html=True
+        )
+
+
+# -----------------------------
 # BOOKING HEADER
 # -----------------------------
-
 st.markdown(
     """
 <div class="section-header">
@@ -391,7 +452,6 @@ st.markdown(
 # -----------------------------
 # BOOKING BUTTONS
 # -----------------------------
-
 col1, col2, col3, col4 = st.columns(4)
 
 buttons = [
@@ -402,9 +462,7 @@ buttons = [
 ]
 
 for label, column in buttons:
-
     with column:
-
         if st.button(
             f"Book {label} →",
             use_container_width=True,
@@ -416,7 +474,6 @@ for label, column in buttons:
 # -----------------------------
 # CTA
 # -----------------------------
-
 st.markdown(
     """
 <div class="cta">
@@ -433,20 +490,16 @@ st.markdown(
 # -----------------------------
 # DIVIDER
 # -----------------------------
-
 st.divider()
 
 
 # -----------------------------
 # LOGOUT
 # -----------------------------
-
 if st.button(
     "Log Out",
     use_container_width=True
 ):
-
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
-
     st.switch_page("pages/login.py")
