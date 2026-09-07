@@ -69,7 +69,6 @@ if restore_session_from_cookie():
 
 st.markdown("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -176,7 +175,6 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     flex-direction: column;
     gap: 10px;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -187,13 +185,12 @@ div[data-testid="stFormSubmitButton"] > button:hover {
 
 st.markdown("""
 <div class="login-header">
-    <div class="login-brand">
-        🎾 CLUTCH<span>TENNIS</span>
-    </div>
-
-    <div class="login-subtitle">
-        Welcome back! Please enter your details.
-    </div>
+<div class="login-brand">
+🎾 CLUTCH<span>TENNIS</span>
+</div>
+<div class="login-subtitle">
+Welcome back! Please enter your details.
+</div>
 </div>
 """, unsafe_allow_html=True)
 
