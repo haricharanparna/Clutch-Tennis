@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from supabase import create_client
-from cookies_controller import CookieController
+from streamlit_cookies_controller import CookieController
 
 # -----------------------------
 # PAGE CONFIG
