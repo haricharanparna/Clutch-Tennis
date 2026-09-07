@@ -37,28 +37,32 @@ FIVE_DAYS_IN_SECONDS = 5 * 24 * 60 * 60  # 432,000 seconds
 def restore_session_from_cookie():
     """
     Checks for a valid session token stored in browser cookies
-    and restores the Supabase session on page refresh.
+    and restores the Supabase session on page refresh without resetting.
     """
+    # 1. Check if user is already marked active in state
+    if st.session_state.get("logged_in", False):
+        return True
+
+    # 2. Retrieve token from cookie manager
     token = cookie_manager.get(cookie=COOKIE_NAME)
-    
-    if token and not st.session_state.get("logged_in", False):
+
+    # 3. Attempt to restore Supabase session if token exists
+    if token:
         try:
-            # Restore Supabase session using stored refresh token
             res = supabase.auth.set_session(token["access_token"], token["refresh_token"])
             if res.user:
                 st.session_state["logged_in"] = True
                 st.session_state["user"] = res.user
                 return True
         except Exception:
-            # Remove invalid or expired cookie
             cookie_manager.delete(COOKIE_NAME)
             st.session_state.clear()
             return False
 
-    return st.session_state.get("logged_in", False)
+    return False
 
 
-# Attempt to restore session immediately on page load
+# Attempt to restore session on load
 if restore_session_from_cookie():
     st.switch_page("app.py")
 
