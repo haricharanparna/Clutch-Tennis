@@ -405,17 +405,15 @@ div.stButton > button:hover {
 st.markdown("""
 <div class="floating-navbar">
     <div class="nav-logo">
-        🎾 TENNIS<span>DNA</span>
+        🎾 Clutch<span>Tennis</span>
     </div>
     <div class="nav-links">
         <a href="#" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Locations</a>
-        <a href="#" class="nav-item">Events</a>
-        <a href="#" class="nav-item">Blog</a>
-        <a href="#" class="nav-item">About us</a>
+        <a href="#" class="nav-item">Booking</a>
+        <a href="#" class="nav-item">About</a>
         <a href="#" class="nav-item">FAQs</a>
         <a href="#" class="nav-item">Contact</a>
-        <a href="#" class="nav-cta-btn">Book a Free Trial</a>
+        <a href="#" class="nav-cta-btn">Book a Lesson</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
