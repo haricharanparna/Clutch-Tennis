@@ -272,28 +272,23 @@ div.stButton > button:hover {
 
 st.markdown(
     f"""
-    <div class="hero">
-
-        <div class="welcome-pill">
-            Welcome back, {full_name} 👋
-        </div>
-
-        <div class="hero-eyebrow">
-            Clutch Tennis Academy
-        </div>
-
-        <div class="hero-title">
-            Train Hard.<br>
-            <span>Play Clutch.</span>
-        </div>
-
-        <div class="hero-text">
-            Personalized tennis coaching designed to sharpen your skills,
-            build confidence, and help you perform when it matters most.
-        </div>
-
+<div class="hero">
+    <div class="welcome-pill">
+        Welcome back, {full_name} 👋
     </div>
-    """,
+    <div class="hero-eyebrow">
+        Clutch Tennis Academy
+    </div>
+    <div class="hero-title">
+        Train Hard.<br>
+        <span>Play Clutch.</span>
+    </div>
+    <div class="hero-text">
+        Personalized tennis coaching designed to sharpen your skills,
+        build confidence, and help you perform when it matters most.
+    </div>
+</div>
+""",
     unsafe_allow_html=True
 )
 
@@ -304,11 +299,11 @@ st.markdown(
 
 st.markdown(
     """
-    <div class="section-header">
-        <div class="section-kicker">What We Offer</div>
-        <div class="section-title">Train for your game.</div>
-    </div>
-    """,
+<div class="section-header">
+    <div class="section-kicker">What We Offer</div>
+    <div class="section-title">Train for your game.</div>
+</div>
+""",
     unsafe_allow_html=True
 )
 
@@ -359,26 +354,21 @@ if not df.empty:
 
             st.markdown(
                 f"""
-                <div class="service-card">
-
-                    <div class="service-icon">
-                        {icon}
-                    </div>
-
-                    <div class="service-name">
-                        {service_name}
-                    </div>
-
-                    <div class="service-description">
-                        {description}
-                    </div>
-
-                    <div class="service-price">
-                        {price}
-                    </div>
-
-                </div>
-                """,
+<div class="service-card">
+    <div class="service-icon">
+        {icon}
+    </div>
+    <div class="service-name">
+        {service_name}
+    </div>
+    <div class="service-description">
+        {description}
+    </div>
+    <div class="service-price">
+        {price}
+    </div>
+</div>
+""",
                 unsafe_allow_html=True
             )
 
@@ -389,11 +379,11 @@ if not df.empty:
 
 st.markdown(
     """
-    <div class="section-header">
-        <div class="section-kicker">Start Training</div>
-        <div class="section-title">Ready to get better?</div>
-    </div>
-    """,
+<div class="section-header">
+    <div class="section-kicker">Start Training</div>
+    <div class="section-title">Ready to get better?</div>
+</div>
+""",
     unsafe_allow_html=True
 )
 
@@ -429,16 +419,13 @@ for label, column in buttons:
 
 st.markdown(
     """
-    <div class="cta">
-
-        <h2>Your next level starts here. 🎾</h2>
-
-        <div class="small-note">
-            Train with purpose. Build confidence. Compete with confidence.
-        </div>
-
+<div class="cta">
+    <h2>Your next level starts here. 🎾</h2>
+    <div class="small-note">
+        Train with purpose. Build confidence. Compete with confidence.
     </div>
-    """,
+</div>
+""",
     unsafe_allow_html=True
 )
 
