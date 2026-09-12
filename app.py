@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 from supabase import create_client
 
@@ -68,73 +67,63 @@ html, body, [class*="css"] {
 }
 
 /* FLOATING NAVBAR CONTAINER */
-.floating-navbar {
-    position: relative;
+[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
     background-color: #FFFFFF;
     border-radius: 40px;
-    padding: 10px 14px 10px 35px;
-    display: flex;
+    padding: 8px 16px 8px 30px;
     align-items: center;
-    justify-content: space-between;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
     border: 1px solid #EFEFEF;
+    margin-bottom: 30px;
 }
 
-.nav-logo {
+.nav-logo-target {
     font-weight: 800;
     font-size: 1.3rem;
     color: #0B3D2E;
     letter-spacing: -0.5px;
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
-.nav-logo span {
+.nav-logo-target span {
     color: #88C425;
     margin-left: 4px;
 }
 
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-item {
-    color: #3B82F6;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: underline;
-    transition: all 0.2s ease;
-}
-
-.nav-item.active {
-    border-bottom: 3px solid #88C425;
-}
-
-.nav-item:hover {
-    color: #1D4ED8;
-}
-
-.nav-cta-btn {
-    background-color: #0B3D2E;
-    color: #FFFFFF !important;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 0.9rem;
+/* NAVBAR BUTTONS */
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+    background: transparent !important;
+    color: #3B82F6 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
     text-decoration: underline !important;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
 }
 
-.nav-cta-btn:hover {
-    background-color: #145A43;
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+    color: #1D4ED8 !important;
+    background: transparent !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 20px !important;
+    min-height: 42px !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+    background-color: #145A43 !important;
 }
 
 /* HERO */
@@ -507,106 +496,45 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# Define the links dictionary
-NAVBAR_LINKS = {
-    "Home": "#",
-    "Location": "#location",
-    "About Us": "#about",
-    "FAQ": "#faq",
-    "Contact": "#contact"
-}
 
 # -----------------------------
 # UNIFIED NATIVE NAVBAR
 # -----------------------------
-# CSS targeting native Streamlit elements inside the custom container
-st.markdown("""
-<style>
-/* Style the wrapping container */
-[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
-    background-color: #FFFFFF;
-    border-radius: 40px;
-    padding: 8px 16px 8px 30px;
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border: 1px solid #EFEFEF;
-    margin-bottom: 30px;
-}
-
-.nav-logo-target {
-    font-weight: 800;
-    font-size: 1.3rem;
-    color: #0B3D2E;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-}
-
-.nav-logo-target span {
-    color: #88C425;
-    margin-left: 4px;
-}
-
-/* Style inline links inside the navbar */
-.nav-links-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    width: 100%;
-}
-
-.nav-links-wrapper a {
-    color: #3B82F6;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: underline;
-}
-
-/* Style the native Streamlit button inside the navbar column */
-div[data-testid="stColumn"]:has(div.nav-btn-marker) div.stButton > button {
-    background-color: #0B3D2E !important;
-    color: #FFFFFF !important;
-    border-radius: 25px !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    padding: 8px 20px !important;
-    min-height: 42px !important;
-    border: none !important;
-    width: 100% !important;
-}
-
-div[data-testid="stColumn"]:has(div.nav-btn-marker) div.stButton > button:hover {
-    background-color: #145A43 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Build the layout using native Streamlit columns
-nav_col1, nav_col2, nav_col3 = st.columns([2.5, 4, 2])
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
 
 with nav_col1:
     st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
 
 with nav_col2:
-    st.markdown(
-        f"""
-        <div class="nav-links-wrapper">
-            <a href="{NAVBAR_LINKS['Home']}">Home</a>
-            <a href="{NAVBAR_LINKS['Location']}">Location</a>
-            <a href="{NAVBAR_LINKS['About Us']}">About Us</a>
-            <a href="{NAVBAR_LINKS['FAQ']}">FAQ</a>
-            <a href="{NAVBAR_LINKS['Contact']}">Contact</a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Home", key="nav_home"):
+        st.rerun()
 
 with nav_col3:
-    st.markdown('<div class="nav-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Location", key="nav_loc"):
+        pass
+
+with nav_col4:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("About Us", key="nav_about"):
+        pass
+
+with nav_col5:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("FAQ", key="nav_faq"):
+        st.switch_page("pages/faq.py")
+
+with nav_col6:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Contact", key="nav_contact"):
+        pass
+
+with nav_col7:
+    st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
     if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
         st.switch_page("pages/booking.py")
+
 
 # -----------------------------
 # HERO SECTION
