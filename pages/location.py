@@ -247,30 +247,30 @@ with left_col:
 
     # --- NAVIGATION & EXTERNAL LINK PLACEHOLDERS ---
     st.markdown("""
-    <div class="info-card-box">
-        <div class="info-card-title">🗺️ Maps & Directions</div>
-        
-        <!-- PLACEHOLDER LINK 1: GOOGLE MAPS -->
-        <a href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
-            🚗 Open in Google Maps
-        </a>
+<div class="info-card-box">
+    <div class="info-card-title">🗺️ Maps & Directions</div>
+    
+    <!-- PLACEHOLDER LINK 1: GOOGLE MAPS -->
+    <a href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
+        🚗 Open in Google Maps
+    </a>
 
-        <!-- PLACEHOLDER LINK 2: APPLE MAPS -->
-        <a href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
-            🍏 Open in Apple Maps
-        </a>
+    <!-- PLACEHOLDER LINK 2: APPLE MAPS -->
+    <a href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
+        🍏 Open in Apple Maps
+    </a>
 
-        <!-- PLACEHOLDER LINK 3: WAZE -->
-        <a href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA" target="_blank" class="action-link-btn">
-            🚙 Open in Waze
-        </a>
+    <!-- PLACEHOLDER LINK 3: WAZE -->
+    <a href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA" target="_blank" class="action-link-btn">
+        🚙 Open in Waze
+    </a>
 
-        <!-- PLACEHOLDER LINK 4: SECONDARY/WINTER COURT LINK PLACEHOLDER -->
-        <a href="https://YOUR_SECONDARY_LOCATION_LINK.com" target="_blank" class="action-link-btn">
-            🎾 Indoor Facility Backup Location Link
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
+    <!-- PLACEHOLDER LINK 4: SECONDARY LOCATION -->
+    <a href="https://YOUR_SECONDARY_LOCATION_LINK.com" target="_blank" class="action-link-btn">
+        🎾 Indoor Facility Backup Location Link
+    </a>
+</div>
+""", unsafe_allow_html=True)
 
 with right_col:
     # --- STREAMLIT MAP DISPLAY ---
