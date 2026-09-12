@@ -8,6 +8,12 @@ st.set_page_config(
 )
 
 # -----------------------------
+# LOGIN PROTECTION
+# -----------------------------
+if not st.session_state.get("logged_in", False):
+    st.switch_page("pages/login.py")
+
+# -----------------------------
 # GLOBAL CSS
 # -----------------------------
 st.markdown("""
