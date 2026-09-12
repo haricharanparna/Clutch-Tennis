@@ -1,3 +1,4 @@
+import textwrap
 import streamlit as st
 
 # ============================================================
@@ -8,7 +9,7 @@ st.set_page_config(
     page_title="Player Dashboard | Clutch Tennis",
     page_icon="🎾",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
 # ============================================================
@@ -32,9 +33,9 @@ if user and hasattr(user, "user_metadata"):
 # CUSTOM STYLING
 # ============================================================
 
-st.markdown("""
+st.markdown(
+    textwrap.dedent("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -138,7 +139,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     box-shadow: 0 20px 50px rgba(11,61,46,0.16);
 }
 
-.dashboard-hero:after {
+.dashboard-hero::after {
     content: "🎾";
     position: absolute;
     right: 50px;
@@ -290,9 +291,10 @@ div.stButton > button {
     min-height: 48px;
     font-weight: 700;
 }
-
 </style>
-""", unsafe_allow_html=True)
+"""),
+    unsafe_allow_html=True,
+)
 
 
 # ============================================================
@@ -340,23 +342,21 @@ with nav_col7:
 # ============================================================
 
 st.markdown(
-    f"""
-<div class="dashboard-hero">
-    <div class="hero-small">
-        Player Dashboard
-    </div>
-
-    <div class="hero-title">
-        Welcome back, <span>{full_name}</span> 👋
-    </div>
-
-    <div class="hero-description">
-        Track your training, review coach feedback, monitor your progress,
-        and stay focused on your next level.
-    </div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent(f"""
+        <div class="dashboard-hero">
+            <div class="hero-small">
+                Player Dashboard
+            </div>
+            <div class="hero-title">
+                Welcome back, <span>{full_name}</span> 👋
+            </div>
+            <div class="hero-description">
+                Track your training, review coach feedback, monitor your progress,
+                and stay focused on your next level.
+            </div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
 
 
@@ -364,162 +364,202 @@ st.markdown(
 # QUICK OVERVIEW
 # ============================================================
 
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">Your Training</div>
-    <div class="section-title">Player Overview</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Your Training</div>
+            <div class="section-title">Player Overview</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
+)
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">🎾</div>
-        <div class="card-title">My Coach</div>
-        <div class="card-text">
-            Your assigned coach will appear here.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">🎾</div>
+                <div class="card-title">My Coach</div>
+                <div class="card-text">
+                    Your assigned coach will appear here.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with col2:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">📅</div>
-        <div class="card-title">Next Session</div>
-        <div class="card-text">
-            Your upcoming training session will appear here.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">📅</div>
+                <div class="card-title">Next Session</div>
+                <div class="card-text">
+                    Your upcoming training session will appear here.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with col3:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">📈</div>
-        <div class="card-title">Progress</div>
-        <div class="card-text">
-            Track your tennis development over time.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">📈</div>
+                <div class="card-title">Progress</div>
+                <div class="card-text">
+                    Track your tennis development over time.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with col4:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">🏆</div>
-        <div class="card-title">Goals</div>
-        <div class="card-text">
-            Your current training goals will appear here.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">🏆</div>
+                <div class="card-title">Goals</div>
+                <div class="card-text">
+                    Your current training goals will appear here.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================
 # COACH FEEDBACK
 # ============================================================
 
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">Coach Communication</div>
-    <div class="section-title">Coach Feedback</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Coach Communication</div>
+            <div class="section-title">Coach Feedback</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
+)
 
-st.markdown("""
-<div class="feedback-card">
-    <div class="feedback-coach">
-        Coach Feedback
-    </div>
-
-    <div class="feedback-date">
-        No feedback yet
-    </div>
-
-    <div class="feedback-text">
-        Once your coach submits feedback, it will appear here.
-        You'll be able to review notes about your technique,
-        strategy, mindset, and areas to improve.
-    </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    textwrap.dedent("""
+        <div class="feedback-card">
+            <div class="feedback-coach">
+                Coach Feedback
+            </div>
+            <div class="feedback-date">
+                No feedback yet
+            </div>
+            <div class="feedback-text">
+                Once your coach submits feedback, it will appear here.
+                You'll be able to review notes about your technique,
+                strategy, mindset, and areas to improve.
+            </div>
+        </div>
+    """),
+    unsafe_allow_html=True,
+)
 
 
 # ============================================================
 # PROGRESS
 # ============================================================
 
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">Development</div>
-    <div class="section-title">My Progress</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Development</div>
+            <div class="section-title">My Progress</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
+)
 
 progress_col1, progress_col2, progress_col3 = st.columns(3)
 
 with progress_col1:
-    st.markdown("""
-    <div class="progress-card">
-        <div class="progress-label">Technical Skills</div>
-        <div class="progress-value">Not tracked yet</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="progress-card">
+                <div class="progress-label">Technical Skills</div>
+                <div class="progress-value">Not tracked yet</div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with progress_col2:
-    st.markdown("""
-    <div class="progress-card">
-        <div class="progress-label">Match Strategy</div>
-        <div class="progress-value">Not tracked yet</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="progress-card">
+                <div class="progress-label">Match Strategy</div>
+                <div class="progress-value">Not tracked yet</div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with progress_col3:
-    st.markdown("""
-    <div class="progress-card">
-        <div class="progress-label">Mental Game</div>
-        <div class="progress-value">Not tracked yet</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="progress-card">
+                <div class="progress-label">Mental Game</div>
+                <div class="progress-value">Not tracked yet</div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================
 # GOALS
 # ============================================================
 
-st.markdown("""
-<div class="section-header">
-    <div class="section-kicker">Keep Improving</div>
-    <div class="section-title">My Goals</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Keep Improving</div>
+            <div class="section-title">My Goals</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
+)
 
 goal_col1, goal_col2 = st.columns(2)
 
 with goal_col1:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">🎯</div>
-        <div class="card-title">Current Goal</div>
-        <div class="card-text">
-            Your coach-assigned goals will appear here.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Current Goal</div>
+                <div class="card-text">
+                    Your coach-assigned goals will appear here.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with goal_col2:
-    st.markdown("""
-    <div class="dashboard-card">
-        <div class="card-icon">🔥</div>
-        <div class="card-title">Training Focus</div>
-        <div class="card-text">
-            Your current training focus will appear here.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="dashboard-card">
+                <div class="card-icon">🔥</div>
+                <div class="card-title">Training Focus</div>
+                <div class="card-text">
+                    Your current training focus will appear here.
+                </div>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================
