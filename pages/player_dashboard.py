@@ -23,7 +23,6 @@ if not st.session_state.get("logged_in", False):
 # ============================================================
 
 user = st.session_state.get("user")
-
 full_name = "Player"
 
 if user and hasattr(user, "user_metadata"):
@@ -35,7 +34,6 @@ if user and hasattr(user, "user_metadata"):
 
 st.markdown("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -75,18 +73,25 @@ footer {
 .navbar {
     background: #FFFFFF;
     border-radius: 40px;
-    padding: 10px 18px 10px 30px;
+    padding: 14px 28px;
     display: flex;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+    justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     border: 1px solid #EFEFEF;
     margin-bottom: 35px;
+}
+
+.nav-brand {
+    display: flex;
+    flex-direction: column;
 }
 
 .nav-logo {
     font-weight: 800;
     font-size: 1.3rem;
     color: #0B3D2E;
+    line-height: 1.1;
 }
 
 .nav-logo span {
@@ -95,7 +100,9 @@ footer {
 
 .nav-subtitle {
     color: #69736E;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 2px;
 }
 
 /* ============================================================
@@ -118,7 +125,7 @@ footer {
     box-shadow: 0 20px 50px rgba(11,61,46,0.16);
 }
 
-.dashboard-hero:after {
+.dashboard-hero::after {
     content: "🎾";
     position: absolute;
     right: 50px;
@@ -126,6 +133,7 @@ footer {
     font-size: 140px;
     opacity: 0.08;
     transform: rotate(15deg);
+    pointer-events: none;
 }
 
 .hero-small {
@@ -138,7 +146,7 @@ footer {
 }
 
 .hero-title {
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 800;
     margin: 0;
 }
@@ -188,7 +196,7 @@ footer {
     border: 1px solid #E4E9E4;
     border-radius: 20px;
     padding: 25px;
-    min-height: 180px;
+    min-height: 190px;
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
@@ -268,16 +276,28 @@ footer {
 
 .progress-value {
     color: #0B3D2E;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 800;
 }
 
 /* ============================================================
-   LOGOUT
+   LOGOUT BUTTON STYLING
    ============================================================ */
 
-.logout-section {
-    margin-top: 45px;
+div.stButton > button {
+    background-color: #FFFFFF !important;
+    color: #0B3D2E !important;
+    border: 1px solid #D1DBD4 !important;
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+div.stButton > button:hover {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-color: #0B3D2E !important;
 }
 
 </style>
@@ -290,7 +310,7 @@ footer {
 
 st.markdown("""
 <div class="navbar">
-    <div>
+    <div class="nav-brand">
         <div class="nav-logo">
             🎾 CLUTCH<span>TENNIS</span>
         </div>
@@ -493,8 +513,7 @@ with goal_col2:
 # LOGOUT
 # ============================================================
 
-st.markdown('<div class="logout-section"></div>', unsafe_allow_html=True)
-
+st.write("")
 st.divider()
 
 if st.button("Log Out", use_container_width=True):
