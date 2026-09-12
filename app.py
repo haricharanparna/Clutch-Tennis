@@ -533,7 +533,7 @@ st.markdown("""
         <a href="#" class="nav-item">About Us</a>
         <a href="#" class="nav-item">FAQ</a>
         <a href="#" class="nav-item">Contact</a>
-        <a href="#" class="nav-cta-btn">Book a Free Trial</a>
+        <a href="booking.py" class="nav-cta-btn">Book a Free Trial</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
