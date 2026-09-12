@@ -107,47 +107,6 @@ div[data-testid="stVerticalBlock"] {
     margin-left: 4px;
 }
 
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-item {
-    color: #0B3D2E;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-decoration: none;
-    padding-bottom: 4px;
-    transition: all 0.2s ease;
-}
-
-.nav-item.active {
-    border-bottom: 3px solid #88C425;
-}
-
-.nav-item:hover {
-    color: #88C425;
-}
-
-.nav-cta-btn {
-    background-color: #0B3D2E;
-    color: #FFFFFF !important;
-    padding: 10px 22px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-}
-
-.nav-cta-btn:hover {
-    background-color: #145A43;
-}
-
 /* HERO */
 .hero {
     background: linear-gradient(
@@ -331,20 +290,24 @@ div[data-testid="stVerticalBlock"] {
 }
 
 /* BUTTON STYLES */
-div.stButton > button {
+div.stButton > button, div.stLinkButton > a {
     background: #0B3D2E;
-    color: white;
+    color: white !important;
     border: 0;
     border-radius: 12px;
     min-height: 48px;
     font-weight: 700;
     transition: 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-div.stButton > button:hover {
+div.stButton > button:hover, div.stLinkButton > a:hover {
     background: #145A43;
     border: 0;
-    color: white;
+    color: white !important;
     transform: translateY(-1px);
 }
 
@@ -520,23 +483,53 @@ div.stButton > button:hover {
 
 
 # -----------------------------
+# NAVBAR LINKS CONFIGURATION
+# -----------------------------
+# Insert the external URLs or internal page paths you want here:
+NAVBAR_LINKS = {
+    "Home": "/",
+    "Location": "https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171",
+    "About Us": "https://example.com/about",
+    "FAQ": "https://example.com/faq",
+    "Book Trial": "https://clutch-tennis-6yc8kmr8cduasgptdslws4.streamlit.app/booking"
+}
+
+
+# -----------------------------
 # FLOATING NAVBAR
 # -----------------------------
-st.markdown("""
-<div class="floating-navbar">
+
+st.markdown('<div class="navbar-wrapper">', unsafe_allow_html=True)
+
+nav1, nav2, nav3, nav4, nav5, nav6 = st.columns(
+    [2.2, 1, 1, 1, 1, 1.5]
+)
+
+with nav1:
+    st.markdown("""
     <div class="nav-logo">
         🎾 CLUTCH<span>TENNIS</span>
     </div>
-    <div class="nav-links">
-        <a href="#" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Location</a>
-        <a href="#" class="nav-item">About Us</a>
-        <a href="#" class="nav-item">FAQ</a>
-        <a href="#" class="nav-item">Contact</a>
-        <a href="booking.py" class="nav-cta-btn">Book a Free Trial</a>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+with nav2:
+    st.link_button("Home", NAVBAR_LINKS["Home"], use_container_width=True)
+
+with nav3:
+    st.link_button("Location", NAVBAR_LINKS["Location"], use_container_width=True)
+
+with nav4:
+    st.link_button("About Us", NAVBAR_LINKS["About Us"], use_container_width=True)
+
+with nav5:
+    st.link_button("FAQ", NAVBAR_LINKS["FAQ"], use_container_width=True)
+
+with nav6:
+    st.markdown('<div class="booking-button">', unsafe_allow_html=True)
+    st.link_button("Book a Free Trial", NAVBAR_LINKS["Book Trial"], use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # -----------------------------
