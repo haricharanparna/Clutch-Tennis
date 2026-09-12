@@ -529,9 +529,9 @@ div.stButton > button:hover {
 st.markdown(
     f"""
 <div class="floating-navbar">
-    <a href="{NAVBAR_LINKS['Home']}" class="nav-logo">
+    <div class="nav-logo">
         🎾 CLUTCH<span>TENNIS</span>
-    </a>
+    </div>
     <div class="nav-links">
         <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
         <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
@@ -544,7 +544,6 @@ st.markdown(
 """,
     unsafe_allow_html=True
 )
-
 
 # -----------------------------
 # HERO SECTION
