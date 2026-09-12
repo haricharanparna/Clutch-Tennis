@@ -237,13 +237,13 @@ left_col, right_col = st.columns([1.1, 1], gap="large")
 with left_col:
     # --- PRIMARY COURT LOCATION INFO ---
     st.markdown("""
-    <div class="info-card-box">
-        <div class="info-card-title">📍 Coppermill Tennis Court</div>
-        <p><strong>Address:</strong> 13287 Coppermill Dr, Herndon, VA 20171</p>
-        <p><strong>Operating Seasons:</strong> Spring, Summer, & Fall</p>
-        <p><strong>Amenities:</strong> Outdoor hard courts, lighted facilities, and adjacent public parking.</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="info-card-box">
+    <div class="info-card-title">📍 Coppermill Tennis Court</div>
+    <p><strong>Address:</strong> 13287 Coppermill Dr, Herndon, VA 20171</p>
+    <p><strong>Operating Seasons:</strong> Spring, Summer, & Fall</p>
+    <p><strong>Amenities:</strong> Outdoor hard courts, lighted facilities, and adjacent public parking.</p>
+</div>
+""", unsafe_allow_html=True)
 
     # --- NAVIGATION & EXTERNAL LINK PLACEHOLDERS ---
     st.markdown("""
@@ -275,8 +275,8 @@ with left_col:
 with right_col:
     # --- STREAMLIT MAP DISPLAY ---
     st.markdown("""
-    <div class="info-card-title" style="margin-bottom: 8px;">📌 Interactive Map View</div>
-    """, unsafe_allow_html=True)
+<div class="info-card-title" style="margin-bottom: 8px;">📌 Interactive Map View</div>
+""", unsafe_allow_html=True)
 
     # Coppermill Tennis Court Coordinates
     court_coords = {
