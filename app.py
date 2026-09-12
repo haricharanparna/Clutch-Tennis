@@ -30,6 +30,19 @@ if user and hasattr(user, "user_metadata"):
     full_name = user.user_metadata.get("full_name", "Player")
 
 # -----------------------------
+# NAVBAR LINKS CONFIGURATION
+# Set your target URLs here
+# -----------------------------
+NAVBAR_LINKS = {
+    "Home": "/",
+    "Location": "#location",
+    "About Us": "#about",
+    "FAQ": "#faq",
+    "Contact": "#contact",
+    "Book Trial": "/booking"
+}
+
+# -----------------------------
 # GLOBAL CSS
 # -----------------------------
 st.markdown("""
@@ -66,15 +79,6 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* REMOVE OVERFLOW CONSTRAINTS FOR STICKY NAVBAR */
-[data-testid="stAppViewContainer"] > .main {
-    overflow: visible !important;
-}
-
-div[data-testid="stVerticalBlock"] {
-    overflow: visible !important;
-}
-
 /* FLOATING NAVBAR CONTAINER */
 .floating-navbar {
     position: -webkit-sticky !important;
@@ -83,7 +87,7 @@ div[data-testid="stVerticalBlock"] {
     z-index: 99999 !important;
     background-color: #FFFFFF;
     border-radius: 40px;
-    padding: 12px 30px;
+    padding: 12px 35px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -110,14 +114,14 @@ div[data-testid="stVerticalBlock"] {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 28px;
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
 .nav-item {
-    color: #0B3D2E;
+    color: #3B82F6;
     font-weight: 600;
     font-size: 0.95rem;
     text-decoration: none;
@@ -130,17 +134,17 @@ div[data-testid="stVerticalBlock"] {
 }
 
 .nav-item:hover {
-    color: #88C425;
+    color: #1D4ED8;
 }
 
 .nav-cta-btn {
     background-color: #0B3D2E;
     color: #FFFFFF !important;
-    padding: 10px 22px;
-    border-radius: 20px;
+    padding: 12px 24px;
+    border-radius: 25px;
     font-weight: 700;
     font-size: 0.9rem;
-    text-decoration: none;
+    text-decoration: underline;
     transition: background-color 0.2s ease;
 }
 
@@ -330,7 +334,7 @@ div[data-testid="stVerticalBlock"] {
     font-size: 0.8rem;
 }
 
-/* BUTTON STYLES */
+/* PAGE BUTTON STYLES */
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -520,23 +524,26 @@ div.stButton > button:hover {
 
 
 # -----------------------------
-# FLOATING NAVBAR
+# FLOATING NAVBAR (HTML ONLY)
 # -----------------------------
-st.markdown("""
+st.markdown(
+    f"""
 <div class="floating-navbar">
-    <div class="nav-logo">
+    <a href="{NAVBAR_LINKS['Home']}" class="nav-logo">
         🎾 CLUTCH<span>TENNIS</span>
-    </div>
+    </a>
     <div class="nav-links">
-        <a href="#" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Location</a>
-        <a href="#" class="nav-item">About Us</a>
-        <a href="#" class="nav-item">FAQ</a>
-        <a href="#" class="nav-item">Contact</a>
-        <a href="#" class="nav-cta-btn">Book a Free Trial</a>
+        <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
+        <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
+        <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
+        <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
+        <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
     </div>
+    <a href="{NAVBAR_LINKS['Book Trial']}" class="nav-cta-btn">Book a Free Trial</a>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True
+)
 
 
 # -----------------------------
