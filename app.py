@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 from supabase import create_client
 
@@ -8,12 +9,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-# -----------------------------
-# PAGE SWITCHING HANDLER
-# -----------------------------
-if st.query_params.get("page") == "booking":
-    st.switch_page("pages/booking.py")
 
 # -----------------------------
 # LOGIN PROTECTION
@@ -34,17 +29,6 @@ full_name = "Player"
 
 if user and hasattr(user, "user_metadata"):
     full_name = user.user_metadata.get("full_name", "Player")
-
-# -----------------------------
-# NAVBAR LINKS CONFIGURATION
-# -----------------------------
-NAVBAR_LINKS = {
-    "Home": "#",
-    "Location": "#location",
-    "About Us": "#about",
-    "FAQ": "#faq",
-    "Contact": "#contact"
-}
 
 # -----------------------------
 # GLOBAL CSS
@@ -525,28 +509,51 @@ div.stButton > button:hover {
 
 
 # -----------------------------
-# UNIFIED FLOATING NAVBAR
+# UNIFIED NAVBAR WITH NATIVE CLICK
 # -----------------------------
-st.markdown(
-    f"""
+navbar_html = """
 <div class="floating-navbar">
     <div class="nav-logo">
         🎾 CLUTCH<span>TENNIS</span>
     </div>
     <div class="nav-links">
-        <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
-        <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
-        <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
-        <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
-        <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
+        <a href="#" class="nav-item active">Home</a>
+        <a href="#location" class="nav-item">Location</a>
+        <a href="#about" class="nav-item">About Us</a>
+        <a href="#faq" class="nav-item">FAQ</a>
+        <a href="#contact" class="nav-item">Contact</a>
     </div>
-    <form action="" method="get" style="margin: 0;">
-        <input type="hidden" name="page" value="booking" />
-        <button type="submit" class="nav-cta-btn">Book a Free Trial</button>
-    </form>
+    <button id="bookBtn" class="nav-cta-btn">Book a Free Trial</button>
 </div>
-""",
-    unsafe_allow_html=True
+
+<script>
+    document.getElementById('bookBtn').addEventListener('click', function() {
+        window.parent.postMessage({type: 'TRIGGER_BOOKING'}, '*');
+    });
+</script>
+"""
+
+# HTML render inside frame
+components.html(navbar_html, height=70)
+
+# Listen for component clicks without full refresh
+clicked = st.components.v1.html(
+    """
+    <script>
+        window.addEventListener('message', function(e) {
+            if (e.data.type === 'TRIGGER_BOOKING') {
+                const btns = window.parent.document.querySelectorAll('button');
+                for (let btn of btns) {
+                    if (btn.innerText.includes('Book Private Coaching')) {
+                        btn.click();
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+    """,
+    height=0
 )
 
 
