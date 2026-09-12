@@ -513,12 +513,12 @@ with nav_col2:
 with nav_col3:
     st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
     if st.button("Location", key="nav_loc"):
-        pass
+        st.switch_page("pages/location.py")
 
 with nav_col4:
     st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
     if st.button("About Us", key="nav_about"):
-        pass
+        st.switch_page("pages/about.py")
 
 with nav_col5:
     st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
@@ -528,7 +528,7 @@ with nav_col5:
 with nav_col6:
     st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
     if st.button("Contact", key="nav_contact"):
-        pass
+        st.switch_page("pages/contact.py")
 
 with nav_col7:
     st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
