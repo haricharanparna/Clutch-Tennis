@@ -31,15 +31,13 @@ if user and hasattr(user, "user_metadata"):
 
 # -----------------------------
 # NAVBAR LINKS CONFIGURATION
-# Set your target URLs here
 # -----------------------------
 NAVBAR_LINKS = {
-    "Home": "/",
+    "Home": "#",
     "Location": "#location",
     "About Us": "#about",
     "FAQ": "#faq",
-    "Contact": "#contact",
-    "Book Trial": "/booking"
+    "Contact": "#contact"
 }
 
 # -----------------------------
@@ -81,13 +79,10 @@ html, body, [class*="css"] {
 
 /* FLOATING NAVBAR CONTAINER */
 .floating-navbar {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 10px !important;
-    z-index: 99999 !important;
+    position: relative;
     background-color: #FFFFFF;
     border-radius: 40px;
-    padding: 12px 35px;
+    padding: 10px 25px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -97,12 +92,9 @@ html, body, [class*="css"] {
 }
 
 .nav-logo {
-    display: flex;
-    align-items: center;
     font-weight: 800;
     font-size: 1.3rem;
     color: #0B3D2E;
-    text-decoration: none;
     letter-spacing: -0.5px;
 }
 
@@ -114,18 +106,14 @@ html, body, [class*="css"] {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 28px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    gap: 24px;
 }
 
 .nav-item {
     color: #3B82F6;
     font-weight: 600;
     font-size: 0.95rem;
-    text-decoration: none;
-    padding-bottom: 4px;
+    text-decoration: underline;
     transition: all 0.2s ease;
 }
 
@@ -137,19 +125,27 @@ html, body, [class*="css"] {
     color: #1D4ED8;
 }
 
-.nav-cta-btn {
-    background-color: #0B3D2E;
-    color: #FFFFFF !important;
-    padding: 12px 24px;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    text-decoration: underline;
-    transition: background-color 0.2s ease;
+/* OVERRIDE STREAMLIT BUTTON TO LOOK LIKE NAVBAR CTA */
+div[data-testid="stElementContainer"]:has(button[key="nav_book_btn"]) {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-.nav-cta-btn:hover {
-    background-color: #145A43;
+button[key="nav_book_btn"] {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    text-decoration: underline !important;
+    border: none !important;
+    min-height: 42px !important;
+    padding: 0px 24px !important;
+}
+
+button[key="nav_book_btn"]:hover {
+    background-color: #145A43 !important;
+    color: #FFFFFF !important;
 }
 
 /* HERO */
@@ -524,26 +520,33 @@ div.stButton > button:hover {
 
 
 # -----------------------------
-# FLOATING NAVBAR (HTML ONLY)
+# HYBRID FLOATING NAVBAR
 # -----------------------------
-st.markdown(
-    f"""
-<div class="floating-navbar">
-    <div class="nav-logo">
-        🎾 CLUTCH<span>TENNIS</span>
+nav_left, nav_right = st.columns([4, 1.2], vertical_alignment="center")
+
+with nav_left:
+    st.markdown(
+        f"""
+    <div class="floating-navbar" style="margin-bottom: 0px;">
+        <div class="nav-logo">
+            🎾 CLUTCH<span>TENNIS</span>
+        </div>
+        <div class="nav-links">
+            <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
+            <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
+            <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
+            <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
+            <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
+        </div>
     </div>
-    <div class="nav-links">
-        <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
-        <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
-        <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
-        <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
-        <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
-    </div>
-    <a href="{NAVBAR_LINKS['Book Trial']}" class="nav-cta-btn">Book a Free Trial</a>
-</div>
-""",
-    unsafe_allow_html=True
-)
+    """,
+        unsafe_allow_html=True
+    )
+
+with nav_right:
+    if st.button("Book a Free Trial", key="nav_book_btn", use_container_width=True):
+        st.switch_page("pages/booking.py")
+
 
 # -----------------------------
 # HERO SECTION
@@ -600,7 +603,6 @@ try:
     df = pd.read_csv(cache_bust_url)
     df.columns = df.columns.str.strip()
 except Exception:
-    # Fallback default data if sheet fetch fails
     df = pd.DataFrame([
         {"Service": "Private Coaching", "Description": "1-on-1 personalized instruction tailored to technical and tactical goals.", "Price": "$80 / hr"},
         {"Service": "Group Clinics", "Description": "Dynamic drills, high reps, and competitive point play in small groups.", "Price": "$40 / hr"},
