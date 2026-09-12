@@ -507,6 +507,15 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
+# Define the links dictionary
+NAVBAR_LINKS = {
+    "Home": "#",
+    "Location": "#location",
+    "About Us": "#about",
+    "FAQ": "#faq",
+    "Contact": "#contact"
+}
+
 # -----------------------------
 # UNIFIED NATIVE NAVBAR
 # -----------------------------
