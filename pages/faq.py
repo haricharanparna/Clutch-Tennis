@@ -40,13 +40,74 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    max-width: 1000px;
-    padding-top: 1.5rem;
+    max-width: 1150px;
+    padding-top: 1rem;
     padding-bottom: 3rem;
 }
 
 #MainMenu, footer {
     visibility: hidden;
+}
+
+/* FLOATING NAVBAR CONTAINER */
+[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
+    background-color: #FFFFFF;
+    border-radius: 40px;
+    padding: 8px 16px 8px 30px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #EFEFEF;
+    margin-bottom: 30px;
+}
+
+.nav-logo-target {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #0B3D2E;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.nav-logo-target span {
+    color: #88C425;
+    margin-left: 4px;
+}
+
+/* NAVBAR LINK BUTTONS */
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+    background: transparent !important;
+    color: #3B82F6 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    text-decoration: underline !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+    color: #1D4ED8 !important;
+    background: transparent !important;
+}
+
+/* NAVBAR CTA BUTTON */
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 20px !important;
+    min-height: 42px !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+    background-color: #145A43 !important;
 }
 
 /* HEADER CARD */
@@ -115,23 +176,6 @@ html, body, [class*="css"] {
     font-size: 0.95rem !important;
 }
 
-/* BACK BUTTON */
-div.stButton > button {
-    background: transparent;
-    color: #0B3D2E;
-    border: 2px solid #0B3D2E;
-    border-radius: 20px;
-    font-weight: 700;
-    padding: 6px 20px;
-    transition: all 0.2s ease;
-}
-
-div.stButton > button:hover {
-    background: #0B3D2E;
-    color: #FFFFFF;
-    border-color: #0B3D2E;
-}
-
 /* CONTACT CTA CARD */
 .faq-cta {
     background: white;
@@ -158,12 +202,42 @@ div.stButton > button:hover {
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# TOP NAVIGATION
+# UNIFIED NAVBAR
 # -----------------------------
-col_back, _ = st.columns([1, 4])
-with col_back:
-    if st.button("← Back to Home", key="back_home"):
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
+
+with nav_col1:
+    st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Home", key="nav_home"):
         st.switch_page("app.py")
+
+with nav_col3:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Location", key="nav_loc"):
+        st.switch_page("app.py")
+
+with nav_col4:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("About Us", key="nav_about"):
+        st.switch_page("pages/about.py")
+
+with nav_col5:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("FAQ", key="nav_faq"):
+        st.rerun()
+
+with nav_col6:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Contact", key="nav_contact"):
+        st.switch_page("app.py")
+
+with nav_col7:
+    st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
+    if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
+        st.switch_page("pages/booking.py")
 
 # -----------------------------
 # HERO HEADER
