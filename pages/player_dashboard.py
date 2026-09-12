@@ -34,6 +34,7 @@ if user and hasattr(user, "user_metadata"):
 
 st.markdown("""
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -41,13 +42,7 @@ html, body, [class*="css"] {
 }
 
 [data-testid="stAppViewContainer"] {
-    background:
-        radial-gradient(
-            circle at 90% 5%,
-            rgba(11,61,46,0.08),
-            transparent 25%
-        ),
-        #F7F8F5;
+    background: #F7F8F5;
     color: #17201C;
 }
 
@@ -56,59 +51,77 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    max-width: 1200px;
+    max-width: 1150px;
     padding-top: 1rem;
-    padding-bottom: 2rem;
+    padding-bottom: 4rem;
 }
 
-#MainMenu,
-footer {
+#MainMenu, footer {
     visibility: hidden;
 }
 
-/* ============================================================
-   NAVBAR
-   ============================================================ */
-
-.navbar {
-    background: #FFFFFF;
+/* FLOATING NAVBAR CONTAINER */
+[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
+    background-color: #FFFFFF;
     border-radius: 40px;
-    padding: 14px 28px;
-    display: flex;
+    padding: 8px 16px 8px 30px;
     align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid #EFEFEF;
-    margin-bottom: 35px;
+    margin-bottom: 30px;
 }
 
-.nav-brand {
-    display: flex;
-    flex-direction: column;
-}
-
-.nav-logo {
+.nav-logo-target {
     font-weight: 800;
     font-size: 1.3rem;
     color: #0B3D2E;
-    line-height: 1.1;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
-.nav-logo span {
+.nav-logo-target span {
     color: #88C425;
+    margin-left: 4px;
 }
 
-.nav-subtitle {
-    color: #69736E;
-    font-size: 0.85rem;
-    font-weight: 500;
-    margin-top: 2px;
+/* NAVBAR LINK BUTTONS */
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+    background: transparent !important;
+    color: #3B82F6 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    text-decoration: underline !important;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+    color: #1D4ED8 !important;
+    background: transparent !important;
+}
 
+/* NAVBAR CTA BUTTON */
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 20px !important;
+    min-height: 42px !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+    background-color: #145A43 !important;
+}
+
+/* HERO */
 .dashboard-hero {
     background: linear-gradient(
         135deg,
@@ -125,7 +138,7 @@ footer {
     box-shadow: 0 20px 50px rgba(11,61,46,0.16);
 }
 
-.dashboard-hero::after {
+.dashboard-hero:after {
     content: "🎾";
     position: absolute;
     right: 50px;
@@ -146,7 +159,7 @@ footer {
 }
 
 .hero-title {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     margin: 0;
 }
@@ -163,10 +176,7 @@ footer {
     max-width: 650px;
 }
 
-/* ============================================================
-   SECTION HEADERS
-   ============================================================ */
-
+/* SECTION HEADERS */
 .section-header {
     margin-top: 35px;
     margin-bottom: 18px;
@@ -187,16 +197,13 @@ footer {
     color: #17201C;
 }
 
-/* ============================================================
-   DASHBOARD CARDS
-   ============================================================ */
-
+/* CARDS */
 .dashboard-card {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
     border-radius: 20px;
     padding: 25px;
-    min-height: 190px;
+    min-height: 180px;
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
@@ -225,10 +232,7 @@ footer {
     font-size: 0.9rem;
 }
 
-/* ============================================================
-   FEEDBACK CARD
-   ============================================================ */
-
+/* FEEDBACK CARD */
 .feedback-card {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -256,10 +260,7 @@ footer {
     margin-top: 15px;
 }
 
-/* ============================================================
-   PROGRESS
-   ============================================================ */
-
+/* PROGRESS */
 .progress-card {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -276,28 +277,18 @@ footer {
 
 .progress-value {
     color: #0B3D2E;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 800;
 }
 
-/* ============================================================
-   LOGOUT BUTTON STYLING
-   ============================================================ */
-
+/* GLOBAL PAGE BUTTONS & LOGOUT */
 div.stButton > button {
-    background-color: #FFFFFF !important;
-    color: #0B3D2E !important;
-    border: 1px solid #D1DBD4 !important;
-    border-radius: 12px !important;
-    padding: 12px 24px !important;
-    font-weight: 700 !important;
-    transition: all 0.2s ease-in-out !important;
-}
-
-div.stButton > button:hover {
-    background-color: #0B3D2E !important;
-    color: #FFFFFF !important;
-    border-color: #0B3D2E !important;
+    background: #0B3D2E;
+    color: white;
+    border: 0;
+    border-radius: 12px;
+    min-height: 48px;
+    font-weight: 700;
 }
 
 </style>
@@ -305,21 +296,43 @@ div.stButton > button:hover {
 
 
 # ============================================================
-# NAVBAR
+# UNIFIED NAVBAR
 # ============================================================
 
-st.markdown("""
-<div class="navbar">
-    <div class="nav-brand">
-        <div class="nav-logo">
-            🎾 CLUTCH<span>TENNIS</span>
-        </div>
-        <div class="nav-subtitle">
-            Player Dashboard
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
+
+with nav_col1:
+    st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Home", key="nav_home"):
+        st.switch_page("app.py")
+
+with nav_col3:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Location", key="nav_loc"):
+        st.switch_page("pages/location.py")
+
+with nav_col4:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("About Us", key="nav_about"):
+        st.switch_page("pages/about.py")
+
+with nav_col5:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("FAQ", key="nav_faq"):
+        st.switch_page("pages/faq.py")
+
+with nav_col6:
+    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Contact", key="nav_contact"):
+        st.switch_page("pages/contact.py")
+
+with nav_col7:
+    st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
+    if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
+        st.switch_page("pages/booking.py")
 
 
 # ============================================================
@@ -516,7 +529,7 @@ with goal_col2:
 st.write("")
 st.divider()
 
-if st.button("Log Out", use_container_width=True):
+if st.button("Log Out", key="logout_btn", use_container_width=True):
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
     st.switch_page("pages/login.py")
