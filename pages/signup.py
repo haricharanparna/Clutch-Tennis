@@ -1,8 +1,12 @@
 import streamlit as st
 import re
 from supabase import create_client
+from coach_emails import get_coach_emails
 
-# Page Config
+# ============================================================
+# PAGE CONFIG
+# ============================================================
+
 st.set_page_config(
     page_title="Clutch Tennis | Sign Up",
     page_icon="🎾",
@@ -10,17 +14,26 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Connect to Supabase
+# ============================================================
+# CONNECT TO SUPABASE
+# ============================================================
+
 supabase = create_client(
     st.secrets["SUPABASE_URL"],
     st.secrets["SUPABASE_KEY"]
 )
 
-# Redirect if already logged in
+# ============================================================
+# REDIRECT IF ALREADY LOGGED IN
+# ============================================================
+
 if st.session_state.get("logged_in", False):
     st.switch_page("app.py")
 
-# Custom Styling (Matches Clutch Tennis Theme)
+# ============================================================
+# CUSTOM STYLING
+# ============================================================
+
 st.markdown("""
 <style>
 
@@ -31,7 +44,11 @@ html, body, [class*="css"] {
 }
 
 [data-testid="stAppViewContainer"] {
-    background: radial-gradient(circle at 50% 10%, rgba(11,61,46,0.08), transparent 40%), #F7F8F5;
+    background: radial-gradient(
+        circle at 50% 10%,
+        rgba(11,61,46,0.08),
+        transparent 40%
+    ), #F7F8F5;
     color: #17201C;
 }
 
@@ -49,7 +66,6 @@ html, body, [class*="css"] {
     padding-bottom: 2rem;
 }
 
-/* Card Wrapper Header */
 .signup-header {
     text-align: center;
     margin-bottom: 25px;
@@ -72,7 +88,6 @@ html, body, [class*="css"] {
     margin-top: 6px;
 }
 
-/* Input Fields Styling */
 div[data-baseweb="input"] {
     border-radius: 12px !important;
     background-color: #FFFFFF !important;
@@ -84,7 +99,6 @@ div[data-baseweb="input"]:focus-within {
     box-shadow: 0 0 0 1px #0B3D2E !important;
 }
 
-/* Form Container */
 [data-testid="stForm"] {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -93,7 +107,6 @@ div[data-baseweb="input"]:focus-within {
     box-shadow: 0 10px 30px rgba(23,32,28,0.05);
 }
 
-/* Primary Button Styling */
 div[data-testid="stFormSubmitButton"] > button {
     background: #0B3D2E !important;
     color: #FFFFFF !important;
@@ -112,7 +125,6 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     transform: translateY(-1px);
 }
 
-/* Secondary Button Styling */
 div.stButton > button {
     background: transparent !important;
     color: #0B3D2E !important;
@@ -133,16 +145,25 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# Header Section
+# ============================================================
+# HEADER
+# ============================================================
+
 st.markdown("""
 <div class="signup-header">
     <div class="signup-brand">🎾 CLUTCH<span>TENNIS</span></div>
-    <div class="signup-subtitle">Create an account to start your training journey.</div>
+    <div class="signup-subtitle">
+        Create an account to start your training journey.
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Signup Form
+# ============================================================
+# SIGNUP FORM
+# ============================================================
+
 with st.form("signup_form", clear_on_submit=False):
+
     nameinput = st.text_input(
         "Full Name",
         placeholder="Alex Morgan"
@@ -170,7 +191,10 @@ with st.form("signup_form", clear_on_submit=False):
         use_container_width=True
     )
 
-# Navigation Back to Login
+# ============================================================
+# BACK TO LOGIN
+# ============================================================
+
 login_button = st.button(
     "← Back to Login",
     use_container_width=True
@@ -179,34 +203,78 @@ login_button = st.button(
 if login_button:
     st.switch_page("pages/login.py")
 
-# Account Creation Handler
+# ============================================================
+# ACCOUNT CREATION
+# ============================================================
+
 if createacc:
+
+    # -----------------------------
+    # BASIC VALIDATION
+    # -----------------------------
+
     if not nameinput or not emailinput or not passwordinput or not confirmpassword:
         st.error("Please fill out all fields.")
+
     elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", emailinput):
         st.error("Please enter a valid email address.")
+
     elif passwordinput != confirmpassword:
         st.error("Passwords do not match.")
+
     elif len(passwordinput) < 6:
         st.error("Password must be at least 6 characters long.")
+
     else:
+
+        # -----------------------------
+        # CHECK COACH GOOGLE SHEET
+        # -----------------------------
+
+        coach_emails = get_coach_emails()
+
+        email_clean = emailinput.strip().lower()
+
+        if email_clean in coach_emails:
+            role = "coach"
+        else:
+            role = "player"
+
+        # -----------------------------
+        # CREATE SUPABASE ACCOUNT
+        # -----------------------------
+
         try:
+
             data = supabase.auth.sign_up({
-                "email": emailinput,
+                "email": email_clean,
                 "password": passwordinput,
                 "options": {
                     "data": {
-                        "full_name": nameinput
+                        "full_name": nameinput,
+                        "role": role
                     }
                 }
             })
 
             if data.user:
-                st.success("Account created successfully! 🎾")
-                st.info("You can now log in with your credentials.")
-                st.switch_page("pages/login.py")
-            else:
-                st.error("Account could not be created. Please try again.")
 
-        except Exception:
-            st.error("Something went wrong during account creation. Please try again.")
+                if role == "coach":
+                    st.success("Coach account created successfully! 🎾")
+                else:
+                    st.success("Player account created successfully! 🎾")
+
+                st.info("You can now log in with your credentials.")
+
+                st.switch_page("pages/login.py")
+
+            else:
+                st.error(
+                    "Account could not be created. Please try again."
+                )
+
+        except Exception as e:
+            st.error(
+                "Something went wrong during account creation. "
+                "Please try again."
+            )
