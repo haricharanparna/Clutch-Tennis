@@ -591,7 +591,7 @@ hero_btn_col1, hero_btn_col2 = st.columns([1, 1])
 with hero_btn_col1:
     st.markdown('<div class="hero-btn-marker"></div>', unsafe_allow_html=True)
     if st.button("Go to Player Dashboard →", key="hero_dashboard_btn"):
-        st.switch_page("pages/dashboard.py")
+        st.switch_page("pages/player_dashboard.py")
 
 
 # -----------------------------
