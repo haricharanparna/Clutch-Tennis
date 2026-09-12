@@ -10,6 +10,12 @@ st.set_page_config(
 )
 
 # -----------------------------
+# PAGE SWITCHING HANDLER
+# -----------------------------
+if st.query_params.get("page") == "booking":
+    st.switch_page("pages/booking.py")
+
+# -----------------------------
 # LOGIN PROTECTION
 # -----------------------------
 if not st.session_state.get("logged_in", False):
@@ -82,7 +88,7 @@ html, body, [class*="css"] {
     position: relative;
     background-color: #FFFFFF;
     border-radius: 40px;
-    padding: 10px 25px;
+    padding: 10px 14px 10px 35px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -96,6 +102,8 @@ html, body, [class*="css"] {
     font-size: 1.3rem;
     color: #0B3D2E;
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
 }
 
 .nav-logo span {
@@ -106,7 +114,10 @@ html, body, [class*="css"] {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-item {
@@ -125,27 +136,21 @@ html, body, [class*="css"] {
     color: #1D4ED8;
 }
 
-/* OVERRIDE STREAMLIT BUTTON TO LOOK LIKE NAVBAR CTA */
-div[data-testid="stElementContainer"]:has(button[key="nav_book_btn"]) {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-button[key="nav_book_btn"] {
-    background-color: #0B3D2E !important;
+.nav-cta-btn {
+    background-color: #0B3D2E;
     color: #FFFFFF !important;
-    border-radius: 25px !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.9rem;
     text-decoration: underline !important;
-    border: none !important;
-    min-height: 42px !important;
-    padding: 0px 24px !important;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-button[key="nav_book_btn"]:hover {
-    background-color: #145A43 !important;
-    color: #FFFFFF !important;
+.nav-cta-btn:hover {
+    background-color: #145A43;
 }
 
 /* HERO */
@@ -520,32 +525,29 @@ div.stButton > button:hover {
 
 
 # -----------------------------
-# HYBRID FLOATING NAVBAR
+# UNIFIED FLOATING NAVBAR
 # -----------------------------
-nav_left, nav_right = st.columns([4, 1.2], vertical_alignment="center")
-
-with nav_left:
-    st.markdown(
-        f"""
-    <div class="floating-navbar" style="margin-bottom: 0px;">
-        <div class="nav-logo">
-            🎾 CLUTCH<span>TENNIS</span>
-        </div>
-        <div class="nav-links">
-            <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
-            <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
-            <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
-            <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
-            <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
-        </div>
+st.markdown(
+    f"""
+<div class="floating-navbar">
+    <div class="nav-logo">
+        🎾 CLUTCH<span>TENNIS</span>
     </div>
-    """,
-        unsafe_allow_html=True
-    )
-
-with nav_right:
-    if st.button("Book a Free Trial", key="nav_book_btn", use_container_width=True):
-        st.switch_page("pages/booking.py")
+    <div class="nav-links">
+        <a href="{NAVBAR_LINKS['Home']}" class="nav-item active">Home</a>
+        <a href="{NAVBAR_LINKS['Location']}" class="nav-item">Location</a>
+        <a href="{NAVBAR_LINKS['About Us']}" class="nav-item">About Us</a>
+        <a href="{NAVBAR_LINKS['FAQ']}" class="nav-item">FAQ</a>
+        <a href="{NAVBAR_LINKS['Contact']}" class="nav-item">Contact</a>
+    </div>
+    <form action="" method="get" style="margin: 0;">
+        <input type="hidden" name="page" value="booking" />
+        <button type="submit" class="nav-cta-btn">Book a Free Trial</button>
+    </form>
+</div>
+""",
+    unsafe_allow_html=True
+)
 
 
 # -----------------------------
