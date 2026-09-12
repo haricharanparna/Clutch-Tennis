@@ -522,21 +522,49 @@ div.stButton > button:hover {
 # -----------------------------
 # FLOATING NAVBAR
 # -----------------------------
-st.markdown("""
-<div class="floating-navbar">
+
+st.markdown('<div class="navbar-wrapper">', unsafe_allow_html=True)
+
+nav1, nav2, nav3, nav4, nav5, nav6 = st.columns(
+    [2.2, 1, 1, 1, 1, 1.5]
+)
+
+with nav1:
+    st.markdown("""
     <div class="nav-logo">
         🎾 CLUTCH<span>TENNIS</span>
     </div>
-    <div class="nav-links">
-        <a href="#" class="nav-item active">Home</a>
-        <a href="#" class="nav-item">Location</a>
-        <a href="#" class="nav-item">About Us</a>
-        <a href="#" class="nav-item">FAQ</a>
-        <a href="#" class="nav-item">Contact</a>
-        <a href="booking.py" class="nav-cta-btn">Book a Free Trial</a>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+with nav2:
+    if st.button("Home", key="nav_home", use_container_width=True):
+        st.rerun()
+
+with nav3:
+    if st.button("Location", key="nav_location", use_container_width=True):
+        st.toast("Location section is on this page.")
+
+with nav4:
+    if st.button("About Us", key="nav_about", use_container_width=True):
+        st.toast("About Us section coming soon.")
+
+with nav5:
+    if st.button("FAQ", key="nav_faq", use_container_width=True):
+        st.toast("FAQ coming soon.")
+
+with nav6:
+    st.markdown('<div class="booking-button">', unsafe_allow_html=True)
+
+    if st.button(
+        "Book a Free Trial",
+        key="nav_booking",
+        use_container_width=True
+    ):
+        st.switch_page("pages/booking.py")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # -----------------------------
