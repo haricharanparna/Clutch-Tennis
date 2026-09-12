@@ -235,6 +235,7 @@ st.markdown("""
 left_col, right_col = st.columns([1.1, 1], gap="large")
 
 with left_col:
+    # --- PRIMARY COURT LOCATION INFO ---
     st.markdown("""
 <div class="info-card-box">
     <div class="info-card-title">📍 Coppermill Tennis Court</div>
@@ -244,33 +245,36 @@ with left_col:
 </div>
 """, unsafe_allow_html=True)
 
+    # --- NAVIGATION & EXTERNAL LINKS (LEFT-ALIGNED TO PREVENT CODE BLOCK RENDERING) ---
     st.markdown("""
 <div class="info-card-box">
-    <div class="info-card-title">🗺️ Maps & Directions</div>
-    
-    <a href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
-        🚗 Open in Google Maps
-    </a>
+<div class="info-card-title">🗺️ Maps & Directions</div>
 
-    <a href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
-        🍏 Open in Apple Maps
-    </a>
+<a href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
+    🚗 Open in Google Maps
+</a>
 
-    <a href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA" target="_blank" class="action-link-btn">
-        🚙 Open in Waze
-    </a>
+<a href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171" target="_blank" class="action-link-btn">
+    🍏 Open in Apple Maps
+</a>
 
-    <a href="https://YOUR_SECONDARY_LOCATION_LINK.com" target="_blank" class="action-link-btn">
-        🎾 Indoor Facility Backup Location Link
-    </a>
+<a href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA" target="_blank" class="action-link-btn">
+    🚙 Open in Waze
+</a>
+
+<a href="https://YOUR_SECONDARY_LOCATION_LINK.com" target="_blank" class="action-link-btn">
+    🎾 Indoor Facility Backup Location Link
+</a>
 </div>
 """, unsafe_allow_html=True)
 
 with right_col:
+    # --- STREAMLIT MAP DISPLAY ---
     st.markdown("""
 <div class="info-card-title" style="margin-bottom: 8px;">📌 Interactive Map View</div>
 """, unsafe_allow_html=True)
 
+    # Coppermill Tennis Court Coordinates
     court_coords = {
         "lat": [38.938722],
         "lon": [-77.408750]
