@@ -28,7 +28,11 @@ html, body, [class*="css"] {
 }
 
 [data-testid="stAppViewContainer"] {
-    background: radial-gradient(circle at 50% 10%, rgba(11,61,46,0.08), transparent 40%), #F7F8F5;
+    background: radial-gradient(
+        circle at 50% 10%,
+        rgba(11,61,46,0.08),
+        transparent 40%
+    ), #F7F8F5;
     color: #17201C;
 }
 
@@ -42,11 +46,15 @@ html, body, [class*="css"] {
     padding-bottom: 3rem;
 }
 
-#MainMenu, footer {
+#MainMenu,
+footer {
     visibility: hidden;
 }
 
-/* FLOATING NAVBAR CONTAINER */
+/* -----------------------------
+   FLOATING NAVBAR
+----------------------------- */
+
 [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
     background-color: #FFFFFF;
     border-radius: 40px;
@@ -72,8 +80,12 @@ html, body, [class*="css"] {
     margin-left: 4px;
 }
 
-/* NAVBAR LINK BUTTONS */
-div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+/* -----------------------------
+   NAVBAR LINK BUTTONS
+----------------------------- */
+
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker)
+div.stButton > button {
     background: transparent !important;
     color: #3B82F6 !important;
     font-weight: 600 !important;
@@ -85,13 +97,18 @@ div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
     text-decoration: underline !important;
 }
 
-div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker)
+div.stButton > button:hover {
     color: #1D4ED8 !important;
     background: transparent !important;
 }
 
-/* NAVBAR CTA BUTTON */
-div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+/* -----------------------------
+   NAVBAR CTA
+----------------------------- */
+
+div[data-testid="stColumn"]:has(div.nav-cta-marker)
+div.stButton > button {
     background-color: #0B3D2E !important;
     color: #FFFFFF !important;
     border-radius: 25px !important;
@@ -103,13 +120,22 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
     width: 100% !important;
 }
 
-div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+div[data-testid="stColumn"]:has(div.nav-cta-marker)
+div.stButton > button:hover {
     background-color: #145A43 !important;
 }
 
-/* PAGE HERO BANNER */
+/* -----------------------------
+   HERO
+----------------------------- */
+
 .location-hero {
-    background: linear-gradient(135deg, #082D22 0%, #0B3D2E 55%, #145A43 100%);
+    background: linear-gradient(
+        135deg,
+        #082D22 0%,
+        #0B3D2E 55%,
+        #145A43 100%
+    );
     border-radius: 24px;
     padding: 45px 40px;
     color: white;
@@ -139,7 +165,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     max-width: 600px;
 }
 
-/* CARD BOXES */
+/* -----------------------------
+   CARD BOXES
+----------------------------- */
+
 .info-card-box {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -156,7 +185,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     margin-bottom: 12px;
 }
 
-/* LINK CARDS */
+/* -----------------------------
+   MAP LINKS
+----------------------------- */
+
 .action-link-btn {
     display: block;
     background: #F7F8F5;
@@ -164,126 +196,262 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     border-radius: 12px;
     padding: 12px 16px;
     margin-bottom: 10px;
-    color: #0B3D2E;
+    color: #0B3D2E !important;
     font-weight: 600;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: all 0.2s ease;
 }
 
 .action-link-btn:hover {
     background: #0B3D2E;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     border-color: #0B3D2E;
 }
+
+/* -----------------------------
+   MAP
+----------------------------- */
+
+[data-testid="stMap"] {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #E4E9E4;
+}
+
 </style>
 """, unsafe_allow_html=True)
+
 
 # -----------------------------
 # UNIFIED NAVBAR
 # -----------------------------
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
+
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns(
+    [2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2]
+)
 
 with nav_col1:
-    st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>',
+        unsafe_allow_html=True
+    )
 
 with nav_col2:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Home", key="nav_home"):
         st.switch_page("app.py")
 
+
 with nav_col3:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Location", key="nav_loc"):
         st.rerun()
 
+
 with nav_col4:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("About Us", key="nav_about"):
         st.switch_page("pages/about.py")
 
+
 with nav_col5:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("FAQ", key="nav_faq"):
         st.switch_page("pages/faq.py")
 
+
 with nav_col6:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Contact", key="nav_contact"):
         st.switch_page("pages/contact.py")
 
+
 with nav_col7:
-    st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
-    if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
+    st.markdown(
+        '<div class="nav-cta-marker"></div>',
+        unsafe_allow_html=True
+    )
+
+    if st.button(
+        "Book a Free Trial",
+        key="nav_cta_btn",
+        use_container_width=True
+    ):
         st.switch_page("pages/booking.py")
+
 
 # -----------------------------
 # HERO HEADER
 # -----------------------------
+
 st.markdown("""
 <div class="location-hero">
-    <div class="location-kicker">Find Us</div>
-    <div class="location-title">Our Court Location</div>
-    <div class="location-subtitle">
-        Join us at our primary outdoor training facilities. Check court details, directions, and navigation links below.
+
+    <div class="location-kicker">
+        Find Us
     </div>
+
+    <div class="location-title">
+        Our Court Location
+    </div>
+
+    <div class="location-subtitle">
+        Join us at our primary outdoor training facilities.
+        Check court details, directions, and navigation links below.
+    </div>
+
 </div>
 """, unsafe_allow_html=True)
+
 
 # -----------------------------
 # TWO-COLUMN LAYOUT
 # -----------------------------
-left_col, right_col = st.columns([1.1, 1], gap="large")
+
+left_col, right_col = st.columns(
+    [1.1, 1],
+    gap="large"
+)
+
+
+# ============================================================
+# LEFT COLUMN
+# ============================================================
 
 with left_col:
-    # --- PRIMARY COURT LOCATION INFO ---
+
+    # -----------------------------
+    # PRIMARY COURT INFORMATION
+    # -----------------------------
+
     st.markdown("""
-<div class="info-card-box">
-    <div class="info-card-title">📍 Coppermill Tennis Court</div>
-    <p><strong>Address:</strong> 13287 Coppermill Dr, Herndon, VA 20171</p>
-    <p><strong>Operating Seasons:</strong> Spring, Summer, & Fall</p>
-    <p><strong>Amenities:</strong> Outdoor hard courts, lighted facilities, and adjacent public parking.</p>
-</div>
-""", unsafe_allow_html=True)
+    <div class="info-card-box">
 
-    # --- NAVIGATION & EXTERNAL LINK PLACEHOLDERS ---
-    # --- NAVIGATION & EXTERNAL LINKS ---
-st.markdown("""
-<div class="info-card-box">
-    <div class="info-card-title">🗺️ Maps & Directions</div>
+        <div class="info-card-title">
+            📍 Coppermill Tennis Court
+        </div>
 
-    <a href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171"
-       target="_blank"
-       class="action-link-btn">
-        🚗 Open in Google Maps
-    </a>
+        <p>
+            <strong>Address:</strong>
+            13287 Coppermill Dr, Herndon, VA 20171
+        </p>
 
-    <a href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171"
-       target="_blank"
-       class="action-link-btn">
-        🍏 Open in Apple Maps
-    </a>
+        <p>
+            <strong>Operating Seasons:</strong>
+            Spring, Summer, & Fall
+        </p>
 
-    <a href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA"
-       target="_blank"
-       class="action-link-btn">
-        🚙 Open in Waze
-    </a>
+        <p>
+            <strong>Amenities:</strong>
+            Outdoor hard courts, lighted facilities,
+            and adjacent public parking.
+        </p>
 
-</div>
-""", unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    # -----------------------------
+    # MAPS & DIRECTIONS
+    # -----------------------------
+
+    st.markdown("""
+    <div class="info-card-box">
+
+        <div class="info-card-title">
+            🗺️ Maps & Directions
+        </div>
+
+        <a
+            href="https://maps.google.com/?q=13287+Coppermill+Dr,+Herndon,+VA+20171"
+            target="_blank"
+            class="action-link-btn"
+        >
+            🚗 Open in Google Maps
+        </a>
+
+        <a
+            href="https://maps.apple.com/?address=13287+Coppermill+Dr,+Herndon,+VA+20171"
+            target="_blank"
+            class="action-link-btn"
+        >
+            🍏 Open in Apple Maps
+        </a>
+
+        <a
+            href="https://waze.com/ul?q=13287+Coppermill+Dr+Herndon+VA"
+            target="_blank"
+            class="action-link-btn"
+        >
+            🚙 Open in Waze
+        </a>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================
+# RIGHT COLUMN
+# ============================================================
 
 with right_col:
-    # --- STREAMLIT MAP DISPLAY ---
-    st.markdown("""
-<div class="info-card-title" style="margin-bottom: 8px;">📌 Interactive Map View</div>
-""", unsafe_allow_html=True)
 
-    # Coppermill Tennis Court Coordinates
+    # -----------------------------
+    # MAP TITLE
+    # -----------------------------
+
+    st.markdown("""
+    <div class="info-card-title" style="margin-bottom: 8px;">
+        📌 Interactive Map View
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    # -----------------------------
+    # COURT COORDINATES
+    # -----------------------------
+
     court_coords = {
         "lat": [38.938722],
         "lon": [-77.408750]
     }
 
-    st.map(court_coords, zoom=14)
 
-    st.caption("Coordinates: 38°56'19.4\"N 77°24'31.5\"W | Coppermill Dr, Herndon, VA")
+    # -----------------------------
+    # STREAMLIT MAP
+    # -----------------------------
+
+    st.map(
+        court_coords,
+        zoom=14
+    )
+
+
+    # -----------------------------
+    # COORDINATES
+    # -----------------------------
+
+    st.caption(
+        'Coordinates: 38°56\'19.4"N 77°24\'31.5"W | '
+        'Coppermill Dr, Herndon, VA'
+    )
