@@ -507,55 +507,97 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-
 # -----------------------------
-# UNIFIED NAVBAR WITH NATIVE CLICK
+# UNIFIED NATIVE NAVBAR
 # -----------------------------
-navbar_html = """
-<div class="floating-navbar">
-    <div class="nav-logo">
-        🎾 CLUTCH<span>TENNIS</span>
-    </div>
-    <div class="nav-links">
-        <a href="#" class="nav-item active">Home</a>
-        <a href="#location" class="nav-item">Location</a>
-        <a href="#about" class="nav-item">About Us</a>
-        <a href="#faq" class="nav-item">FAQ</a>
-        <a href="#contact" class="nav-item">Contact</a>
-    </div>
-    <button id="bookBtn" class="nav-cta-btn">Book a Free Trial</button>
-</div>
+# CSS targeting native Streamlit elements inside the custom container
+st.markdown("""
+<style>
+/* Style the wrapping container */
+[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
+    background-color: #FFFFFF;
+    border-radius: 40px;
+    padding: 8px 16px 8px 30px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #EFEFEF;
+    margin-bottom: 30px;
+}
 
-<script>
-    document.getElementById('bookBtn').addEventListener('click', function() {
-        window.parent.postMessage({type: 'TRIGGER_BOOKING'}, '*');
-    });
-</script>
-"""
+.nav-logo-target {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #0B3D2E;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
 
-# HTML render inside frame
-components.html(navbar_html, height=70)
+.nav-logo-target span {
+    color: #88C425;
+    margin-left: 4px;
+}
 
-# Listen for component clicks without full refresh
-clicked = st.components.v1.html(
-    """
-    <script>
-        window.addEventListener('message', function(e) {
-            if (e.data.type === 'TRIGGER_BOOKING') {
-                const btns = window.parent.document.querySelectorAll('button');
-                for (let btn of btns) {
-                    if (btn.innerText.includes('Book Private Coaching')) {
-                        btn.click();
-                        break;
-                    }
-                }
-            }
-        });
-    </script>
-    """,
-    height=0
-)
+/* Style inline links inside the navbar */
+.nav-links-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+}
 
+.nav-links-wrapper a {
+    color: #3B82F6;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: underline;
+}
+
+/* Style the native Streamlit button inside the navbar column */
+div[data-testid="stColumn"]:has(div.nav-btn-marker) div.stButton > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 20px !important;
+    min-height: 42px !important;
+    border: none !important;
+    width: 100% !important;
+}
+
+div[data-testid="stColumn"]:has(div.nav-btn-marker) div.stButton > button:hover {
+    background-color: #145A43 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Build the layout using native Streamlit columns
+nav_col1, nav_col2, nav_col3 = st.columns([2.5, 4, 2])
+
+with nav_col1:
+    st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
+
+with nav_col2:
+    st.markdown(
+        f"""
+        <div class="nav-links-wrapper">
+            <a href="{NAVBAR_LINKS['Home']}">Home</a>
+            <a href="{NAVBAR_LINKS['Location']}">Location</a>
+            <a href="{NAVBAR_LINKS['About Us']}">About Us</a>
+            <a href="{NAVBAR_LINKS['FAQ']}">FAQ</a>
+            <a href="{NAVBAR_LINKS['Contact']}">Contact</a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with nav_col3:
+    st.markdown('<div class="nav-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
+        st.switch_page("pages/booking.py")
 
 # -----------------------------
 # HERO SECTION
