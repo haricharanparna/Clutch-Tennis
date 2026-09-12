@@ -1,12 +1,16 @@
-import streamlit as st
+import textwrap
 import pandas as pd
+import streamlit as st
 from supabase import create_client
 
+# -----------------------------
+# PAGE CONFIG
+# -----------------------------
 st.set_page_config(
     page_title="Clutch Tennis",
     page_icon="🎾",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="collapsed",
 )
 
 # -----------------------------
@@ -19,8 +23,7 @@ if not st.session_state.get("logged_in", False):
 # SUPABASE SETUP
 # -----------------------------
 supabase = create_client(
-    st.secrets.get("SUPABASE_URL", ""),
-    st.secrets.get("SUPABASE_KEY", "")
+    st.secrets.get("SUPABASE_URL", ""), st.secrets.get("SUPABASE_KEY", "")
 )
 
 user = st.session_state.get("user")
@@ -32,9 +35,9 @@ if user and hasattr(user, "user_metadata"):
 # -----------------------------
 # GLOBAL CSS
 # -----------------------------
-st.markdown("""
+st.markdown(
+    textwrap.dedent("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -126,8 +129,8 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     background-color: #145A43 !important;
 }
 
-/* HERO */
-.hero {
+/* HERO SECTION WRAPPER */
+.hero-wrapper {
     background: linear-gradient(
         135deg,
         #082D22 0%,
@@ -135,7 +138,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
         #145A43 100%
     );
     border-radius: 28px;
-    padding: 65px 60px;
+    padding: 50px 50px;
     color: white;
     position: relative;
     overflow: hidden;
@@ -143,7 +146,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     box-shadow: 0 20px 50px rgba(11,61,46,0.18);
 }
 
-.hero:after {
+.hero-wrapper::after {
     content: "🎾";
     position: absolute;
     right: 50px;
@@ -151,6 +154,17 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 170px;
     opacity: 0.09;
     transform: rotate(15deg);
+    pointer-events: none;
+}
+
+.welcome-pill {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.16);
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
 }
 
 .hero-eyebrow {
@@ -159,12 +173,12 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.78rem;
     font-weight: 700;
     opacity: 0.75;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .hero-title {
-    font-size: 4rem;
-    line-height: 1.02;
+    font-size: 3.5rem;
+    line-height: 1.05;
     font-weight: 800;
     margin: 0;
     max-width: 700px;
@@ -175,21 +189,31 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
 }
 
 .hero-text {
-    font-size: 1.08rem;
-    line-height: 1.7;
+    font-size: 1.05rem;
+    line-height: 1.6;
     max-width: 620px;
-    margin-top: 22px;
+    margin-top: 18px;
     opacity: 0.88;
 }
 
-.welcome-pill {
-    display: inline-block;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.16);
-    padding: 8px 15px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    margin-bottom: 20px;
+/* HERO BUTTON STYLING */
+div[data-testid="stColumn"]:has(div.hero-btn-marker) div.stButton > button {
+    background-color: #C9E86A !important;
+    color: #082D22 !important;
+    font-weight: 800 !important;
+    font-size: 0.95rem !important;
+    border-radius: 25px !important;
+    padding: 10px 24px !important;
+    border: none !important;
+    margin-top: 20px !important;
+    min-height: 46px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+}
+
+div[data-testid="stColumn"]:has(div.hero-btn-marker) div.stButton > button:hover {
+    background-color: #D6F27B !important;
+    color: #082D22 !important;
+    transform: translateY(-2px);
 }
 
 /* SECTION HEADINGS */
@@ -492,13 +516,14 @@ div.stButton > button:hover {
     margin-bottom: 8px;
     text-transform: uppercase;
 }
-
 </style>
-""", unsafe_allow_html=True)
+"""),
+    unsafe_allow_html=True,
+)
 
 
 # -----------------------------
-# UNIFIED NATIVE NAVBAR
+# UNIFIED NAVBAR
 # -----------------------------
 nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
 
@@ -537,42 +562,49 @@ with nav_col7:
 
 
 # -----------------------------
-# HERO SECTION
+# HERO SECTION WITH DASHBOARD BUTTON
 # -----------------------------
 st.markdown(
-    f"""
-<div class="hero">
-    <div class="welcome-pill">
-        Welcome back, {full_name} 👋
-    </div>
-    <div class="hero-eyebrow">
-        Clutch Tennis Academy
-    </div>
-    <div class="hero-title">
-        Train Hard.<br>
-        <span>Play Clutch.</span>
-    </div>
-    <div class="hero-text">
-        Personalized tennis coaching designed to sharpen your skills,
-        build confidence, and help you perform when it matters most.
-    </div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent(f"""
+        <div class="hero-wrapper">
+            <div class="welcome-pill">
+                Welcome back, {full_name} 👋
+            </div>
+            <div class="hero-eyebrow">
+                Clutch Tennis Academy
+            </div>
+            <div class="hero-title">
+                Train Hard.<br>
+                <span>Play Clutch.</span>
+            </div>
+            <div class="hero-text">
+                Personalized tennis coaching designed to sharpen your skills,
+                build confidence, and help you perform when it matters most.
+            </div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
+
+hero_btn_col1, hero_btn_col2 = st.columns([1, 1])
+
+with hero_btn_col1:
+    st.markdown('<div class="hero-btn-marker"></div>', unsafe_allow_html=True)
+    if st.button("Go to Player Dashboard →", key="hero_dashboard_btn"):
+        st.switch_page("pages/dashboard.py")
 
 
 # -----------------------------
 # SERVICES HEADER
 # -----------------------------
 st.markdown(
-    """
-<div class="section-header">
-    <div class="section-kicker">What We Offer</div>
-    <div class="section-title">Train for your game.</div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">What We Offer</div>
+            <div class="section-title">Train for your game.</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
 
 
@@ -616,23 +648,23 @@ if not df.empty:
             price = str(row.get("Price", ""))
 
             st.markdown(
-                f"""
-<div class="service-card">
-    <div class="service-icon">
-        {icon}
-    </div>
-    <div class="service-name">
-        {service_name}
-    </div>
-    <div class="service-description">
-        {description}
-    </div>
-    <div class="service-price">
-        {price}
-    </div>
-</div>
-""",
-                unsafe_allow_html=True
+                textwrap.dedent(f"""
+                    <div class="service-card">
+                        <div class="service-icon">
+                            {icon}
+                        </div>
+                        <div class="service-name">
+                            {service_name}
+                        </div>
+                        <div class="service-description">
+                            {description}
+                        </div>
+                        <div class="service-price">
+                            {price}
+                        </div>
+                    </div>
+                """),
+                unsafe_allow_html=True,
             )
 
 
@@ -642,30 +674,36 @@ if not df.empty:
 loc_col, event_col = st.columns(2)
 
 with loc_col:
-    st.markdown("""
-    <div class="section-header">
-        <div class="section-kicker">Coaching Location</div>
-        <div class="section-title">Location Details</div>
-    </div>
-    <div class="info-card">
-        <p style="font-size: 1.1rem; font-weight: 700; color: #0B3D2E; margin-bottom: 8px;">📍 Coppermill Tennis Court</p>
-        <p style="color: #59635E; margin-bottom: 12px;">13287 Coppermill Dr, Herndon, VA 20171</p>
-        <p style="font-size: 0.9rem; color: #69736E; margin: 0;">🎾 Summer, Fall, and Spring Training</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="section-header">
+                <div class="section-kicker">Coaching Location</div>
+                <div class="section-title">Location Details</div>
+            </div>
+            <div class="info-card">
+                <p style="font-size: 1.1rem; font-weight: 700; color: #0B3D2E; margin-bottom: 8px;">📍 Coppermill Tennis Court</p>
+                <p style="color: #59635E; margin-bottom: 12px;">13287 Coppermill Dr, Herndon, VA 20171</p>
+                <p style="font-size: 0.9rem; color: #69736E; margin: 0;">🎾 Summer, Fall, and Spring Training</p>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 with event_col:
-    st.markdown("""
-    <div class="section-header">
-        <div class="section-kicker">Schedule</div>
-        <div class="section-title">Upcoming Events</div>
-    </div>
-    <div class="info-card">
-        <span class="event-date-badge">September 19</span>
-        <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Full Day Introductory Lessons | Herndon VA</p>
-        <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        textwrap.dedent("""
+            <div class="section-header">
+                <div class="section-kicker">Schedule</div>
+                <div class="section-title">Upcoming Events</div>
+            </div>
+            <div class="info-card">
+                <span class="event-date-badge">September 19</span>
+                <p style="font-weight: 700; color: #17201C; margin: 4px 0;">Full Day Introductory Lessons | Herndon VA</p>
+                <a href="#" style="color: #2B6CB0; font-weight: 600; font-size: 0.85rem; text-decoration: none;">View details →</a>
+            </div>
+        """),
+        unsafe_allow_html=True,
+    )
 
 
 # -----------------------------
@@ -694,13 +732,13 @@ reviews = [
 # REVIEWS SECTION
 # -----------------------------
 st.markdown(
-    """
-<div class="section-header">
-    <div class="section-kicker">Testimonials</div>
-    <div class="section-title">What Players Say</div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Testimonials</div>
+            <div class="section-title">What Players Say</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
 
 if "review_page" not in st.session_state:
@@ -751,13 +789,13 @@ st.markdown('</div>', unsafe_allow_html=True)
 # BOOKING SECTION
 # -----------------------------
 st.markdown(
-    """
-<div class="section-header">
-    <div class="section-kicker">Start Training</div>
-    <div class="section-title">Ready to get better?</div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent("""
+        <div class="section-header">
+            <div class="section-kicker">Start Training</div>
+            <div class="section-title">Ready to get better?</div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
 
 col1, col2, col3, col4 = st.columns(4)
@@ -783,15 +821,15 @@ for label, column in buttons:
 # CTA
 # -----------------------------
 st.markdown(
-    """
-<div class="cta">
-    <h2>Your next level starts here. 🎾</h2>
-    <div class="small-note">
-        Train with purpose. Build confidence. Compete with confidence.
-    </div>
-</div>
-""",
-    unsafe_allow_html=True
+    textwrap.dedent("""
+        <div class="cta">
+            <h2>Your next level starts here. 🎾</h2>
+            <div class="small-note">
+                Train with purpose. Build confidence. Compete with confidence.
+            </div>
+        </div>
+    """),
+    unsafe_allow_html=True,
 )
 
 
@@ -809,43 +847,46 @@ if st.button("Log Out", use_container_width=True):
 # -----------------------------
 # FOOTER
 # -----------------------------
-st.markdown("""
-<div class="footer-wrapper">
-    <div class="footer-grid">
-        <div>
-            <div class="footer-brand">🎾 CLUTCH<span>TENNIS</span></div>
-            <div class="footer-tagline">
-                Perfect Tennis Academy to get to the Next Level
+st.markdown(
+    textwrap.dedent("""
+        <div class="footer-wrapper">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-brand">🎾 CLUTCH<span>TENNIS</span></div>
+                    <div class="footer-tagline">
+                        Perfect Tennis Academy to get to the Next Level
+                    </div>
+                    <div class="footer-contact-item">✉️ haricharanparna@gmail.com</div>
+                    <div class="footer-contact-item">📞 (703) 962 0621</div>
+                </div>
+                <div>
+                    <div class="footer-col-title">About Us</div>
+                    <ul class="footer-links">
+                        <li><a href="#">Our Coaches</a></li>
+                        <li><a href="#">Our Locations</a></li>
+                        <li><a href="#">Our Story</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer-col-title">Resources</div>
+                    <ul class="footer-links">
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer-col-title">Follow Us</div>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon">G</a>
+                        <a href="#" class="social-icon">YT</a>
+                        <a href="#" class="social-icon">IN</a>
+                    </div>
+                </div>
             </div>
-            <div class="footer-contact-item">✉️ haricharanparna@gmail.com</div>
-            <div class="footer-contact-item">📞 (703) 962 0621</div>
-        </div>
-        <div>
-            <div class="footer-col-title">About Us</div>
-            <ul class="footer-links">
-                <li><a href="#">Our Coaches</a></li>
-                <li><a href="#">Our Locations</a></li>
-                <li><a href="#">Our Story</a></li>
-            </ul>
-        </div>
-        <div>
-            <div class="footer-col-title">Resources</div>
-            <ul class="footer-links">
-                <li><a href="#">FAQs</a></li>
-                <li><a href="#">Contact Us</a></li>
-            </ul>
-        </div>
-        <div>
-            <div class="footer-col-title">Follow Us</div>
-            <div class="social-icons">
-                <a href="#" class="social-icon">G</a>
-                <a href="#" class="social-icon">YT</a>
-                <a href="#" class="social-icon">IN</a>
+            <div class="footer-bottom">
+                © 2026 Clutch Tennis. All rights reserved.
             </div>
         </div>
-    </div>
-    <div class="footer-bottom">
-        © 2026 Clutch Tennis. All rights reserved.
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """),
+    unsafe_allow_html=True,
+)
