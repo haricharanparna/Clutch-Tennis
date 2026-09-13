@@ -47,7 +47,7 @@ if st.session_state.get("logged_in", False):
         if user_email in COACH_EMAILS:
             st.switch_page("pages/coach.py")
         else:
-            st.switch_page("pages/playerdashboard.py")
+            st.switch_page("pages/player_dashboard.py")
 
 # ============================================================
 # CUSTOM STYLING
@@ -314,7 +314,7 @@ if loginbutton:
                 else:
 
                     # Player
-                    st.switch_page("pages/playerdashboard.py")
+                    st.switch_page("pages/player_dashboard.py")
 
             else:
 
