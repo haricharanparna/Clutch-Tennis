@@ -75,7 +75,7 @@ except Exception as e:
     players = []
 
 # ============================================================
-# CUSTOM STYLING
+# CUSTOM STYLING (FIXED FORM CONTRAST & DARK INPUTS)
 # ============================================================
 
 st.markdown(
@@ -290,7 +290,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
 }
 
 /* ============================================================
-   FEEDBACK
+   FEEDBACK CARDS
    ============================================================ */
 
 .feedback-card {
@@ -323,7 +323,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
 }
 
 /* ============================================================
-   FORM
+   FORM & INPUT CONTRAST FIXES
    ============================================================ */
 
 div[data-testid="stForm"] {
@@ -334,10 +334,57 @@ div[data-testid="stForm"] {
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
+/* INPUT LABELS */
+div[data-widget="stSelectbox"] label,
+div[data-widget="stTextArea"] label,
+div[class*="stSelectbox"] label,
+div[class*="stTextArea"] label {
+    color: #0B3D2E !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
 
+/* SELECT BOX CONTAINERS & TEXT */
+div[data-baseweb="select"] > div {
+    background-color: #FFFFFF !important;
+    color: #17201C !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="select"] span {
+    color: #17201C !important;
+}
+
+/* TEXT AREA CONTAINER & TEXT */
+div[data-baseweb="textarea"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="textarea"] textarea {
+    background-color: #FFFFFF !important;
+    color: #17201C !important;
+}
+
+/* FORM SUBMIT BUTTON */
+div[data-testid="stFormSubmitButton"] > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    border: none !important;
+    padding: 12px 24px !important;
+}
+
+div[data-testid="stFormSubmitButton"] > button:hover {
+    background-color: #145A43 !important;
+    color: #FFFFFF !important;
+}
+
+/* GENERAL BUTTONS */
 div.stButton > button {
     background: #0B3D2E;
     color: white;
