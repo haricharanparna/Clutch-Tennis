@@ -36,9 +36,50 @@ if not st.session_state.get("logged_in", False):
 user = st.session_state.get("user")
 
 coach_name = "Coach"
+coach_email = ""
 
-if user and hasattr(user, "user_metadata"):
-    coach_name = user.user_metadata.get("full_name", "Coach")
+if user:
+    coach_email = getattr(user, "email", "") or ""
+
+    if hasattr(user, "user_metadata"):
+        coach_name = user.user_metadata.get("full_name", "Coach")
+
+# ============================================================
+# GET PLAYERS FROM SUPABASE AUTH
+# ============================================================
+
+players = []
+
+try:
+    users_response = supabase.auth.admin.list_users()
+
+    # Supabase may return a list directly or an object containing users
+    if hasattr(users_response, "users"):
+        all_users = users_response.users
+    else:
+        all_users = users_response
+
+    for player in all_users:
+        player_email = getattr(player, "email", None)
+
+        metadata = getattr(player, "user_metadata", {}) or {}
+        role = metadata.get("role", "player")
+
+        # Only show accounts marked as players
+        if player_email and role == "player":
+            full_name = metadata.get("full_name", player_email)
+
+            players.append({
+                "email": player_email,
+                "name": full_name
+            })
+
+except Exception as e:
+    st.error("Unable to load players from Supabase.")
+    players = []
+
+# Sort players alphabetically
+players.sort(key=lambda x: x["name"].lower())
 
 # ============================================================
 # CUSTOM STYLING
@@ -46,261 +87,265 @@ if user and hasattr(user, "user_metadata"):
 
 st.markdown(
     textwrap.dedent("""
-    <style>
+<style>
 
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
 
-    [data-testid="stAppViewContainer"] {
-        background: #F7F8F5;
-        color: #17201C;
-    }
+[data-testid="stAppViewContainer"] {
+    background: #F7F8F5;
+    color: #17201C;
+}
 
-    [data-testid="stHeader"] {
-        background: transparent;
-    }
+[data-testid="stHeader"] {
+    background: transparent;
+}
 
-    .block-container {
-        max-width: 1150px;
-        padding-top: 1rem;
-        padding-bottom: 4rem;
-    }
+.block-container {
+    max-width: 1150px;
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+}
 
-    #MainMenu, footer {
-        visibility: hidden;
-    }
+#MainMenu, footer {
+    visibility: hidden;
+}
 
-    /* NAVBAR */
+/* FLOATING NAVBAR */
 
-    [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
-        background-color: #FFFFFF;
-        border-radius: 40px;
-        padding: 8px 16px 8px 30px;
-        align-items: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        border: 1px solid #EFEFEF;
-        margin-bottom: 30px;
-    }
+[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
+    background-color: #FFFFFF;
+    border-radius: 40px;
+    padding: 8px 16px 8px 30px;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #EFEFEF;
+    margin-bottom: 30px;
+}
 
-    .nav-logo-target {
-        font-weight: 800;
-        font-size: 1.3rem;
-        color: #0B3D2E;
-        letter-spacing: -0.5px;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-    }
+.nav-logo-target {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #0B3D2E;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
 
-    .nav-logo-target span {
-        color: #88C425;
-        margin-left: 4px;
-    }
+.nav-logo-target span {
+    color: #88C425;
+    margin-left: 4px;
+}
 
-    div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
-        background: transparent !important;
-        color: #3B82F6 !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        border: none !important;
-        padding: 0 !important;
-        min-height: auto !important;
-        box-shadow: none !important;
-        text-decoration: underline !important;
-    }
+/* NAVBAR LINKS */
 
-    div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
-        color: #1D4ED8 !important;
-        background: transparent !important;
-    }
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+    background: transparent !important;
+    color: #3B82F6 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    text-decoration: underline !important;
+}
 
-    div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
-        background-color: #0B3D2E !important;
-        color: #FFFFFF !important;
-        border-radius: 25px !important;
-        font-weight: 700 !important;
-        font-size: 0.9rem !important;
-        padding: 8px 20px !important;
-        min-height: 42px !important;
-        border: none !important;
-        width: 100% !important;
-    }
+div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+    color: #1D4ED8 !important;
+    background: transparent !important;
+}
 
-    div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
-        background-color: #145A43 !important;
-    }
+/* NAVBAR CTA */
 
-    /* HERO */
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+    background-color: #0B3D2E !important;
+    color: #FFFFFF !important;
+    border-radius: 25px !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    padding: 8px 20px !important;
+    min-height: 42px !important;
+    border: none !important;
+    width: 100% !important;
+}
 
-    .dashboard-hero {
-        background: linear-gradient(
-            135deg,
-            #082D22 0%,
-            #0B3D2E 55%,
-            #145A43 100%
-        );
-        border-radius: 28px;
-        padding: 45px 50px;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 35px;
-        box-shadow: 0 20px 50px rgba(11,61,46,0.16);
-    }
+div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+    background-color: #145A43 !important;
+}
 
-    .dashboard-hero::after {
-        content: "🎾";
-        position: absolute;
-        right: 50px;
-        top: 15px;
-        font-size: 140px;
-        opacity: 0.08;
-        transform: rotate(15deg);
-        pointer-events: none;
-    }
+/* HERO */
 
-    .hero-small {
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 0.75rem;
-        font-weight: 800;
-        opacity: 0.7;
-        margin-bottom: 12px;
-    }
+.dashboard-hero {
+    background: linear-gradient(
+        135deg,
+        #082D22 0%,
+        #0B3D2E 55%,
+        #145A43 100%
+    );
+    border-radius: 28px;
+    padding: 45px 50px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 35px;
+    box-shadow: 0 20px 50px rgba(11,61,46,0.16);
+}
 
-    .hero-title {
-        font-size: 3rem;
-        font-weight: 800;
-        margin: 0;
-    }
+.dashboard-hero::after {
+    content: "🎾";
+    position: absolute;
+    right: 50px;
+    top: 15px;
+    font-size: 140px;
+    opacity: 0.08;
+    transform: rotate(15deg);
+    pointer-events: none;
+}
 
-    .hero-title span {
-        color: #C9E86A;
-    }
+.hero-small {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    opacity: 0.7;
+    margin-bottom: 12px;
+}
 
-    .hero-description {
-        margin-top: 12px;
-        font-size: 1rem;
-        line-height: 1.6;
-        opacity: 0.85;
-        max-width: 650px;
-    }
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+}
 
-    /* SECTION HEADERS */
+.hero-title span {
+    color: #C9E86A;
+}
 
-    .section-header {
-        margin-top: 35px;
-        margin-bottom: 18px;
-    }
+.hero-description {
+    margin-top: 12px;
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.85;
+    max-width: 650px;
+}
 
-    .section-kicker {
-        color: #0B3D2E;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-size: 0.72rem;
-        font-weight: 800;
-    }
+/* SECTION HEADERS */
 
-    .section-title {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin-top: 4px;
-        color: #17201C;
-    }
+.section-header {
+    margin-top: 35px;
+    margin-bottom: 18px;
+}
 
-    /* CARDS */
+.section-kicker {
+    color: #0B3D2E;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
 
-    .dashboard-card {
-        background: #FFFFFF;
-        border: 1px solid #E4E9E4;
-        border-radius: 20px;
-        padding: 25px;
-        min-height: 160px;
-        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-    }
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-top: 4px;
+    color: #17201C;
+}
 
-    .card-icon {
-        width: 45px;
-        height: 45px;
-        background: #EEF5D9;
-        border-radius: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 15px;
-    }
+/* CARDS */
 
-    .card-title {
-        color: #0B3D2E;
-        font-size: 1.1rem;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
+.dashboard-card {
+    background: #FFFFFF;
+    border: 1px solid #E4E9E4;
+    border-radius: 20px;
+    padding: 25px;
+    min-height: 160px;
+    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+}
 
-    .card-text {
-        color: #66706B;
-        line-height: 1.5;
-        font-size: 0.9rem;
-    }
+.card-icon {
+    width: 45px;
+    height: 45px;
+    background: #EEF5D9;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
 
-    /* FEEDBACK */
+.card-title {
+    color: #0B3D2E;
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
 
-    .feedback-card {
-        background: #FFFFFF;
-        border: 1px solid #E4E9E4;
-        border-left: 5px solid #88C425;
-        border-radius: 18px;
-        padding: 22px;
-        margin-bottom: 15px;
-        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-    }
+.card-text {
+    color: #66706B;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
 
-    .feedback-player {
-        color: #0B3D2E;
-        font-weight: 800;
-        font-size: 1rem;
-    }
+/* FEEDBACK */
 
-    .feedback-date {
-        color: #8A938E;
-        font-size: 0.8rem;
-        margin-top: 2px;
-    }
+.feedback-card {
+    background: #FFFFFF;
+    border: 1px solid #E4E9E4;
+    border-left: 5px solid #88C425;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+}
 
-    .feedback-text {
-        color: #59635E;
-        line-height: 1.5;
-        margin-top: 10px;
-        font-size: 0.92rem;
-    }
+.feedback-player {
+    color: #0B3D2E;
+    font-weight: 800;
+    font-size: 1rem;
+}
 
-    /* FORM */
+.feedback-date {
+    color: #8A938E;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
 
-    div[data-testid="stForm"] {
-        background: #FFFFFF;
-        border: 1px solid #E4E9E4;
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-    }
+.feedback-text {
+    color: #59635E;
+    line-height: 1.5;
+    margin-top: 10px;
+    font-size: 0.92rem;
+}
 
-    /* BUTTONS */
+/* FORM */
 
-    div.stButton > button {
-        background: #0B3D2E;
-        color: white;
-        border: 0;
-        border-radius: 12px;
-        min-height: 48px;
-        font-weight: 700;
-    }
+div[data-testid="stForm"] {
+    background: #FFFFFF;
+    border: 1px solid #E4E9E4;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+}
 
-    </style>
-    """),
+/* BUTTONS */
+
+div.stButton > button {
+    background: #0B3D2E;
+    color: white;
+    border: 0;
+    border-radius: 12px;
+    min-height: 48px;
+    font-weight: 700;
+}
+
+</style>
+"""),
     unsafe_allow_html=True,
 )
 
@@ -382,63 +427,75 @@ st.markdown(
 # ============================================================
 
 st.markdown(
-    textwrap.dedent("""
-        <div class="section-header">
-            <div class="section-kicker">Roster & Schedule</div>
-            <div class="section-title">Overview</div>
-        </div>
-    """),
+    """
+    <div class="section-header">
+        <div class="section-kicker">Roster & Schedule</div>
+        <div class="section-title">Overview</div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown("""
+    st.markdown(
+        f"""
         <div class="dashboard-card">
             <div class="card-icon">👥</div>
             <div class="card-title">My Players</div>
             <div class="card-text">
-                Active assigned players will appear here.
+                {len(players)} player(s) currently registered.
             </div>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 with col2:
-    st.markdown("""
+    st.markdown(
+        """
         <div class="dashboard-card">
             <div class="card-icon">📅</div>
             <div class="card-title">Today's Sessions</div>
             <div class="card-text">
-                Your scheduled sessions for today will list here.
+                Your scheduled sessions will appear here.
             </div>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 with col3:
-    st.markdown("""
+    st.markdown(
+        """
         <div class="dashboard-card">
             <div class="card-icon">📈</div>
             <div class="card-title">Player Progress</div>
             <div class="card-text">
-                Monitor technical and strategic growth metrics.
+                Monitor technical and strategic growth.
             </div>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 with col4:
-    st.markdown("""
+    st.markdown(
+        """
         <div class="dashboard-card">
             <div class="card-icon">📝</div>
             <div class="card-title">Feedback Sent</div>
             <div class="card-text">
-                Track all notes submitted to players this week.
+                Track feedback submitted to players.
             </div>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
 # ============================================================
-# FEEDBACK
+# FEEDBACK FORM
 # ============================================================
 
 feedback_col, recent_col = st.columns([1.2, 1])
@@ -446,83 +503,103 @@ feedback_col, recent_col = st.columns([1.2, 1])
 with feedback_col:
 
     st.markdown(
-        textwrap.dedent("""
-            <div class="section-header">
-                <div class="section-kicker">Coach Communication</div>
-                <div class="section-title">Give Feedback</div>
-            </div>
-        """),
+        """
+        <div class="section-header">
+            <div class="section-kicker">Coach Communication</div>
+            <div class="section-title">Give Feedback</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    with st.form("coach_feedback_form"):
+    if not players:
 
-        player_selected = st.selectbox(
-            "Select Player",
-            [
-                "John M. (Advanced)",
-                "Sarah K. (Junior)",
-                "David L. (Clinic)",
-                "Jason T. (Varsity)"
-            ]
+        st.warning(
+            "No player accounts were found. Make sure your player accounts "
+            "have `role: player` in their Supabase user metadata."
         )
 
-        feedback_category = st.selectbox(
-            "Category",
-            [
-                "Technique & Stroke",
-                "Match Strategy",
-                "Mental Game & Focus",
-                "Physical & Footwork"
-            ]
-        )
+    else:
 
-        feedback_notes = st.text_area(
-            "Feedback Notes",
-            placeholder=(
-                "Write notes on technique, key takeaways, "
-                "and areas to work on before next session..."
-            ),
-            height=140
-        )
+        # Display player names in dropdown
+        player_options = [
+            f"{player['name']} — {player['email']}"
+            for player in players
+        ]
 
-        submitted = st.form_submit_button(
-            "Submit Feedback →",
-            use_container_width=True
-        )
+        with st.form("coach_feedback_form"):
 
-        # ====================================================
-        # SAVE FEEDBACK TO SUPABASE
-        # ====================================================
+            selected_player = st.selectbox(
+                "Select Player",
+                player_options
+            )
+
+            feedback_category = st.selectbox(
+                "Category",
+                [
+                    "Technique & Stroke",
+                    "Match Strategy",
+                    "Mental Game & Focus",
+                    "Physical & Footwork"
+                ]
+            )
+
+            feedback_notes = st.text_area(
+                "Feedback Notes",
+                placeholder=(
+                    "Write notes on technique, key takeaways, "
+                    "and areas to work on before the next session..."
+                ),
+                height=140
+            )
+
+            submitted = st.form_submit_button(
+                "Submit Feedback →",
+                use_container_width=True
+            )
+
+        # ========================================================
+        # SAVE FEEDBACK
+        # ========================================================
 
         if submitted:
 
             if not feedback_notes.strip():
 
-                st.error("Please enter feedback before submitting.")
+                st.error("Please enter some feedback before submitting.")
 
             else:
 
+                # Find selected player's email
+                selected_index = player_options.index(selected_player)
+
+                selected_player_email = players[selected_index]["email"]
+
                 try:
 
-                    # Get logged-in coach's Supabase UUID
-                    coach_id = user.id
-
-                    # Save feedback
-                    supabase.table("coach_feedback").insert({
-                        "coach_id": coach_id,
-                        "player_id": None,
+                    feedback_data = {
+                        "coach_email": coach_email,
+                        "player_email": selected_player_email,
                         "category": feedback_category,
-                        "feedback": feedback_notes
-                    }).execute()
+                        "feedback": feedback_notes.strip()
+                    }
+
+                    response = supabase.table(
+                        "coach_feedback"
+                    ).insert(
+                        feedback_data
+                    ).execute()
 
                     st.success(
-                        f"Feedback submitted for {player_selected}! 🎾"
+                        f"Feedback successfully sent to "
+                        f"{players[selected_index]['name']}! 🎾"
                     )
 
                 except Exception as e:
 
-                    st.error("Could not save the feedback.")
+                    st.error(
+                        "Could not save feedback."
+                    )
 
                     st.code(str(e))
 
@@ -533,43 +610,63 @@ with feedback_col:
 with recent_col:
 
     st.markdown(
-        textwrap.dedent("""
-            <div class="section-header">
-                <div class="section-kicker">History</div>
-                <div class="section-title">Recent Feedback</div>
-            </div>
-        """),
+        """
+        <div class="section-header">
+            <div class="section-kicker">History</div>
+            <div class="section-title">Recent Feedback</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    # Get feedback belonging to this coach
     try:
 
-        coach_feedback = (
+        feedback_response = (
             supabase
             .table("coach_feedback")
             .select("*")
-            .eq("coach_id", user.id)
+            .eq("coach_email", coach_email)
             .order("created_at", desc=True)
-            .limit(5)
+            .limit(10)
             .execute()
         )
 
-        feedback_rows = coach_feedback.data
+        recent_feedback = feedback_response.data or []
 
-        if feedback_rows:
+        if not recent_feedback:
 
-            for row in feedback_rows:
+            st.info("You haven't submitted any feedback yet.")
 
-                category = row.get("category", "Feedback")
-                feedback_text = row.get("feedback", "")
-                created_at = row.get("created_at", "")
+        else:
+
+            for feedback in recent_feedback:
+
+                player_email = feedback.get(
+                    "player_email",
+                    "Unknown player"
+                )
+
+                category = feedback.get(
+                    "category",
+                    "General"
+                )
+
+                feedback_text = feedback.get(
+                    "feedback",
+                    ""
+                )
+
+                created_at = feedback.get(
+                    "created_at",
+                    ""
+                )
 
                 st.markdown(
                     f"""
                     <div class="feedback-card">
+
                         <div class="feedback-player">
-                            Coach Feedback — {category}
+                            {player_email} — {category}
                         </div>
 
                         <div class="feedback-date">
@@ -579,18 +676,15 @@ with recent_col:
                         <div class="feedback-text">
                             {feedback_text}
                         </div>
+
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-        else:
-
-            st.info("No feedback has been submitted yet.")
-
     except Exception as e:
 
-        st.warning("Unable to load recent feedback.")
+        st.error("Unable to load recent feedback.")
 
 # ============================================================
 # LOGOUT
