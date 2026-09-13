@@ -42,37 +42,61 @@ if user:
     coach_email = getattr(user, "email", "") or ""
 
     if hasattr(user, "user_metadata"):
-        coach_name = user.user_metadata.get("full_name", "Coach")
+        metadata = user.user_metadata or {}
+        coach_name = metadata.get("full_name", "Coach")
 
 # ============================================================
-# GET PLAYERS FROM players_email TABLE
+# GET PLAYERS FROM SUPABASE AUTH
 # ============================================================
 
 players = []
 
 try:
-    response = (
-        supabase
-        .table("players_email")
-        .select("email")
-        .execute()
-    )
+    response = supabase.auth.admin.list_users()
 
-    for row in response.data or []:
-        player_email = row.get("email")
+    # Depending on the Supabase Python version,
+    # the users may be inside .users or returned directly.
+    if hasattr(response, "users"):
+        all_users = response.users
+    elif isinstance(response, list):
+        all_users = response
+    else:
+        all_users = []
 
-        if player_email:
+    for player in all_users:
+
+        player_email = getattr(player, "email", None)
+
+        metadata = getattr(player, "user_metadata", {}) or {}
+
+        role = metadata.get("role", "")
+
+        # ONLY include users whose role is player
+        if player_email and role == "player":
+
+            full_name = metadata.get(
+                "full_name",
+                player_email
+            )
+
             players.append({
                 "email": player_email,
-                "name": player_email
+                "name": full_name
             })
 
 except Exception as e:
-    st.error("Unable to load players from players_email.")
+
+    st.error("Unable to load players from Supabase Auth.")
+
     st.code(str(e))
+
     players = []
 
-players.sort(key=lambda x: x["email"].lower())
+# Sort players alphabetically
+players.sort(
+    key=lambda x: x["name"].lower()
+)
+
 # ============================================================
 # CUSTOM STYLING
 # ============================================================
@@ -106,14 +130,16 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* FLOATING NAVBAR */
+/* ============================================================
+   NAVBAR
+   ============================================================ */
 
 [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
     background-color: #FFFFFF;
     border-radius: 40px;
     padding: 8px 16px 8px 30px;
     align-items: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     border: 1px solid #EFEFEF;
     margin-bottom: 30px;
 }
@@ -133,8 +159,6 @@ html, body, [class*="css"] {
     margin-left: 4px;
 }
 
-/* NAVBAR LINKS */
-
 div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
     background: transparent !important;
     color: #3B82F6 !important;
@@ -152,8 +176,6 @@ div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:h
     background: transparent !important;
 }
 
-/* NAVBAR CTA */
-
 div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
     background-color: #0B3D2E !important;
     color: #FFFFFF !important;
@@ -170,7 +192,9 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     background-color: #145A43 !important;
 }
 
-/* HERO */
+/* ============================================================
+   HERO
+   ============================================================ */
 
 .dashboard-hero {
     background: linear-gradient(
@@ -226,7 +250,9 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     max-width: 650px;
 }
 
-/* SECTION HEADERS */
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
 
 .section-header {
     margin-top: 35px;
@@ -248,7 +274,9 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     color: #17201C;
 }
 
-/* CARDS */
+/* ============================================================
+   CARDS
+   ============================================================ */
 
 .dashboard-card {
     background: #FFFFFF;
@@ -284,7 +312,9 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.9rem;
 }
 
-/* FEEDBACK */
+/* ============================================================
+   FEEDBACK
+   ============================================================ */
 
 .feedback-card {
     background: #FFFFFF;
@@ -315,7 +345,9 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.92rem;
 }
 
-/* FORM */
+/* ============================================================
+   FORM
+   ============================================================ */
 
 div[data-testid="stForm"] {
     background: #FFFFFF;
@@ -325,7 +357,9 @@ div[data-testid="stForm"] {
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
-/* BUTTONS */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
 
 div.stButton > button {
     background: #0B3D2E;
@@ -350,38 +384,69 @@ nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.column
 )
 
 with nav_col1:
+
     st.markdown(
         '<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>',
         unsafe_allow_html=True
     )
 
 with nav_col2:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Home", key="nav_home"):
         st.switch_page("app.py")
 
 with nav_col3:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Location", key="nav_loc"):
         st.switch_page("pages/location.py")
 
 with nav_col4:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("About Us", key="nav_about"):
         st.switch_page("pages/about.py")
 
 with nav_col5:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("FAQ", key="nav_faq"):
         st.switch_page("pages/faq.py")
 
 with nav_col6:
-    st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-link-btn-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button("Contact", key="nav_contact"):
         st.switch_page("pages/contact.py")
 
 with nav_col7:
-    st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="nav-cta-marker"></div>',
+        unsafe_allow_html=True
+    )
+
     if st.button(
         "Book a Free Trial",
         key="nav_cta_btn",
@@ -394,8 +459,10 @@ with nav_col7:
 # ============================================================
 
 st.markdown(
-    textwrap.dedent(f"""
+    textwrap.dedent(
+        f"""
         <div class="dashboard-hero">
+
             <div class="hero-small">
                 Coach Dashboard
             </div>
@@ -409,8 +476,10 @@ st.markdown(
                 track skill development, and send detailed feedback
                 to keep your athletes performing clutch.
             </div>
+
         </div>
-    """),
+        """
+    ),
     unsafe_allow_html=True,
 )
 
@@ -431,56 +500,84 @@ st.markdown(
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
+
     st.markdown(
         f"""
         <div class="dashboard-card">
+
             <div class="card-icon">👥</div>
-            <div class="card-title">My Players</div>
+
+            <div class="card-title">
+                My Players
+            </div>
+
             <div class="card-text">
                 {len(players)} player(s) currently registered.
             </div>
+
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 with col2:
+
     st.markdown(
         """
         <div class="dashboard-card">
+
             <div class="card-icon">📅</div>
-            <div class="card-title">Today's Sessions</div>
+
+            <div class="card-title">
+                Today's Sessions
+            </div>
+
             <div class="card-text">
                 Your scheduled sessions will appear here.
             </div>
+
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 with col3:
+
     st.markdown(
         """
         <div class="dashboard-card">
+
             <div class="card-icon">📈</div>
-            <div class="card-title">Player Progress</div>
+
+            <div class="card-title">
+                Player Progress
+            </div>
+
             <div class="card-text">
                 Monitor technical and strategic growth.
             </div>
+
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 with col4:
+
     st.markdown(
         """
         <div class="dashboard-card">
+
             <div class="card-icon">📝</div>
-            <div class="card-title">Feedback Sent</div>
+
+            <div class="card-title">
+                Feedback Sent
+            </div>
+
             <div class="card-text">
                 Track feedback submitted to players.
             </div>
+
         </div>
         """,
         unsafe_allow_html=True,
@@ -497,8 +594,15 @@ with feedback_col:
     st.markdown(
         """
         <div class="section-header">
-            <div class="section-kicker">Coach Communication</div>
-            <div class="section-title">Give Feedback</div>
+
+            <div class="section-kicker">
+                Coach Communication
+            </div>
+
+            <div class="section-title">
+                Give Feedback
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True,
@@ -507,13 +611,13 @@ with feedback_col:
     if not players:
 
         st.warning(
-            "No player accounts were found. Make sure your player accounts "
-            "have `role: player` in their Supabase user metadata."
+            "No player accounts were found. "
+            "Make sure your player account has "
+            "`role: player` in Supabase user metadata."
         )
 
     else:
 
-        # Display player names in dropdown
         player_options = [
             f"{player['name']} — {player['email']}"
             for player in players
@@ -550,22 +654,27 @@ with feedback_col:
                 use_container_width=True
             )
 
-        # ========================================================
+        # ====================================================
         # SAVE FEEDBACK
-        # ========================================================
+        # ====================================================
 
         if submitted:
 
             if not feedback_notes.strip():
 
-                st.error("Please enter some feedback before submitting.")
+                st.error(
+                    "Please enter some feedback before submitting."
+                )
 
             else:
 
-                # Find selected player's email
-                selected_index = player_options.index(selected_player)
+                selected_index = player_options.index(
+                    selected_player
+                )
 
-                selected_player_email = players[selected_index]["email"]
+                selected_player_email = players[
+                    selected_index
+                ]["email"]
 
                 try:
 
@@ -576,7 +685,7 @@ with feedback_col:
                         "feedback": feedback_notes.strip()
                     }
 
-                    response = supabase.table(
+                    supabase.table(
                         "coach_feedback"
                     ).insert(
                         feedback_data
@@ -604,8 +713,15 @@ with recent_col:
     st.markdown(
         """
         <div class="section-header">
-            <div class="section-kicker">History</div>
-            <div class="section-title">Recent Feedback</div>
+
+            <div class="section-kicker">
+                History
+            </div>
+
+            <div class="section-title">
+                Recent Feedback
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True,
@@ -627,7 +743,9 @@ with recent_col:
 
         if not recent_feedback:
 
-            st.info("You haven't submitted any feedback yet.")
+            st.info(
+                "You haven't submitted any feedback yet."
+            )
 
         else:
 
@@ -676,13 +794,18 @@ with recent_col:
 
     except Exception as e:
 
-        st.error("Unable to load recent feedback.")
+        st.error(
+            "Unable to load recent feedback."
+        )
+
+        st.code(str(e))
 
 # ============================================================
 # LOGOUT
 # ============================================================
 
 st.write("")
+
 st.divider()
 
 if st.button(
