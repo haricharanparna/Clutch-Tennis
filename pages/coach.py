@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# SUPABASE CONNECTION
+# CONNECT TO SUPABASE
 # ============================================================
 
 supabase = create_client(
@@ -36,16 +36,9 @@ if not st.session_state.get("logged_in", False):
 user = st.session_state.get("user")
 
 coach_name = "Coach"
-coach_email = ""
 
-if user:
-    coach_email = user.email.lower()
-
-    if hasattr(user, "user_metadata"):
-        coach_name = user.user_metadata.get(
-            "full_name",
-            "Coach"
-        )
+if user and hasattr(user, "user_metadata"):
+    coach_name = user.user_metadata.get("full_name", "Coach")
 
 # ============================================================
 # CUSTOM STYLING
@@ -53,279 +46,261 @@ if user:
 
 st.markdown(
     textwrap.dedent("""
-<style>
+    <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-}
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
 
-[data-testid="stAppViewContainer"] {
-    background: #F7F8F5;
-    color: #17201C;
-}
+    [data-testid="stAppViewContainer"] {
+        background: #F7F8F5;
+        color: #17201C;
+    }
 
-[data-testid="stHeader"] {
-    background: transparent;
-}
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
 
-.block-container {
-    max-width: 1150px;
-    padding-top: 1rem;
-    padding-bottom: 4rem;
-}
+    .block-container {
+        max-width: 1150px;
+        padding-top: 1rem;
+        padding-bottom: 4rem;
+    }
 
-#MainMenu, footer {
-    visibility: hidden;
-}
+    #MainMenu, footer {
+        visibility: hidden;
+    }
 
-/* ============================================================
-   NAVBAR
-   ============================================================ */
+    /* NAVBAR */
 
-[data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
-    background-color: #FFFFFF;
-    border-radius: 40px;
-    padding: 8px 16px 8px 30px;
-    align-items: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    border: 1px solid #EFEFEF;
-    margin-bottom: 30px;
-}
+    [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
+        background-color: #FFFFFF;
+        border-radius: 40px;
+        padding: 8px 16px 8px 30px;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: 1px solid #EFEFEF;
+        margin-bottom: 30px;
+    }
 
-.nav-logo-target {
-    font-weight: 800;
-    font-size: 1.3rem;
-    color: #0B3D2E;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-}
+    .nav-logo-target {
+        font-weight: 800;
+        font-size: 1.3rem;
+        color: #0B3D2E;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
 
-.nav-logo-target span {
-    color: #88C425;
-    margin-left: 4px;
-}
+    .nav-logo-target span {
+        color: #88C425;
+        margin-left: 4px;
+    }
 
-/* NAVBAR LINKS */
+    div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
+        background: transparent !important;
+        color: #3B82F6 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        border: none !important;
+        padding: 0 !important;
+        min-height: auto !important;
+        box-shadow: none !important;
+        text-decoration: underline !important;
+    }
 
-div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
-    background: transparent !important;
-    color: #3B82F6 !important;
-    font-weight: 600 !important;
-    font-size: 0.95rem !important;
-    border: none !important;
-    padding: 0 !important;
-    min-height: auto !important;
-    box-shadow: none !important;
-    text-decoration: underline !important;
-}
+    div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
+        color: #1D4ED8 !important;
+        background: transparent !important;
+    }
 
-div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:hover {
-    color: #1D4ED8 !important;
-    background: transparent !important;
-}
+    div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
+        background-color: #0B3D2E !important;
+        color: #FFFFFF !important;
+        border-radius: 25px !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        padding: 8px 20px !important;
+        min-height: 42px !important;
+        border: none !important;
+        width: 100% !important;
+    }
 
-/* NAVBAR CTA */
+    div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
+        background-color: #145A43 !important;
+    }
 
-div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
-    background-color: #0B3D2E !important;
-    color: #FFFFFF !important;
-    border-radius: 25px !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    padding: 8px 20px !important;
-    min-height: 42px !important;
-    border: none !important;
-    width: 100% !important;
-}
+    /* HERO */
 
-div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover {
-    background-color: #145A43 !important;
-}
+    .dashboard-hero {
+        background: linear-gradient(
+            135deg,
+            #082D22 0%,
+            #0B3D2E 55%,
+            #145A43 100%
+        );
+        border-radius: 28px;
+        padding: 45px 50px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 35px;
+        box-shadow: 0 20px 50px rgba(11,61,46,0.16);
+    }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+    .dashboard-hero::after {
+        content: "🎾";
+        position: absolute;
+        right: 50px;
+        top: 15px;
+        font-size: 140px;
+        opacity: 0.08;
+        transform: rotate(15deg);
+        pointer-events: none;
+    }
 
-.dashboard-hero {
-    background: linear-gradient(
-        135deg,
-        #082D22 0%,
-        #0B3D2E 55%,
-        #145A43 100%
-    );
-    border-radius: 28px;
-    padding: 45px 50px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 35px;
-    box-shadow: 0 20px 50px rgba(11,61,46,0.16);
-}
+    .hero-small {
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        opacity: 0.7;
+        margin-bottom: 12px;
+    }
 
-.dashboard-hero::after {
-    content: "🎾";
-    position: absolute;
-    right: 50px;
-    top: 15px;
-    font-size: 140px;
-    opacity: 0.08;
-    transform: rotate(15deg);
-    pointer-events: none;
-}
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+    }
 
-.hero-small {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    opacity: 0.7;
-    margin-bottom: 12px;
-}
+    .hero-title span {
+        color: #C9E86A;
+    }
 
-.hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    margin: 0;
-}
+    .hero-description {
+        margin-top: 12px;
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: 0.85;
+        max-width: 650px;
+    }
 
-.hero-title span {
-    color: #C9E86A;
-}
+    /* SECTION HEADERS */
 
-.hero-description {
-    margin-top: 12px;
-    font-size: 1rem;
-    line-height: 1.6;
-    opacity: 0.85;
-    max-width: 650px;
-}
+    .section-header {
+        margin-top: 35px;
+        margin-bottom: 18px;
+    }
 
-/* ============================================================
-   SECTION HEADERS
-   ============================================================ */
+    .section-kicker {
+        color: #0B3D2E;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
 
-.section-header {
-    margin-top: 35px;
-    margin-bottom: 18px;
-}
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-top: 4px;
+        color: #17201C;
+    }
 
-.section-kicker {
-    color: #0B3D2E;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 0.72rem;
-    font-weight: 800;
-}
+    /* CARDS */
 
-.section-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin-top: 4px;
-    color: #17201C;
-}
+    .dashboard-card {
+        background: #FFFFFF;
+        border: 1px solid #E4E9E4;
+        border-radius: 20px;
+        padding: 25px;
+        min-height: 160px;
+        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+    }
 
-/* ============================================================
-   CARDS
-   ============================================================ */
+    .card-icon {
+        width: 45px;
+        height: 45px;
+        background: #EEF5D9;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
 
-.dashboard-card {
-    background: #FFFFFF;
-    border: 1px solid #E4E9E4;
-    border-radius: 20px;
-    padding: 25px;
-    min-height: 160px;
-    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-}
+    .card-title {
+        color: #0B3D2E;
+        font-size: 1.1rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
 
-.card-icon {
-    width: 45px;
-    height: 45px;
-    background: #EEF5D9;
-    border-radius: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-}
+    .card-text {
+        color: #66706B;
+        line-height: 1.5;
+        font-size: 0.9rem;
+    }
 
-.card-title {
-    color: #0B3D2E;
-    font-size: 1.1rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-}
+    /* FEEDBACK */
 
-.card-text {
-    color: #66706B;
-    line-height: 1.5;
-    font-size: 0.9rem;
-}
+    .feedback-card {
+        background: #FFFFFF;
+        border: 1px solid #E4E9E4;
+        border-left: 5px solid #88C425;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+    }
 
-/* ============================================================
-   FEEDBACK CARD
-   ============================================================ */
+    .feedback-player {
+        color: #0B3D2E;
+        font-weight: 800;
+        font-size: 1rem;
+    }
 
-.feedback-card {
-    background: #FFFFFF;
-    border: 1px solid #E4E9E4;
-    border-left: 5px solid #88C425;
-    border-radius: 18px;
-    padding: 22px;
-    margin-bottom: 15px;
-    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-}
+    .feedback-date {
+        color: #8A938E;
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
 
-.feedback-player {
-    color: #0B3D2E;
-    font-weight: 800;
-    font-size: 1rem;
-}
+    .feedback-text {
+        color: #59635E;
+        line-height: 1.5;
+        margin-top: 10px;
+        font-size: 0.92rem;
+    }
 
-.feedback-date {
-    color: #8A938E;
-    font-size: 0.8rem;
-    margin-top: 2px;
-}
+    /* FORM */
 
-.feedback-text {
-    color: #59635E;
-    line-height: 1.5;
-    margin-top: 10px;
-    font-size: 0.92rem;
-}
+    div[data-testid="stForm"] {
+        background: #FFFFFF;
+        border: 1px solid #E4E9E4;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(23,32,28,0.04);
+    }
 
-/* ============================================================
-   FORM
-   ============================================================ */
+    /* BUTTONS */
 
-div[data-testid="stForm"] {
-    background: #FFFFFF;
-    border: 1px solid #E4E9E4;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(23,32,28,0.04);
-}
+    div.stButton > button {
+        background: #0B3D2E;
+        color: white;
+        border: 0;
+        border-radius: 12px;
+        min-height: 48px;
+        font-weight: 700;
+    }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-div.stButton > button {
-    background: #0B3D2E;
-    color: white;
-    border: 0;
-    border-radius: 12px;
-    min-height: 48px;
-    font-weight: 700;
-}
-
-</style>
-"""),
+    </style>
+    """),
     unsafe_allow_html=True,
 )
 
@@ -382,10 +357,8 @@ with nav_col7:
 # ============================================================
 
 st.markdown(
-    textwrap.dedent(
-        f"""
+    textwrap.dedent(f"""
         <div class="dashboard-hero">
-
             <div class="hero-small">
                 Coach Dashboard
             </div>
@@ -399,34 +372,29 @@ st.markdown(
                 track skill development, and send detailed feedback
                 to keep your athletes performing clutch.
             </div>
-
         </div>
-        """
-    ),
+    """),
     unsafe_allow_html=True,
 )
 
 # ============================================================
-# QUICK OVERVIEW
+# OVERVIEW
 # ============================================================
 
 st.markdown(
-    textwrap.dedent(
-        """
+    textwrap.dedent("""
         <div class="section-header">
             <div class="section-kicker">Roster & Schedule</div>
             <div class="section-title">Overview</div>
         </div>
-        """
-    ),
+    """),
     unsafe_allow_html=True,
 )
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(
-        """
+    st.markdown("""
         <div class="dashboard-card">
             <div class="card-icon">👥</div>
             <div class="card-title">My Players</div>
@@ -434,13 +402,10 @@ with col1:
                 Active assigned players will appear here.
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
 with col2:
-    st.markdown(
-        """
+    st.markdown("""
         <div class="dashboard-card">
             <div class="card-icon">📅</div>
             <div class="card-title">Today's Sessions</div>
@@ -448,13 +413,10 @@ with col2:
                 Your scheduled sessions for today will list here.
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
 with col3:
-    st.markdown(
-        """
+    st.markdown("""
         <div class="dashboard-card">
             <div class="card-icon">📈</div>
             <div class="card-title">Player Progress</div>
@@ -462,13 +424,10 @@ with col3:
                 Monitor technical and strategic growth metrics.
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
 with col4:
-    st.markdown(
-        """
+    st.markdown("""
         <div class="dashboard-card">
             <div class="card-icon">📝</div>
             <div class="card-title">Feedback Sent</div>
@@ -476,48 +435,36 @@ with col4:
                 Track all notes submitted to players this week.
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
 # ============================================================
-# FEEDBACK FORM & RECENT FEEDBACK
+# FEEDBACK
 # ============================================================
 
 feedback_col, recent_col = st.columns([1.2, 1])
 
-# ============================================================
-# GIVE FEEDBACK
-# ============================================================
-
 with feedback_col:
 
     st.markdown(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             <div class="section-header">
                 <div class="section-kicker">Coach Communication</div>
                 <div class="section-title">Give Feedback</div>
             </div>
-            """
-        ),
+        """),
         unsafe_allow_html=True,
     )
 
     with st.form("coach_feedback_form"):
 
-        # For now, these are example players.
-        # We'll replace these with real player accounts next.
-        player_options = {
-            "John M. (Advanced)": "john@example.com",
-            "Sarah K. (Junior)": "sarah@example.com",
-            "David L. (Clinic)": "david@example.com",
-            "Jason T. (Varsity)": "jason@example.com",
-        }
-
         player_selected = st.selectbox(
             "Select Player",
-            list(player_options.keys())
+            [
+                "John M. (Advanced)",
+                "Sarah K. (Junior)",
+                "David L. (Clinic)",
+                "Jason T. (Varsity)"
+            ]
         )
 
         feedback_category = st.selectbox(
@@ -526,7 +473,7 @@ with feedback_col:
                 "Technique & Stroke",
                 "Match Strategy",
                 "Mental Game & Focus",
-                "Physical & Footwork",
+                "Physical & Footwork"
             ]
         )
 
@@ -536,7 +483,7 @@ with feedback_col:
                 "Write notes on technique, key takeaways, "
                 "and areas to work on before next session..."
             ),
-            height=140,
+            height=140
         )
 
         submitted = st.form_submit_button(
@@ -544,40 +491,40 @@ with feedback_col:
             use_container_width=True
         )
 
-        # ========================================================
+        # ====================================================
         # SAVE FEEDBACK TO SUPABASE
-        # ========================================================
+        # ====================================================
 
         if submitted:
 
             if not feedback_notes.strip():
 
-                st.error(
-                    "Please enter feedback before submitting."
-                )
+                st.error("Please enter feedback before submitting.")
 
             else:
 
-                player_email = player_options[player_selected]
-
                 try:
 
+                    # Get logged-in coach's Supabase UUID
+                    coach_id = user.id
+
+                    # Save feedback
                     supabase.table("coach_feedback").insert({
-                        "coach_email": coach_email,
-                        "player_email": player_email,
+                        "coach_id": coach_id,
+                        "player_id": None,
                         "category": feedback_category,
-                        "feedback": feedback_notes.strip(),
+                        "feedback": feedback_notes
                     }).execute()
 
                     st.success(
-                        f"Feedback sent to {player_selected}! 🎾"
+                        f"Feedback submitted for {player_selected}! 🎾"
                     )
 
                 except Exception as e:
 
-                    st.error(
-                        "Could not save feedback to Supabase."
-                    )
+                    st.error("Could not save the feedback.")
+
+                    st.code(str(e))
 
 # ============================================================
 # RECENT FEEDBACK
@@ -586,61 +533,43 @@ with feedback_col:
 with recent_col:
 
     st.markdown(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             <div class="section-header">
                 <div class="section-kicker">History</div>
                 <div class="section-title">Recent Feedback</div>
             </div>
-            """
-        ),
+        """),
         unsafe_allow_html=True,
     )
 
+    # Get feedback belonging to this coach
     try:
 
-        recent_feedback = (
+        coach_feedback = (
             supabase
             .table("coach_feedback")
             .select("*")
-            .eq("coach_email", coach_email)
+            .eq("coach_id", user.id)
             .order("created_at", desc=True)
             .limit(5)
             .execute()
         )
 
-        feedback_rows = recent_feedback.data
+        feedback_rows = coach_feedback.data
 
         if feedback_rows:
 
             for row in feedback_rows:
 
-                player_email = row.get(
-                    "player_email",
-                    "Player"
-                )
-
-                category = row.get(
-                    "category",
-                    "Feedback"
-                )
-
-                feedback_text = row.get(
-                    "feedback",
-                    ""
-                )
-
-                created_at = row.get(
-                    "created_at",
-                    ""
-                )
+                category = row.get("category", "Feedback")
+                feedback_text = row.get("feedback", "")
+                created_at = row.get("created_at", "")
 
                 st.markdown(
                     f"""
                     <div class="feedback-card">
-
                         <div class="feedback-player">
-                            {player_email} — {category}
+                            Coach Feedback — {category}
                         </div>
 
                         <div class="feedback-date">
@@ -650,23 +579,18 @@ with recent_col:
                         <div class="feedback-text">
                             {feedback_text}
                         </div>
-
                     </div>
                     """,
-                    unsafe_allow_html=True,
+                    unsafe_allow_html=True
                 )
 
         else:
 
-            st.info(
-                "You haven't submitted any feedback yet."
-            )
+            st.info("No feedback has been submitted yet.")
 
-    except Exception:
+    except Exception as e:
 
-        st.warning(
-            "Unable to load recent feedback."
-        )
+        st.warning("Unable to load recent feedback.")
 
 # ============================================================
 # LOGOUT
