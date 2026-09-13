@@ -1,6 +1,6 @@
 import textwrap
-import pandas as pd
 import streamlit as st
+from supabase import create_client
 
 # ============================================================
 # PAGE CONFIG
@@ -11,6 +11,15 @@ st.set_page_config(
     page_icon="🎾",
     layout="wide",
     initial_sidebar_state="collapsed",
+)
+
+# ============================================================
+# SUPABASE CONNECTION
+# ============================================================
+
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
 )
 
 # ============================================================
@@ -25,10 +34,18 @@ if not st.session_state.get("logged_in", False):
 # ============================================================
 
 user = st.session_state.get("user")
-coach_name = "Coach"
 
-if user and hasattr(user, "user_metadata"):
-    coach_name = user.user_metadata.get("full_name", "Coach")
+coach_name = "Coach"
+coach_email = ""
+
+if user:
+    coach_email = user.email.lower()
+
+    if hasattr(user, "user_metadata"):
+        coach_name = user.user_metadata.get(
+            "full_name",
+            "Coach"
+        )
 
 # ============================================================
 # CUSTOM STYLING
@@ -37,6 +54,7 @@ if user and hasattr(user, "user_metadata"):
 st.markdown(
     textwrap.dedent("""
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
@@ -62,7 +80,10 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* FLOATING NAVBAR CONTAINER */
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+
 [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
     background-color: #FFFFFF;
     border-radius: 40px;
@@ -88,7 +109,8 @@ html, body, [class*="css"] {
     margin-left: 4px;
 }
 
-/* NAVBAR LINK BUTTONS */
+/* NAVBAR LINKS */
+
 div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button {
     background: transparent !important;
     color: #3B82F6 !important;
@@ -106,7 +128,8 @@ div[data-testid="stColumn"]:has(div.nav-link-btn-marker) div.stButton > button:h
     background: transparent !important;
 }
 
-/* NAVBAR CTA BUTTON */
+/* NAVBAR CTA */
+
 div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button {
     background-color: #0B3D2E !important;
     color: #FFFFFF !important;
@@ -123,7 +146,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     background-color: #145A43 !important;
 }
 
-/* HERO */
+/* ============================================================
+   HERO
+   ============================================================ */
+
 .dashboard-hero {
     background: linear-gradient(
         135deg,
@@ -178,7 +204,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     max-width: 650px;
 }
 
-/* SECTION HEADERS */
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+
 .section-header {
     margin-top: 35px;
     margin-bottom: 18px;
@@ -199,7 +228,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     color: #17201C;
 }
 
-/* CARDS */
+/* ============================================================
+   CARDS
+   ============================================================ */
+
 .dashboard-card {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -234,7 +266,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.9rem;
 }
 
-/* FEEDBACK CARD */
+/* ============================================================
+   FEEDBACK CARD
+   ============================================================ */
+
 .feedback-card {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -264,7 +299,10 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.92rem;
 }
 
-/* FORM STYLING */
+/* ============================================================
+   FORM
+   ============================================================ */
+
 div[data-testid="stForm"] {
     background: #FFFFFF;
     border: 1px solid #E4E9E4;
@@ -273,7 +311,10 @@ div[data-testid="stForm"] {
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
-/* GLOBAL PAGE BUTTONS & LOGOUT */
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -282,20 +323,25 @@ div.stButton > button {
     min-height: 48px;
     font-weight: 700;
 }
+
 </style>
 """),
     unsafe_allow_html=True,
 )
 
-
 # ============================================================
-# UNIFIED NAVBAR
+# NAVBAR
 # ============================================================
 
-nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns([2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2])
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.columns(
+    [2.5, 0.8, 1.0, 1.1, 0.8, 1.0, 2.2]
+)
 
 with nav_col1:
-    st.markdown('<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>',
+        unsafe_allow_html=True
+    )
 
 with nav_col2:
     st.markdown('<div class="nav-link-btn-marker"></div>', unsafe_allow_html=True)
@@ -324,44 +370,55 @@ with nav_col6:
 
 with nav_col7:
     st.markdown('<div class="nav-cta-marker"></div>', unsafe_allow_html=True)
-    if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
+    if st.button(
+        "Book a Free Trial",
+        key="nav_cta_btn",
+        use_container_width=True
+    ):
         st.switch_page("pages/booking.py")
 
-
 # ============================================================
-# COACH HERO
+# HERO
 # ============================================================
 
 st.markdown(
-    textwrap.dedent(f"""
+    textwrap.dedent(
+        f"""
         <div class="dashboard-hero">
+
             <div class="hero-small">
                 Coach Dashboard
             </div>
+
             <div class="hero-title">
                 Welcome, <span>{coach_name}</span> 🎾
             </div>
+
             <div class="hero-description">
-                Manage your training schedule, review active players, track skill development,
-                and send detailed feedback to keep your athletes performing clutch.
+                Manage your training schedule, review active players,
+                track skill development, and send detailed feedback
+                to keep your athletes performing clutch.
             </div>
+
         </div>
-    """),
+        """
+    ),
     unsafe_allow_html=True,
 )
 
-
 # ============================================================
-# QUICK OVERVIEW CARDS
+# QUICK OVERVIEW
 # ============================================================
 
 st.markdown(
-    textwrap.dedent("""
+    textwrap.dedent(
+        """
         <div class="section-header">
             <div class="section-kicker">Roster & Schedule</div>
             <div class="section-title">Overview</div>
         </div>
-    """),
+        """
+    ),
     unsafe_allow_html=True,
 )
 
@@ -369,128 +426,247 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.markdown(
-        textwrap.dedent("""
-            <div class="dashboard-card">
-                <div class="card-icon">👥</div>
-                <div class="card-title">My Players</div>
-                <div class="card-text">
-                    Active assigned players will appear here.
-                </div>
+        """
+        <div class="dashboard-card">
+            <div class="card-icon">👥</div>
+            <div class="card-title">My Players</div>
+            <div class="card-text">
+                Active assigned players will appear here.
             </div>
-        """),
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
 with col2:
     st.markdown(
-        textwrap.dedent("""
-            <div class="dashboard-card">
-                <div class="card-icon">📅</div>
-                <div class="card-title">Today's Sessions</div>
-                <div class="card-text">
-                    Your scheduled sessions for today will list here.
-                </div>
+        """
+        <div class="dashboard-card">
+            <div class="card-icon">📅</div>
+            <div class="card-title">Today's Sessions</div>
+            <div class="card-text">
+                Your scheduled sessions for today will list here.
             </div>
-        """),
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
 with col3:
     st.markdown(
-        textwrap.dedent("""
-            <div class="dashboard-card">
-                <div class="card-icon">📈</div>
-                <div class="card-title">Player Progress</div>
-                <div class="card-text">
-                    Monitor technical and strategic growth metrics.
-                </div>
+        """
+        <div class="dashboard-card">
+            <div class="card-icon">📈</div>
+            <div class="card-title">Player Progress</div>
+            <div class="card-text">
+                Monitor technical and strategic growth metrics.
             </div>
-        """),
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
 with col4:
     st.markdown(
-        textwrap.dedent("""
-            <div class="dashboard-card">
-                <div class="card-icon">📝</div>
-                <div class="card-title">Feedback Sent</div>
-                <div class="card-text">
-                    Track all notes submitted to players this week.
-                </div>
+        """
+        <div class="dashboard-card">
+            <div class="card-icon">📝</div>
+            <div class="card-title">Feedback Sent</div>
+            <div class="card-text">
+                Track all notes submitted to players this week.
             </div>
-        """),
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-
 # ============================================================
-# FEEDBACK FORM & RECENT FEEDBACK SECTION
+# FEEDBACK FORM & RECENT FEEDBACK
 # ============================================================
 
 feedback_col, recent_col = st.columns([1.2, 1])
 
+# ============================================================
+# GIVE FEEDBACK
+# ============================================================
+
 with feedback_col:
+
     st.markdown(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             <div class="section-header">
                 <div class="section-kicker">Coach Communication</div>
                 <div class="section-title">Give Feedback</div>
             </div>
-        """),
+            """
+        ),
         unsafe_allow_html=True,
     )
 
     with st.form("coach_feedback_form"):
+
+        # For now, these are example players.
+        # We'll replace these with real player accounts next.
+        player_options = {
+            "John M. (Advanced)": "john@example.com",
+            "Sarah K. (Junior)": "sarah@example.com",
+            "David L. (Clinic)": "david@example.com",
+            "Jason T. (Varsity)": "jason@example.com",
+        }
+
         player_selected = st.selectbox(
             "Select Player",
-            ["John M. (Advanced)", "Sarah K. (Junior)", "David L. (Clinic)", "Jason T. (Varsity)"],
+            list(player_options.keys())
         )
+
         feedback_category = st.selectbox(
             "Category",
-            ["Technique & Stroke", "Match Strategy", "Mental Game & Focus", "Physical & Footwork"],
+            [
+                "Technique & Stroke",
+                "Match Strategy",
+                "Mental Game & Focus",
+                "Physical & Footwork",
+            ]
         )
+
         feedback_notes = st.text_area(
             "Feedback Notes",
-            placeholder="Write notes on technique, key takeaways, and areas to work on before next session...",
+            placeholder=(
+                "Write notes on technique, key takeaways, "
+                "and areas to work on before next session..."
+            ),
             height=140,
         )
 
-        submitted = st.form_submit_button("Submit Feedback →", use_container_width=True)
+        submitted = st.form_submit_button(
+            "Submit Feedback →",
+            use_container_width=True
+        )
+
+        # ========================================================
+        # SAVE FEEDBACK TO SUPABASE
+        # ========================================================
+
         if submitted:
-            st.success(f"Feedback prepared for {player_selected}! (Front-end preview)")
+
+            if not feedback_notes.strip():
+
+                st.error(
+                    "Please enter feedback before submitting."
+                )
+
+            else:
+
+                player_email = player_options[player_selected]
+
+                try:
+
+                    supabase.table("coach_feedback").insert({
+                        "coach_email": coach_email,
+                        "player_email": player_email,
+                        "category": feedback_category,
+                        "feedback": feedback_notes.strip(),
+                    }).execute()
+
+                    st.success(
+                        f"Feedback sent to {player_selected}! 🎾"
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        "Could not save feedback to Supabase."
+                    )
+
+# ============================================================
+# RECENT FEEDBACK
+# ============================================================
 
 with recent_col:
+
     st.markdown(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             <div class="section-header">
                 <div class="section-kicker">History</div>
                 <div class="section-title">Recent Feedback</div>
             </div>
-        """),
+            """
+        ),
         unsafe_allow_html=True,
     )
 
-    st.markdown(
-        textwrap.dedent("""
-            <div class="feedback-card">
-                <div class="feedback-player">John M. — Technique & Stroke</div>
-                <div class="feedback-date">Submitted: Yesterday</div>
-                <div class="feedback-text">
-                    Great serve extension on second serves. Work on tossing slightly further in front for extra kick.
-                </div>
-            </div>
-            <div class="feedback-card">
-                <div class="feedback-player">Sarah K. — Mental Game & Focus</div>
-                <div class="feedback-date">Submitted: 3 days ago</div>
-                <div class="feedback-text">
-                    Maintained high energy during tiebreakers. Solid point construction from the baseline.
-                </div>
-            </div>
-        """),
-        unsafe_allow_html=True,
-    )
+    try:
 
+        recent_feedback = (
+            supabase
+            .table("coach_feedback")
+            .select("*")
+            .eq("coach_email", coach_email)
+            .order("created_at", desc=True)
+            .limit(5)
+            .execute()
+        )
+
+        feedback_rows = recent_feedback.data
+
+        if feedback_rows:
+
+            for row in feedback_rows:
+
+                player_email = row.get(
+                    "player_email",
+                    "Player"
+                )
+
+                category = row.get(
+                    "category",
+                    "Feedback"
+                )
+
+                feedback_text = row.get(
+                    "feedback",
+                    ""
+                )
+
+                created_at = row.get(
+                    "created_at",
+                    ""
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="feedback-card">
+
+                        <div class="feedback-player">
+                            {player_email} — {category}
+                        </div>
+
+                        <div class="feedback-date">
+                            Submitted: {created_at}
+                        </div>
+
+                        <div class="feedback-text">
+                            {feedback_text}
+                        </div>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        else:
+
+            st.info(
+                "You haven't submitted any feedback yet."
+            )
+
+    except Exception:
+
+        st.warning(
+            "Unable to load recent feedback."
+        )
 
 # ============================================================
 # LOGOUT
@@ -499,7 +675,13 @@ with recent_col:
 st.write("")
 st.divider()
 
-if st.button("Log Out", key="logout_btn", use_container_width=True):
+if st.button(
+    "Log Out",
+    key="logout_btn",
+    use_container_width=True
+):
+
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
+
     st.switch_page("pages/login.py")
