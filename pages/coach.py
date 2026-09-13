@@ -49,10 +49,6 @@ if user:
 # GET PLAYERS FROM PLAYERS TABLE
 # ============================================================
 
-# ============================================================
-# GET PLAYERS FROM PLAYERS TABLE
-# ============================================================
-
 players = []
 
 try:
@@ -65,13 +61,12 @@ try:
     )
 
     for player in response.data or []:
-        if player.get("emails"):
+        player_email = player.get("emails", "")
+        
+        if player_email:
             players.append({
-                "email": player["emails"],
-                "name": player.get(
-                    "full_name",
-                    player["emails"]
-                )
+                "email": player_email,
+                "name": player.get("full_name") or player_email
             })
 
 except Exception as e:
@@ -376,7 +371,6 @@ with nav_col2:
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button("Home", key="nav_home"):
         st.switch_page("app.py")
 
@@ -385,7 +379,6 @@ with nav_col3:
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button("Location", key="nav_loc"):
         st.switch_page("pages/location.py")
 
@@ -394,7 +387,6 @@ with nav_col4:
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button("About Us", key="nav_about"):
         st.switch_page("pages/about.py")
 
@@ -403,7 +395,6 @@ with nav_col5:
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button("FAQ", key="nav_faq"):
         st.switch_page("pages/faq.py")
 
@@ -412,7 +403,6 @@ with nav_col6:
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button("Contact", key="nav_contact"):
         st.switch_page("pages/contact.py")
 
@@ -421,7 +411,6 @@ with nav_col7:
         '<div class="nav-cta-marker"></div>',
         unsafe_allow_html=True
     )
-
     if st.button(
         "Book a Free Trial",
         key="nav_cta_btn",
@@ -437,21 +426,17 @@ st.markdown(
     textwrap.dedent(
         f"""
         <div class="dashboard-hero">
-
             <div class="hero-small">
                 Coach Dashboard
             </div>
-
             <div class="hero-title">
                 Welcome, <span>{coach_name}</span> 🎾
             </div>
-
             <div class="hero-description">
                 Manage your training schedule, review active players,
                 track skill development, and send detailed feedback
                 to keep your athletes performing clutch.
             </div>
-
         </div>
         """
     ),
@@ -478,17 +463,13 @@ with col1:
     st.markdown(
         f"""
         <div class="dashboard-card">
-
             <div class="card-icon">👥</div>
-
             <div class="card-title">
                 My Players
             </div>
-
             <div class="card-text">
                 {len(players)} player(s) currently registered.
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
@@ -498,17 +479,13 @@ with col2:
     st.markdown(
         """
         <div class="dashboard-card">
-
             <div class="card-icon">📅</div>
-
             <div class="card-title">
                 Today's Sessions
             </div>
-
             <div class="card-text">
                 Your scheduled sessions will appear here.
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
@@ -518,17 +495,13 @@ with col3:
     st.markdown(
         """
         <div class="dashboard-card">
-
             <div class="card-icon">📈</div>
-
             <div class="card-title">
                 Player Progress
             </div>
-
             <div class="card-text">
                 Monitor technical and strategic growth.
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
@@ -538,17 +511,13 @@ with col4:
     st.markdown(
         """
         <div class="dashboard-card">
-
             <div class="card-icon">📝</div>
-
             <div class="card-title">
                 Feedback Sent
             </div>
-
             <div class="card-text">
                 Track feedback submitted to players.
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
@@ -565,35 +534,28 @@ with feedback_col:
     st.markdown(
         """
         <div class="section-header">
-
             <div class="section-kicker">
                 Coach Communication
             </div>
-
             <div class="section-title">
                 Give Feedback
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     if not players:
-
         st.warning(
             "No players have been added yet."
         )
-
     else:
-
         player_options = [
             f"{player['name']} — {player['email']}"
             for player in players
         ]
 
         with st.form("coach_feedback_form"):
-
             selected_player = st.selectbox(
                 "Select Player",
                 player_options
@@ -623,30 +585,20 @@ with feedback_col:
                 use_container_width=True
             )
 
-        # ====================================================
-        # SAVE FEEDBACK
-        # ====================================================
-
         if submitted:
-
             if not feedback_notes.strip():
-
                 st.error(
                     "Please enter some feedback before submitting."
                 )
-
             else:
-
                 selected_index = player_options.index(
                     selected_player
                 )
-
                 selected_player_email = players[
                     selected_index
                 ]["email"]
 
                 try:
-
                     feedback_data = {
                         "coach_email": coach_email,
                         "player_email": selected_player_email,
@@ -664,13 +616,10 @@ with feedback_col:
                         f"Feedback successfully sent to "
                         f"{players[selected_index]['name']}! 🎾"
                     )
+                    st.rerun()
 
                 except Exception as e:
-
-                    st.error(
-                        "Could not save feedback."
-                    )
-
+                    st.error("Could not save feedback.")
                     st.code(str(e))
 
 # ============================================================
@@ -682,27 +631,22 @@ with recent_col:
     st.markdown(
         """
         <div class="section-header">
-
             <div class="section-kicker">
                 History
             </div>
-
             <div class="section-title">
                 Recent Feedback
             </div>
-
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     try:
-
         feedback_response = (
             supabase
             .table("coach_feedback")
             .select("*")
-            .eq("coach_email", coach_email)
             .order("created_at", desc=True)
             .limit(10)
             .execute()
@@ -711,30 +655,23 @@ with recent_col:
         recent_feedback = feedback_response.data or []
 
         if not recent_feedback:
-
             st.info(
                 "You haven't submitted any feedback yet."
             )
-
         else:
-
             for feedback in recent_feedback:
-
                 player_email = feedback.get(
                     "player_email",
                     "Unknown player"
                 )
-
                 category = feedback.get(
                     "category",
                     "General"
                 )
-
                 feedback_text = feedback.get(
                     "feedback",
                     ""
                 )
-
                 created_at = feedback.get(
                     "created_at",
                     ""
@@ -743,30 +680,22 @@ with recent_col:
                 st.markdown(
                     f"""
                     <div class="feedback-card">
-
                         <div class="feedback-player">
                             {player_email} — {category}
                         </div>
-
                         <div class="feedback-date">
                             Submitted: {created_at}
                         </div>
-
                         <div class="feedback-text">
                             {feedback_text}
                         </div>
-
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
     except Exception as e:
-
-        st.error(
-            "Unable to load recent feedback."
-        )
-
+        st.error("Unable to load recent feedback.")
         st.code(str(e))
 
 # ============================================================
@@ -774,7 +703,6 @@ with recent_col:
 # ============================================================
 
 st.write("")
-
 st.divider()
 
 if st.button(
@@ -782,8 +710,6 @@ if st.button(
     key="logout_btn",
     use_container_width=True
 ):
-
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
-
     st.switch_page("pages/login.py")
