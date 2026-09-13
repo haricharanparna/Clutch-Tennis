@@ -60,7 +60,7 @@ try:
         .execute()
     )
 
-    for player in response.data or:
+    for player in response.data or []:
 
         if player.get("email"):
             players.append({
