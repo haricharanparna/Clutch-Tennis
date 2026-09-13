@@ -49,34 +49,34 @@ if user:
 # GET PLAYERS FROM PLAYERS TABLE
 # ============================================================
 
+# ============================================================
+# GET PLAYERS FROM PLAYERS TABLE
+# ============================================================
+
 players = []
 
 try:
     response = (
         supabase
         .table("players")
-        .select("email, full_name")
+        .select("emails, full_name")
         .order("full_name")
         .execute()
     )
 
     for player in response.data or []:
-
-        if player.get("email"):
+        if player.get("emails"):
             players.append({
-                "email": player["email"],
+                "email": player["emails"],
                 "name": player.get(
                     "full_name",
-                    player["email"]
+                    player["emails"]
                 )
             })
 
 except Exception as e:
-
     st.error("Unable to load players.")
-
     st.code(str(e))
-
     players = []
 
 # ============================================================
