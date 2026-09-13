@@ -1,5 +1,6 @@
 import textwrap
 import streamlit as st
+from supabase import create_client
 
 # ============================================================
 # PAGE CONFIG
@@ -10,6 +11,15 @@ st.set_page_config(
     page_icon="🎾",
     layout="wide",
     initial_sidebar_state="collapsed",
+)
+
+# ============================================================
+# CONNECT TO SUPABASE
+# ============================================================
+
+supabase = create_client(
+    st.secrets["SUPABASE_URL"],
+    st.secrets["SUPABASE_KEY"]
 )
 
 # ============================================================
@@ -25,9 +35,34 @@ if not st.session_state.get("logged_in", False):
 
 user = st.session_state.get("user")
 full_name = "Player"
+player_email = ""
 
-if user and hasattr(user, "user_metadata"):
-    full_name = user.user_metadata.get("full_name", "Player")
+if user:
+    player_email = getattr(user, "email", "") or ""
+    if hasattr(user, "user_metadata"):
+        metadata = user.user_metadata or {}
+        full_name = metadata.get("full_name", "Player")
+
+# ============================================================
+# FETCH COACH FEEDBACK FOR THIS PLAYER
+# ============================================================
+
+recent_feedback = []
+
+if player_email:
+    try:
+        feedback_response = (
+            supabase
+            .table("coach_feedback")
+            .select("*")
+            .eq("player_email", player_email)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        recent_feedback = feedback_response.data or []
+    except Exception as e:
+        st.error("Unable to load feedback.")
+        st.code(str(e))
 
 # ============================================================
 # CUSTOM STYLING
@@ -240,6 +275,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     border-left: 5px solid #88C425;
     border-radius: 18px;
     padding: 24px;
+    margin-bottom: 15px;
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
@@ -296,7 +332,6 @@ div.stButton > button {
     unsafe_allow_html=True,
 )
 
-
 # ============================================================
 # UNIFIED NAVBAR
 # ============================================================
@@ -336,7 +371,6 @@ with nav_col7:
     if st.button("Book a Free Trial", key="nav_cta_btn", use_container_width=True):
         st.switch_page("pages/booking.py")
 
-
 # ============================================================
 # DASHBOARD HERO
 # ============================================================
@@ -358,7 +392,6 @@ st.markdown(
     """),
     unsafe_allow_html=True,
 )
-
 
 # ============================================================
 # QUICK OVERVIEW
@@ -432,7 +465,6 @@ with col4:
         unsafe_allow_html=True,
     )
 
-
 # ============================================================
 # COACH FEEDBACK
 # ============================================================
@@ -447,25 +479,48 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    textwrap.dedent("""
-        <div class="feedback-card">
-            <div class="feedback-coach">
-                Coach Feedback
+if not recent_feedback:
+    st.markdown(
+        textwrap.dedent("""
+            <div class="feedback-card">
+                <div class="feedback-coach">
+                    No Feedback Yet
+                </div>
+                <div class="feedback-date">
+                    Check back after your next training session
+                </div>
+                <div class="feedback-text">
+                    Once your coach submits feedback, it will appear here.
+                    You'll be able to review notes about your technique,
+                    strategy, mindset, and areas to improve.
+                </div>
             </div>
-            <div class="feedback-date">
-                No feedback yet
-            </div>
-            <div class="feedback-text">
-                Once your coach submits feedback, it will appear here.
-                You'll be able to review notes about your technique,
-                strategy, mindset, and areas to improve.
-            </div>
-        </div>
-    """),
-    unsafe_allow_html=True,
-)
+        """),
+        unsafe_allow_html=True,
+    )
+else:
+    for item in recent_feedback:
+        coach = item.get("coach_email", "Coach")
+        category = item.get("category", "General")
+        feedback_text = item.get("feedback", "")
+        created_at = item.get("created_at", "")
 
+        st.markdown(
+            f"""
+            <div class="feedback-card">
+                <div class="feedback-coach">
+                    {category} — From: {coach}
+                </div>
+                <div class="feedback-date">
+                    Submitted: {created_at}
+                </div>
+                <div class="feedback-text">
+                    {feedback_text}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 # ============================================================
 # PROGRESS
@@ -516,7 +571,6 @@ with progress_col3:
         unsafe_allow_html=True,
     )
 
-
 # ============================================================
 # GOALS
 # ============================================================
@@ -560,7 +614,6 @@ with goal_col2:
         """),
         unsafe_allow_html=True,
     )
-
 
 # ============================================================
 # LOGOUT
