@@ -46,56 +46,38 @@ if user:
         coach_name = metadata.get("full_name", "Coach")
 
 # ============================================================
-# GET PLAYERS FROM SUPABASE AUTH
+# GET PLAYERS FROM PLAYERS TABLE
 # ============================================================
 
 players = []
 
 try:
-    response = supabase.auth.admin.list_users()
+    response = (
+        supabase
+        .table("players")
+        .select("email, full_name")
+        .order("full_name")
+        .execute()
+    )
 
-    # Depending on the Supabase Python version,
-    # the users may be inside .users or returned directly.
-    if hasattr(response, "users"):
-        all_users = response.users
-    elif isinstance(response, list):
-        all_users = response
-    else:
-        all_users = []
+    for player in response.data or:
 
-    for player in all_users:
-
-        player_email = getattr(player, "email", None)
-
-        metadata = getattr(player, "user_metadata", {}) or {}
-
-        role = metadata.get("role", "")
-
-        # ONLY include users whose role is player
-        if player_email and role == "player":
-
-            full_name = metadata.get(
-                "full_name",
-                player_email
-            )
-
+        if player.get("email"):
             players.append({
-                "email": player_email,
-                "name": full_name
+                "email": player["email"],
+                "name": player.get(
+                    "full_name",
+                    player["email"]
+                )
             })
 
 except Exception as e:
 
-    st.error("Unable to load players from Supabase Auth.")
+    st.error("Unable to load players.")
 
     st.code(str(e))
 
     players = []
-
-# Sort players alphabetically
-players.sort(
-    key=lambda x: x["name"].lower()
-)
 
 # ============================================================
 # CUSTOM STYLING
@@ -384,14 +366,12 @@ nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, nav_col6, nav_col7 = st.column
 )
 
 with nav_col1:
-
     st.markdown(
         '<div class="nav-logo-target">🎾 CLUTCH<span>TENNIS</span></div>',
         unsafe_allow_html=True
     )
 
 with nav_col2:
-
     st.markdown(
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
@@ -401,7 +381,6 @@ with nav_col2:
         st.switch_page("app.py")
 
 with nav_col3:
-
     st.markdown(
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
@@ -411,7 +390,6 @@ with nav_col3:
         st.switch_page("pages/location.py")
 
 with nav_col4:
-
     st.markdown(
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
@@ -421,7 +399,6 @@ with nav_col4:
         st.switch_page("pages/about.py")
 
 with nav_col5:
-
     st.markdown(
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
@@ -431,7 +408,6 @@ with nav_col5:
         st.switch_page("pages/faq.py")
 
 with nav_col6:
-
     st.markdown(
         '<div class="nav-link-btn-marker"></div>',
         unsafe_allow_html=True
@@ -441,7 +417,6 @@ with nav_col6:
         st.switch_page("pages/contact.py")
 
 with nav_col7:
-
     st.markdown(
         '<div class="nav-cta-marker"></div>',
         unsafe_allow_html=True
@@ -500,7 +475,6 @@ st.markdown(
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-
     st.markdown(
         f"""
         <div class="dashboard-card">
@@ -521,7 +495,6 @@ with col1:
     )
 
 with col2:
-
     st.markdown(
         """
         <div class="dashboard-card">
@@ -542,7 +515,6 @@ with col2:
     )
 
 with col3:
-
     st.markdown(
         """
         <div class="dashboard-card">
@@ -563,7 +535,6 @@ with col3:
     )
 
 with col4:
-
     st.markdown(
         """
         <div class="dashboard-card">
@@ -611,9 +582,7 @@ with feedback_col:
     if not players:
 
         st.warning(
-            "No player accounts were found. "
-            "Make sure your player account has "
-            "`role: player` in Supabase user metadata."
+            "No players have been added yet."
         )
 
     else:
