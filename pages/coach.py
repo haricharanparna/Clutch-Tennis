@@ -45,42 +45,34 @@ if user:
         coach_name = user.user_metadata.get("full_name", "Coach")
 
 # ============================================================
-# GET PLAYERS FROM SUPABASE AUTH
+# GET PLAYERS FROM players_email TABLE
 # ============================================================
 
 players = []
 
 try:
-    users_response = supabase.auth.admin.list_users()
+    response = (
+        supabase
+        .table("players_email")
+        .select("email")
+        .execute()
+    )
 
-    # Supabase may return a list directly or an object containing users
-    if hasattr(users_response, "users"):
-        all_users = users_response.users
-    else:
-        all_users = users_response
+    for row in response.data or []:
+        player_email = row.get("email")
 
-    for player in all_users:
-        player_email = getattr(player, "email", None)
-
-        metadata = getattr(player, "user_metadata", {}) or {}
-        role = metadata.get("role", "player")
-
-        # Only show accounts marked as players
-        if player_email and role == "player":
-            full_name = metadata.get("full_name", player_email)
-
+        if player_email:
             players.append({
                 "email": player_email,
-                "name": full_name
+                "name": player_email
             })
 
 except Exception as e:
-    st.error("Unable to load players from Supabase.")
+    st.error("Unable to load players from players_email.")
+    st.code(str(e))
     players = []
 
-# Sort players alphabetically
-players.sort(key=lambda x: x["name"].lower())
-
+players.sort(key=lambda x: x["email"].lower())
 # ============================================================
 # CUSTOM STYLING
 # ============================================================
