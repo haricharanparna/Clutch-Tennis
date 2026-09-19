@@ -34,6 +34,29 @@ COACH_EMAILS = {
 }
 
 # ============================================================
+# HANDLE GOOGLE OAUTH CALLBACK
+# ============================================================
+
+try:
+    # Get the current session
+    session = supabase.auth.get_session()
+
+    if session and session.user:
+
+        st.session_state["logged_in"] = True
+        st.session_state["user"] = session.user
+
+        user_email = session.user.email.lower()
+
+        if user_email in COACH_EMAILS:
+            st.switch_page("pages/coach.py")
+        else:
+            st.switch_page("pages/player_dashboard.py")
+
+except Exception:
+    pass
+
+# ============================================================
 # IF ALREADY LOGGED IN
 # ============================================================
 
@@ -42,6 +65,7 @@ if st.session_state.get("logged_in", False):
     user = st.session_state.get("user")
 
     if user and user.email:
+
         user_email = user.email.lower()
 
         if user_email in COACH_EMAILS:
@@ -154,6 +178,48 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     transform: translateY(-1px);
 }
 
+/* Google Button */
+
+.google-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #FFFFFF;
+    color: #17201C !important;
+    border: 1px solid #D9DED9;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-decoration: none !important;
+    box-sizing: border-box;
+}
+
+.google-button:hover {
+    background: #F7F8F5;
+    border-color: #B8C0BA;
+}
+
+/* Divider */
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+    color: #8A938E;
+    font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #E4E9E4;
+}
+
 /* Secondary buttons */
 
 .secondary-btn-container {
@@ -178,6 +244,45 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+# ============================================================
+# GOOGLE SIGN IN
+# ============================================================
+
+try:
+
+    google_response = supabase.auth.sign_in_with_oauth({
+        "provider": "google",
+        "options": {
+            "redirect_to": (
+                "https://clutch-tennis-6yc8kmr8cduasgptdslws4"
+                ".streamlit.app"
+            )
+        }
+    })
+
+    google_url = google_response.url
+
+    st.markdown(
+        f"""
+        <a class="google-button" href="{google_url}">
+            🔵 &nbsp; Continue with Google
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
+
+except Exception:
+    st.error("Google Sign-In is currently unavailable.")
+
+# ============================================================
+# DIVIDER
+# ============================================================
+
+st.markdown(
+    '<div class="divider">OR</div>',
+    unsafe_allow_html=True
+)
 
 # ============================================================
 # LOGIN FORM
@@ -208,6 +313,7 @@ with st.form("login_form", clear_on_submit=False):
 col1, col2 = st.columns(2)
 
 with col1:
+
     forgotpassword = st.button(
         "Forgot Password?",
         use_container_width=True,
@@ -215,6 +321,7 @@ with col1:
     )
 
 with col2:
+
     signup_button = st.button(
         "Create Account",
         use_container_width=True,
@@ -226,6 +333,7 @@ with col2:
 # ============================================================
 
 if signup_button:
+
     st.switch_page("pages/signup.py")
 
 # ============================================================
@@ -235,10 +343,19 @@ if signup_button:
 if forgotpassword:
 
     if not emailinput:
-        st.error("Please enter your email address above first.")
 
-    elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", emailinput):
-        st.error("Please enter a valid email address.")
+        st.error(
+            "Please enter your email address above first."
+        )
+
+    elif not re.match(
+        r"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        emailinput
+    ):
+
+        st.error(
+            "Please enter a valid email address."
+        )
 
     else:
 
@@ -259,6 +376,7 @@ if forgotpassword:
             )
 
         except Exception:
+
             st.error(
                 "Unable to send reset email. Please try again."
             )
@@ -308,12 +426,10 @@ if loginbutton:
 
                 if user_email in COACH_EMAILS:
 
-                    # Coach
                     st.switch_page("pages/coach.py")
 
                 else:
 
-                    # Player
                     st.switch_page("pages/player_dashboard.py")
 
             else:
