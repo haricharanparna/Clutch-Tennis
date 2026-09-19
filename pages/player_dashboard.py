@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CONNECT TO SUPABASE
+# CONNECT TO SUPABASE & RESTORE SESSION
 # ============================================================
 
 supabase = create_client(
@@ -22,12 +22,22 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
+# Restore active Supabase session from session state if available
+if "supabase_session" in st.session_state and st.session_state["supabase_session"]:
+    try:
+        supabase.auth.set_session(
+            st.session_state["supabase_session"].access_token,
+            st.session_state["supabase_session"].refresh_token
+        )
+    except Exception:
+        pass
+
 # ============================================================
 # LOGIN PROTECTION
 # ============================================================
 
 if not st.session_state.get("logged_in", False):
-    st.switch_page("pages/login.py")
+    st.switch_page("login.py")
 
 # ============================================================
 # CURRENT USER
@@ -625,4 +635,5 @@ st.divider()
 if st.button("Log Out", key="logout_btn", use_container_width=True):
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
-    st.switch_page("pages/login.py")
+    st.session_state["supabase_session"] = None
+    st.switch_page("login.py")
