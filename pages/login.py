@@ -22,35 +22,43 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
-# Set app URL for Google OAuth redirects
-# Update this to your production URL (e.g., https://your-app.streamlit.app) when deploying
+# Define exact app URL for redirects
 APP_URL = st.secrets.get("APP_URL", "http://localhost:8501")
 
+# Initialize session state keys safely
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+if "user" not in st.session_state:
+    st.session_state["user"] = None
+if "supabase_session" not in st.session_state:
+    st.session_state["supabase_session"] = None
+
 # ============================================================
-# HANDLE OAUTH / PKCE REDIRECT CODES (GOOGLE & MAGIC LINKS)
+# CHECK EXISTING SESSION OR PROCESS URL CALLBACK
 # ============================================================
 
 query_params = st.query_params
 
+# 1. Process OAuth / Magic Link callback parameter
 if "code" in query_params:
     auth_code = query_params.get("code")
-    
     if auth_code and isinstance(auth_code, str) and auth_code.strip():
         try:
             auth_response = supabase.auth.exchange_code_for_session({"auth_code": auth_code})
-            
             if auth_response and auth_response.session:
                 st.session_state["logged_in"] = True
                 st.session_state["user"] = auth_response.user
                 st.session_state["supabase_session"] = auth_response.session
                 
+                # Clear parameters to prevent re-submitting the same code on refresh
                 st.query_params.clear()
                 st.switch_page("pages/player_dashboard.py")
         except Exception as err:
-            st.error("Authentication failed or expired link. Please try logging in again.")
+            st.error(f"Authentication failed: {str(err)}")
             st.query_params.clear()
 
-if st.session_state.get("logged_in", False):
+# 2. Redirect immediately if already logged in
+if st.session_state["logged_in"]:
     st.switch_page("pages/player_dashboard.py")
 
 # ============================================================
@@ -113,10 +121,8 @@ html, body, [class*="css"] {
     font-size: 0.85rem;
     font-weight: 600;
     margin: 20px 0;
-    position: relative;
 }
 
-/* MAIN BUTTON STYLES */
 div.stButton > button {
     border-radius: 12px !important;
     min-height: 48px !important;
@@ -125,7 +131,6 @@ div.stButton > button {
     width: 100% !important;
 }
 
-/* GOOGLE OAUTH BUTTON CONTAINER */
 div[data-testid="stColumn"]:has(div.google-btn-marker) div.stButton > button {
     background-color: #FFFFFF !important;
     color: #17201C !important;
@@ -138,7 +143,6 @@ div[data-testid="stColumn"]:has(div.google-btn-marker) div.stButton > button:hov
     border-color: #9CA3AF !important;
 }
 
-/* SUBMIT BUTTON CONTAINER */
 div[data-testid="stColumn"]:has(div.submit-btn-marker) div.stButton > button {
     background: #0B3D2E !important;
     color: white !important;
@@ -167,25 +171,24 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# 1. Google OAuth Button
+# Google OAuth Section
 st.markdown('<div class="google-btn-marker"></div>', unsafe_allow_html=True)
 if st.button("🌐 Continue with Google", key="google_login", use_container_width=True):
     try:
         response = supabase.auth.sign_in_with_oauth({
             "provider": "google",
             "options": {
-                "redirect_to": f"{APP_URL}/login"
+                "redirect_to": f"{APP_URL}"
             }
         })
         if response.url:
-            st.link_button("Open Google Authorization", response.url)
+            st.markdown(f'<a href="{response.url}" target="_self" style="text-decoration:none;"><button style="width:100%; height:48px; border-radius:12px; background-color:#0B3D2E; color:white; font-weight:700; border:none; cursor:pointer;">Proceed to Google Authorization</button></a>', unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Google sign-in error: {str(e)}")
 
-# 2. Divider
 st.markdown('<div class="divider-text">OR EMAIL LOGIN</div>', unsafe_allow_html=True)
 
-# 3. Email / Password Form
+# Email/Password Section
 with st.form("login_form", clear_on_submit=False):
     email = st.text_input("Email Address", placeholder="player@example.com")
     password = st.text_input("Password", type="password", placeholder="••••••••")
@@ -207,9 +210,9 @@ with st.form("login_form", clear_on_submit=False):
                     st.session_state["logged_in"] = True
                     st.session_state["user"] = response.user
                     st.session_state["supabase_session"] = response.session
-                    st.success("Login successful! Redirecting...")
+                    st.success("Login successful!")
                     st.switch_page("pages/player_dashboard.py")
                 else:
-                    st.error("Invalid email or password.")
+                    st.error("Authentication failed: Invalid email or password.")
             except Exception as e:
                 st.error(f"Login failed: {str(e)}")
