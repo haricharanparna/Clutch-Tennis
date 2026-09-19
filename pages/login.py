@@ -1,9 +1,17 @@
+import base64
+import hashlib
+import secrets
 import textwrap
+import threading
+import time
+import uuid
+from urllib.parse import urlencode
+
 import streamlit as st
 from supabase import create_client
 
 # ============================================================
-# PAGE CONFIG
+# PAGE CONFIG (must be the first Streamlit call)
 # ============================================================
 
 st.set_page_config(
@@ -14,52 +22,129 @@ st.set_page_config(
 )
 
 # ============================================================
-# SUPABASE CLIENT SETUP
+# CONFIG
 # ============================================================
 
-supabase = create_client(
-    st.secrets["SUPABASE_URL"],
-    st.secrets["SUPABASE_KEY"]
-)
+SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key, never service_role
+APP_URL = st.secrets.get("APP_URL", "http://localhost:8501").rstrip("/")
 
-# Define exact app URL for redirects
-APP_URL = st.secrets.get("APP_URL", "http://localhost:8501")
-
-# Initialize session state keys safely
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-if "user" not in st.session_state:
-    st.session_state["user"] = None
-if "supabase_session" not in st.session_state:
-    st.session_state["supabase_session"] = None
+DASHBOARD_PAGE = "pages/player_dashboard.py"
+VERIFIER_TTL_SECONDS = 60 * 60  # how long a Google login link stays valid
 
 # ============================================================
-# CHECK EXISTING SESSION OR PROCESS URL CALLBACK
+# SESSION STATE + SUPABASE CLIENT (one client per browser session)
 # ============================================================
 
-query_params = st.query_params
+st.session_state.setdefault("logged_in", False)
+st.session_state.setdefault("user", None)
+st.session_state.setdefault("supabase_session", None)
 
-# 1. Process OAuth / Magic Link callback parameter
-if "code" in query_params:
-    auth_code = query_params.get("code")
-    if auth_code and isinstance(auth_code, str) and auth_code.strip():
+# Keeping the client in session_state means the signed-in session stays attached
+# to it. Other pages can reuse it: supabase = st.session_state["supabase"]
+if "supabase" not in st.session_state:
+    st.session_state["supabase"] = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = st.session_state["supabase"]
+
+# ============================================================
+# PKCE HELPERS
+#
+# Why this exists: Google sign-in opens in a new tab, so the callback arrives
+# in a brand-new Streamlit session with a brand-new Supabase client that never
+# saw the PKCE code verifier. We generate the verifier ourselves, keep it in
+# server memory under a random ID (sid), and pass the sid through the redirect
+# URL so the callback can look the verifier up again.
+# ============================================================
+
+
+@st.cache_resource
+def _verifier_store() -> dict:
+    return {"lock": threading.Lock(), "items": {}}
+
+
+def _purge_expired(items: dict) -> None:
+    cutoff = time.time() - VERIFIER_TTL_SECONDS
+    for key in [k for k, (_, created) in items.items() if created < cutoff]:
+        items.pop(key, None)
+
+
+def _save_verifier(sid: str, verifier: str) -> None:
+    store = _verifier_store()
+    with store["lock"]:
+        _purge_expired(store["items"])
+        store["items"][sid] = (verifier, time.time())
+
+
+def _pop_verifier(sid: str):
+    if not sid:
+        return None
+    store = _verifier_store()
+    with store["lock"]:
+        _purge_expired(store["items"])
+        item = store["items"].pop(sid, None)
+    return item[0] if item else None
+
+
+def build_google_url() -> str:
+    sid = uuid.uuid4().hex
+    verifier = secrets.token_urlsafe(64)  # 86 chars, within PKCE's 43-128 limit
+    challenge = (
+        base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+        .decode()
+        .rstrip("=")
+    )
+    _save_verifier(sid, verifier)
+    return f"{SUPABASE_URL}/auth/v1/authorize?" + urlencode(
+        {
+            "provider": "google",
+            # Trailing slash before "?" so the "/**" Redirect URL pattern in Supabase matches
+            "redirect_to": f"{APP_URL}/?sid={sid}",
+            "code_challenge": challenge,
+            "code_challenge_method": "s256",
+        }
+    )
+
+
+def _store_login(auth_response) -> None:
+    st.session_state["logged_in"] = True
+    st.session_state["user"] = auth_response.user
+    st.session_state["supabase_session"] = auth_response.session
+
+
+# ============================================================
+# PROCESS OAUTH CALLBACK (?code=...&sid=...) OR ?error=...
+# ============================================================
+
+callback_error = None
+params = st.query_params
+
+if "code" in params:
+    code = params.get("code", "")
+    verifier = _pop_verifier(params.get("sid", ""))
+    st.query_params.clear()  # never re-submit the same one-time code
+
+    if not verifier:
+        callback_error = "That Google sign-in link expired or was already used. Please try again."
+    else:
         try:
-            auth_response = supabase.auth.exchange_code_for_session({"auth_code": auth_code})
+            auth_response = supabase.auth.exchange_code_for_session(
+                {"auth_code": code, "code_verifier": verifier}
+            )
             if auth_response and auth_response.session:
-                st.session_state["logged_in"] = True
-                st.session_state["user"] = auth_response.user
-                st.session_state["supabase_session"] = auth_response.session
-                
-                # Clear parameters to prevent re-submitting the same code on refresh
-                st.query_params.clear()
-                st.switch_page("pages/player_dashboard.py")
+                _store_login(auth_response)
+            else:
+                callback_error = "Google sign-in did not return a session. Please try again."
         except Exception as err:
-            st.error(f"Authentication failed: {str(err)}")
-            st.query_params.clear()
+            callback_error = f"Google sign-in failed: {err}"
 
-# 2. Redirect immediately if already logged in
+elif "error" in params:
+    callback_error = params.get("error_description") or params.get("error")
+    st.query_params.clear()
+
+# Already logged in (or just finished the OAuth callback): go to the dashboard.
+# switch_page is called outside any try/except on purpose.
 if st.session_state["logged_in"]:
-    st.switch_page("pages/player_dashboard.py")
+    st.switch_page(DASHBOARD_PAGE)
 
 # ============================================================
 # CUSTOM STYLING
@@ -123,34 +208,83 @@ html, body, [class*="css"] {
     margin: 20px 0;
 }
 
-div.stButton > button {
-    border-radius: 12px !important;
-    min-height: 48px !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    width: 100% !important;
+/* ---- Form fields: readable in both light and dark browser modes ---- */
+[data-testid="stWidgetLabel"] p {
+    color: #17201C !important;
+    font-weight: 600;
 }
 
-div[data-testid="stColumn"]:has(div.google-btn-marker) div.stButton > button {
+[data-testid="stTextInput"] div[data-baseweb="input"],
+[data-testid="stTextInput"] div[data-baseweb="base-input"] {
+    background-color: #FFFFFF !important;
+    border-radius: 10px !important;
+}
+
+[data-testid="stTextInput"] div[data-baseweb="input"] {
+    border: 1px solid #D1D5DB !important;
+}
+
+[data-testid="stTextInput"] input {
     background-color: #FFFFFF !important;
     color: #17201C !important;
-    border: 1px solid #D1D5DB !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    -webkit-text-fill-color: #17201C !important;
 }
 
-div[data-testid="stColumn"]:has(div.google-btn-marker) div.stButton > button:hover {
+[data-testid="stTextInput"] input::placeholder {
+    color: #9AA29E !important;
+    -webkit-text-fill-color: #9AA29E !important;
+}
+
+[data-testid="stTextInput"] button {
+    color: #66706B !important;
+}
+
+[data-testid="stForm"] {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+/* ---- Google button (white, outlined) ---- */
+.st-key-google_wrap a {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 12px !important;
+    min-height: 48px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    text-decoration: none !important;
+}
+
+.st-key-google_wrap a,
+.st-key-google_wrap a * {
+    color: #17201C !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
+
+.st-key-google_wrap a:hover {
     background-color: #F9FAFB !important;
     border-color: #9CA3AF !important;
 }
 
-div[data-testid="stColumn"]:has(div.submit-btn-marker) div.stButton > button {
+/* ---- Email sign-in button (solid green) ---- */
+[data-testid="stFormSubmitButton"] button {
     background: #0B3D2E !important;
-    color: white !important;
     border: 0 !important;
+    border-radius: 12px !important;
+    min-height: 48px !important;
+    width: 100% !important;
 }
 
-div[data-testid="stColumn"]:has(div.submit-btn-marker) div.stButton > button:hover {
-    background-color: #145A43 !important;
+[data-testid="stFormSubmitButton"] button,
+[data-testid="stFormSubmitButton"] button * {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+}
+
+[data-testid="stFormSubmitButton"] button:hover {
+    background: #145A43 !important;
 }
 </style>
 """),
@@ -171,48 +305,55 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Google OAuth Section
-st.markdown('<div class="google-btn-marker"></div>', unsafe_allow_html=True)
-if st.button("🌐 Continue with Google", key="google_login", use_container_width=True):
-    try:
-        response = supabase.auth.sign_in_with_oauth({
-            "provider": "google",
-            "options": {
-                "redirect_to": f"{APP_URL}"
-            }
-        })
-        if response.url:
-            st.markdown(f'<a href="{response.url}" target="_self" style="text-decoration:none;"><button style="width:100%; height:48px; border-radius:12px; background-color:#0B3D2E; color:white; font-weight:700; border:none; cursor:pointer;">Proceed to Google Authorization</button></a>', unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"Google sign-in error: {str(e)}")
+if callback_error:
+    st.error(callback_error)
+
+# ---- Google ----
+# Build the link once per browser session. If you add a logout button, delete
+# st.session_state["google_url"] there so the next login gets a fresh link.
+if "google_url" not in st.session_state:
+    st.session_state["google_url"] = build_google_url()
+
+with st.container(key="google_wrap"):
+    st.link_button(
+        "Continue with Google",
+        st.session_state["google_url"],
+        use_container_width=True,
+    )
 
 st.markdown('<div class="divider-text">OR EMAIL LOGIN</div>', unsafe_allow_html=True)
 
-# Email/Password Section
+# ---- Email / password ----
+login_ok = False
+
 with st.form("login_form", clear_on_submit=False):
     email = st.text_input("Email Address", placeholder="player@example.com")
     password = st.text_input("Password", type="password", placeholder="••••••••")
-    
-    st.markdown('<div class="submit-btn-marker"></div>', unsafe_allow_html=True)
     submit = st.form_submit_button("Sign In with Email", use_container_width=True)
 
-    if submit:
-        if not email or not password:
-            st.warning("Please enter both your email and password.")
-        else:
-            try:
-                response = supabase.auth.sign_in_with_password({
-                    "email": email.strip(),
-                    "password": password
-                })
-                
-                if response.session and response.user:
-                    st.session_state["logged_in"] = True
-                    st.session_state["user"] = response.user
-                    st.session_state["supabase_session"] = response.session
-                    st.success("Login successful!")
-                    st.switch_page("pages/player_dashboard.py")
-                else:
-                    st.error("Authentication failed: Invalid email or password.")
-            except Exception as e:
-                st.error(f"Login failed: {str(e)}")
+if submit:
+    if not email or not password:
+        st.warning("Please enter both your email and password.")
+    else:
+        try:
+            response = supabase.auth.sign_in_with_password(
+                {"email": email.strip(), "password": password}
+            )
+            if response and response.session and response.user:
+                _store_login(response)
+                login_ok = True
+            else:
+                st.error("Sign-in failed. Check your email and password.")
+        except Exception as err:
+            message = str(err)
+            if "invalid login credentials" in message.lower():
+                st.error("Invalid email or password.")
+            elif "email not confirmed" in message.lower():
+                st.error("Please confirm your email first. Check your inbox for the confirmation link.")
+            else:
+                st.error(f"Login failed: {message}")
+
+# switch_page outside the try/except so Streamlit's internal control-flow exception isn't swallowed
+if login_ok:
+    st.switch_page(DASHBOARD_PAGE)
+
