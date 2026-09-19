@@ -22,6 +22,16 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
+# Restore active session if tokens already exist in session state
+if "supabase_session" in st.session_state:
+    try:
+        supabase.auth.set_session(
+            st.session_state["supabase_session"].access_token,
+            st.session_state["supabase_session"].refresh_token
+        )
+    except Exception:
+        pass
+
 # ============================================================
 # COACH EMAILS
 # ============================================================
@@ -34,22 +44,23 @@ COACH_EMAILS = {
 }
 
 # ============================================================
-# HANDLE GOOGLE OAUTH CALLBACK & SESSION CHECK
+# HANDLE GOOGLE OAUTH CALLBACK & SESSION ROUTING
 # ============================================================
 
-# 1. Process PKCE OAuth callback if returned from Google
 query_params = st.query_params
 
+# 1. Process OAuth PKCE return from Google
 if "code" in query_params:
     auth_code = query_params["code"]
     try:
-        # Exchange authorization code for a valid Supabase session
         res = supabase.auth.exchange_code_for_session({"auth_code": auth_code})
-        if res and res.user:
+        if res and res.user and res.session:
+            # Store session objects across page navigations
             st.session_state["logged_in"] = True
             st.session_state["user"] = res.user
+            st.session_state["supabase_session"] = res.session
 
-            # Clear code parameter from URL after successful login
+            # Clear code from URL to break reload/redirect loops
             st.query_params.clear()
 
             user_email = res.user.email.lower()
@@ -58,9 +69,10 @@ if "code" in query_params:
             else:
                 st.switch_page("pages/player_dashboard.py")
     except Exception as e:
+        st.query_params.clear()
         st.error(f"Authentication failed: {e}")
 
-# 2. Redirect if already authenticated in session state
+# 2. Redirect if user is already verified in st.session_state
 elif st.session_state.get("logged_in", False):
     user = st.session_state.get("user")
     if user and user.email:
@@ -246,7 +258,6 @@ st.markdown("""
 # GOOGLE SIGN IN
 # ============================================================
 
-# Cache OAuth authorization URL in session state to prevent excess API calls on reruns
 if "google_auth_url" not in st.session_state:
     try:
         google_response = supabase.auth.sign_in_with_oauth({
@@ -411,25 +422,18 @@ if loginbutton:
                 "password": passinput
             })
 
-            if data.user:
+            if data.user and data.session:
 
-                # Save login information
+                # Save session state
                 st.session_state["logged_in"] = True
                 st.session_state["user"] = data.user
+                st.session_state["supabase_session"] = data.session
 
-                # Get logged-in email
                 user_email = data.user.email.lower()
 
-                # ====================================================
-                # ROLE CHECK
-                # ====================================================
-
                 if user_email in COACH_EMAILS:
-
                     st.switch_page("pages/coach.py")
-
                 else:
-
                     st.switch_page("pages/player_dashboard.py")
 
             else:
