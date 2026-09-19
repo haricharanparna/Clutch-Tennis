@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ============================================================
-# CONNECT TO SUPABASE
+# CONNECT TO SUPABASE & RESTORE SESSION
 # ============================================================
 
 supabase = create_client(
@@ -22,12 +22,22 @@ supabase = create_client(
     st.secrets["SUPABASE_KEY"]
 )
 
+# Restore active Supabase session from session state if available
+if "supabase_session" in st.session_state and st.session_state["supabase_session"]:
+    try:
+        supabase.auth.set_session(
+            st.session_state["supabase_session"].access_token,
+            st.session_state["supabase_session"].refresh_token
+        )
+    except Exception:
+        pass
+
 # ============================================================
 # LOGIN PROTECTION
 # ============================================================
 
 if not st.session_state.get("logged_in", False):
-    st.switch_page("pages/login.py")
+    st.switch_page("login.py")
 
 # ============================================================
 # CURRENT USER
@@ -107,9 +117,7 @@ html, body, [class*="css"] {
     visibility: hidden;
 }
 
-/* ============================================================
-   NAVBAR
-   ============================================================ */
+/* NAVBAR */
 
 [data-testid="stHorizontalBlock"]:has(div.nav-logo-target) {
     background-color: #FFFFFF;
@@ -169,9 +177,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     background-color: #145A43 !important;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+/* HERO */
 
 .dashboard-hero {
     background: linear-gradient(
@@ -227,9 +233,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     max-width: 650px;
 }
 
-/* ============================================================
-   SECTION HEADERS
-   ============================================================ */
+/* SECTION HEADERS */
 
 .section-header {
     margin-top: 35px;
@@ -251,9 +255,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     color: #17201C;
 }
 
-/* ============================================================
-   CARDS
-   ============================================================ */
+/* CARDS */
 
 .dashboard-card {
     background: #FFFFFF;
@@ -289,9 +291,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.9rem;
 }
 
-/* ============================================================
-   FEEDBACK CARDS
-   ============================================================ */
+/* FEEDBACK CARDS */
 
 .feedback-card {
     background: #FFFFFF;
@@ -322,9 +322,7 @@ div[data-testid="stColumn"]:has(div.nav-cta-marker) div.stButton > button:hover 
     font-size: 0.92rem;
 }
 
-/* ============================================================
-   FORM & INPUT CONTRAST FIXES
-   ============================================================ */
+/* FORM CONTRAST FIXES */
 
 div[data-testid="stForm"] {
     background: #FFFFFF;
@@ -334,7 +332,6 @@ div[data-testid="stForm"] {
     box-shadow: 0 8px 25px rgba(23,32,28,0.04);
 }
 
-/* INPUT LABELS */
 div[data-widget="stSelectbox"] label,
 div[data-widget="stTextArea"] label,
 div[class*="stSelectbox"] label,
@@ -344,7 +341,6 @@ div[class*="stTextArea"] label {
     font-size: 0.95rem !important;
 }
 
-/* SELECT BOX CONTAINERS & TEXT */
 div[data-baseweb="select"] > div {
     background-color: #FFFFFF !important;
     color: #17201C !important;
@@ -356,7 +352,6 @@ div[data-baseweb="select"] span {
     color: #17201C !important;
 }
 
-/* TEXT AREA CONTAINER & TEXT */
 div[data-baseweb="textarea"] {
     background-color: #FFFFFF !important;
     border: 1px solid #D1D5DB !important;
@@ -368,7 +363,6 @@ div[data-baseweb="textarea"] textarea {
     color: #17201C !important;
 }
 
-/* FORM SUBMIT BUTTON */
 div[data-testid="stFormSubmitButton"] > button {
     background-color: #0B3D2E !important;
     color: #FFFFFF !important;
@@ -384,7 +378,6 @@ div[data-testid="stFormSubmitButton"] > button:hover {
     color: #FFFFFF !important;
 }
 
-/* GENERAL BUTTONS */
 div.stButton > button {
     background: #0B3D2E;
     color: white;
@@ -759,4 +752,5 @@ if st.button(
 ):
     st.session_state["logged_in"] = False
     st.session_state["user"] = None
-    st.switch_page("pages/login.py")
+    st.session_state["supabase_session"] = None
+    st.switch_page("login.py")
