@@ -34,40 +34,37 @@ COACH_EMAILS = {
 }
 
 # ============================================================
-# HANDLE GOOGLE OAUTH CALLBACK
+# HANDLE GOOGLE OAUTH CALLBACK & SESSION CHECK
 # ============================================================
 
-try:
-    # Get the current session
-    session = supabase.auth.get_session()
+# 1. Process PKCE OAuth callback if returned from Google
+query_params = st.query_params
 
-    if session and session.user:
+if "code" in query_params:
+    auth_code = query_params["code"]
+    try:
+        # Exchange authorization code for a valid Supabase session
+        res = supabase.auth.exchange_code_for_session({"auth_code": auth_code})
+        if res and res.user:
+            st.session_state["logged_in"] = True
+            st.session_state["user"] = res.user
 
-        st.session_state["logged_in"] = True
-        st.session_state["user"] = session.user
+            # Clear code parameter from URL after successful login
+            st.query_params.clear()
 
-        user_email = session.user.email.lower()
+            user_email = res.user.email.lower()
+            if user_email in COACH_EMAILS:
+                st.switch_page("pages/coach.py")
+            else:
+                st.switch_page("pages/player_dashboard.py")
+    except Exception as e:
+        st.error(f"Authentication failed: {e}")
 
-        if user_email in COACH_EMAILS:
-            st.switch_page("pages/coach.py")
-        else:
-            st.switch_page("pages/player_dashboard.py")
-
-except Exception:
-    pass
-
-# ============================================================
-# IF ALREADY LOGGED IN
-# ============================================================
-
-if st.session_state.get("logged_in", False):
-
+# 2. Redirect if already authenticated in session state
+elif st.session_state.get("logged_in", False):
     user = st.session_state.get("user")
-
     if user and user.email:
-
         user_email = user.email.lower()
-
         if user_email in COACH_EMAILS:
             st.switch_page("pages/coach.py")
         else:
@@ -249,30 +246,32 @@ st.markdown("""
 # GOOGLE SIGN IN
 # ============================================================
 
-try:
+# Cache OAuth authorization URL in session state to prevent excess API calls on reruns
+if "google_auth_url" not in st.session_state:
+    try:
+        google_response = supabase.auth.sign_in_with_oauth({
+            "provider": "google",
+            "options": {
+                "redirect_to": (
+                    "https://clutch-tennis-6yc8kmr8cduasgptdslws4"
+                    ".streamlit.app"
+                )
+            }
+        })
+        st.session_state["google_auth_url"] = google_response.url
+    except Exception:
+        st.session_state["google_auth_url"] = None
 
-    google_response = supabase.auth.sign_in_with_oauth({
-        "provider": "google",
-        "options": {
-            "redirect_to": (
-                "https://clutch-tennis-6yc8kmr8cduasgptdslws4"
-                ".streamlit.app"
-            )
-        }
-    })
-
-    google_url = google_response.url
-
+if st.session_state.get("google_auth_url"):
     st.markdown(
         f"""
-        <a class="google-button" href="{google_url}">
+        <a class="google-button" href="{st.session_state['google_auth_url']}">
             🔵 &nbsp; Continue with Google
         </a>
         """,
         unsafe_allow_html=True
     )
-
-except Exception:
+else:
     st.error("Google Sign-In is currently unavailable.")
 
 # ============================================================
@@ -292,7 +291,8 @@ with st.form("login_form", clear_on_submit=False):
 
     emailinput = st.text_input(
         "Email Address",
-        placeholder="player@clutch-tennis.com"
+        placeholder="player@clutch-tennis.com",
+        key="login_email"
     )
 
     passinput = st.text_input(
