@@ -10,6 +10,8 @@ from urllib.parse import urlencode
 import streamlit as st
 from supabase import create_client
 
+from coach_emails import get_coach_emails
+
 # ============================================================
 # PAGE CONFIG (must be the first Streamlit call)
 # ============================================================
@@ -27,10 +29,23 @@ st.set_page_config(
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key, never service_role
-APP_URL = st.secrets.get("APP_URL", "http://localhost:8501").rstrip("/")
 
-DASHBOARD_PAGE = "pages/player_dashboard.py"
-VERIFIER_TTL_SECONDS = 60 * 60  # how long a Google login link stays valid
+# APP_URL is the site root, e.g. https://clutchtennis.streamlit.app
+# (a trailing "/login" is tolerated and stripped)
+_app_base = st.secrets.get("APP_URL", "http://localhost:8501").rstrip("/")
+if _app_base.endswith("/login"):
+    _app_base = _app_base[: -len("/login")]
+APP_URL = _app_base
+
+# Google must send the user straight back to THIS page. If it lands on the
+# home page (app.py) instead, app.py bounces logged-out users to the login
+# page and the ?code=... is lost.
+LOGIN_URL = f"{APP_URL}/login"
+
+PLAYER_DASHBOARD_PAGE = "pages/player_dashboard.py"
+COACH_DASHBOARD_PAGE = "pages/coach_dashboard.py"
+
+VERIFIER_TTL_SECONDS = 24 * 60 * 60  # how long a Google login link stays valid
 
 # ============================================================
 # SESSION STATE + SUPABASE CLIENT (one client per browser session)
@@ -39,12 +54,46 @@ VERIFIER_TTL_SECONDS = 60 * 60  # how long a Google login link stays valid
 st.session_state.setdefault("logged_in", False)
 st.session_state.setdefault("user", None)
 st.session_state.setdefault("supabase_session", None)
+st.session_state.setdefault("role", None)
 
 # Keeping the client in session_state means the signed-in session stays attached
-# to it. Other pages can reuse it: supabase = st.session_state["supabase"]
+# to it (and auto-refreshes). Other pages can reuse it:
+#     supabase = st.session_state["supabase"]
 if "supabase" not in st.session_state:
     st.session_state["supabase"] = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase = st.session_state["supabase"]
+
+# ============================================================
+# ROLE ROUTING
+# ============================================================
+
+
+def resolve_role(user) -> str:
+    """Return "coach" or "player".
+
+    The coach Google Sheet is the source of truth (works for Google sign-ins,
+    which have no signup-time metadata). If the sheet can't be read, fall back
+    to the role saved in user_metadata at signup.
+    """
+    email = (getattr(user, "email", "") or "").strip().lower()
+    metadata = getattr(user, "user_metadata", None) or {}
+
+    coach_emails = get_coach_emails()
+    if coach_emails:
+        return "coach" if email in coach_emails else "player"
+    return "coach" if metadata.get("role") == "coach" else "player"
+
+
+def dashboard_for(role) -> str:
+    return COACH_DASHBOARD_PAGE if role == "coach" else PLAYER_DASHBOARD_PAGE
+
+
+def _store_login(auth_response) -> None:
+    st.session_state["logged_in"] = True
+    st.session_state["user"] = auth_response.user
+    st.session_state["supabase_session"] = auth_response.session
+    st.session_state["role"] = resolve_role(auth_response.user)
+
 
 # ============================================================
 # PKCE HELPERS
@@ -75,13 +124,15 @@ def _save_verifier(sid: str, verifier: str) -> None:
         store["items"][sid] = (verifier, time.time())
 
 
-def _pop_verifier(sid: str):
+def _get_verifier(sid: str):
+    # Not removed on read: the auth code itself is single-use, and keeping the
+    # verifier lets an old login tab (or a logout + login again) keep working.
     if not sid:
         return None
     store = _verifier_store()
     with store["lock"]:
         _purge_expired(store["items"])
-        item = store["items"].pop(sid, None)
+        item = store["items"].get(sid)
     return item[0] if item else None
 
 
@@ -97,18 +148,11 @@ def build_google_url() -> str:
     return f"{SUPABASE_URL}/auth/v1/authorize?" + urlencode(
         {
             "provider": "google",
-            # Trailing slash before "?" so the "/**" Redirect URL pattern in Supabase matches
-            "redirect_to": f"{APP_URL}/?sid={sid}",
+            "redirect_to": f"{LOGIN_URL}?sid={sid}",
             "code_challenge": challenge,
             "code_challenge_method": "s256",
         }
     )
-
-
-def _store_login(auth_response) -> None:
-    st.session_state["logged_in"] = True
-    st.session_state["user"] = auth_response.user
-    st.session_state["supabase_session"] = auth_response.session
 
 
 # ============================================================
@@ -120,11 +164,11 @@ params = st.query_params
 
 if "code" in params:
     code = params.get("code", "")
-    verifier = _pop_verifier(params.get("sid", ""))
+    verifier = _get_verifier(params.get("sid", ""))
     st.query_params.clear()  # never re-submit the same one-time code
 
     if not verifier:
-        callback_error = "That Google sign-in link expired or was already used. Please try again."
+        callback_error = "That Google sign-in link expired. Please try again."
     else:
         try:
             auth_response = supabase.auth.exchange_code_for_session(
@@ -141,10 +185,12 @@ elif "error" in params:
     callback_error = params.get("error_description") or params.get("error")
     st.query_params.clear()
 
-# Already logged in (or just finished the OAuth callback): go to the dashboard.
+# Already logged in (or just finished the OAuth callback): go to the right dashboard.
 # switch_page is called outside any try/except on purpose.
 if st.session_state["logged_in"]:
-    st.switch_page(DASHBOARD_PAGE)
+    role = st.session_state.get("role") or resolve_role(st.session_state.get("user"))
+    st.session_state["role"] = role
+    st.switch_page(dashboard_for(role))
 
 # ============================================================
 # CUSTOM STYLING
@@ -299,7 +345,7 @@ st.markdown(
     textwrap.dedent("""
         <div class="login-header">
             <div class="login-logo">🎾 CLUTCH<span>TENNIS</span></div>
-            <div class="login-subtitle">Sign in to access your player dashboard</div>
+            <div class="login-subtitle">Sign in to access your dashboard</div>
         </div>
     """),
     unsafe_allow_html=True,
@@ -309,8 +355,7 @@ if callback_error:
     st.error(callback_error)
 
 # ---- Google ----
-# Build the link once per browser session. If you add a logout button, delete
-# st.session_state["google_url"] there so the next login gets a fresh link.
+# The link is built once per browser session and can be reused (see _get_verifier).
 if "google_url" not in st.session_state:
     st.session_state["google_url"] = build_google_url()
 
@@ -355,5 +400,5 @@ if submit:
 
 # switch_page outside the try/except so Streamlit's internal control-flow exception isn't swallowed
 if login_ok:
-    st.switch_page(DASHBOARD_PAGE)
+    st.switch_page(dashboard_for(st.session_state["role"]))
 
