@@ -2,8 +2,6 @@ import base64
 import hashlib
 import secrets
 import textwrap
-import threading
-import time
 import uuid
 from urllib.parse import urlencode
 
@@ -30,7 +28,6 @@ st.set_page_config(
 SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key
 
-# Defaults strictly to your production domain so OAuth callbacks match
 _app_base = st.secrets.get("APP_URL", "https://clutchtennis.streamlit.app").rstrip("/")
 if _app_base.endswith("/login"):
     _app_base = _app_base[:-6]
@@ -40,8 +37,6 @@ LOGIN_URL = f"{APP_URL}/login"
 
 PLAYER_DASHBOARD_PAGE = "pages/player_dashboard.py"
 COACH_DASHBOARD_PAGE = "pages/coach_dashboard.py"
-
-VERIFIER_TTL_SECONDS = 24 * 60 * 60  # 24 hours
 
 # ============================================================
 # SESSION STATE + SUPABASE CLIENT
@@ -92,36 +87,30 @@ if st.session_state.get("logged_in") and st.session_state.get("user"):
     st.switch_page(dashboard_for(role))
 
 # ============================================================
-# PKCE HELPERS
+# DATABASE-BACKED PKCE HELPERS
 # ============================================================
 
 
-@st.cache_resource
-def _verifier_store() -> dict:
-    return {"lock": threading.Lock(), "items": {}}
-
-
-def _purge_expired(items: dict) -> None:
-    cutoff = time.time() - VERIFIER_TTL_SECONDS
-    for key in [k for k, (_, created) in items.items() if created < cutoff]:
-        items.pop(key, None)
-
-
 def _save_verifier(sid: str, verifier: str) -> None:
-    store = _verifier_store()
-    with store["lock"]:
-        _purge_expired(store["items"])
-        store["items"][sid] = (verifier, time.time())
+    try:
+        supabase.table("auth_states").insert({"sid": sid, "verifier": verifier}).execute()
+    except Exception as e:
+        st.error(f"Failed to write auth state to DB: {e}")
 
 
-def _get_verifier(sid: str):
+def _get_and_delete_verifier(sid: str):
     if not sid:
         return None
-    store = _verifier_store()
-    with store["lock"]:
-        _purge_expired(store["items"])
-        item = store["items"].get(sid)
-    return item[0] if item else None
+    try:
+        res = supabase.table("auth_states").select("verifier").eq("sid", sid).execute()
+        if res.data and len(res.data) > 0:
+            verifier = res.data[0]["verifier"]
+            # Clean up after retrieving
+            supabase.table("auth_states").delete().eq("sid", sid).execute()
+            return verifier
+    except Exception as e:
+        st.error(f"Failed to read auth state from DB: {e}")
+    return None
 
 
 def build_google_url() -> str:
@@ -138,7 +127,7 @@ def build_google_url() -> str:
         {
             "provider": "google",
             "redirect_to": LOGIN_URL,
-            "state": sid,  # sid passed safely via state parameter
+            "state": sid,
             "code_challenge": challenge,
             "code_challenge_method": "s256",
         }
@@ -161,12 +150,11 @@ if "code" in query_params:
     if isinstance(code, list):
         code = code[0]
 
-    # Look up sid from state parameter (or fallback to sid)
     sid = query_params.get("state") or query_params.get("sid")
     if isinstance(sid, list):
         sid = sid[0]
 
-    verifier = _get_verifier(sid)
+    verifier = _get_and_delete_verifier(sid)
 
     # Clear query parameters immediately
     st.query_params.clear()
