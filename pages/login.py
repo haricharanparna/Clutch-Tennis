@@ -84,7 +84,7 @@ def _store_login(auth_response) -> None:
     st.session_state["role"] = resolve_role(auth_response.user)
 
 
-# Early exit if user is already authenticated
+# Automatically switch if user is already logged in
 if st.session_state.get("logged_in") and st.session_state.get("user"):
     role = st.session_state.get("role") or resolve_role(st.session_state.get("user"))
     st.session_state["role"] = role
@@ -132,10 +132,12 @@ def build_google_url() -> str:
         .rstrip("=")
     )
     _save_verifier(sid, verifier)
+
     return f"{SUPABASE_URL}/auth/v1/authorize?" + urlencode(
         {
             "provider": "google",
-            "redirect_to": f"{LOGIN_URL}?sid={sid}",
+            "redirect_to": LOGIN_URL,
+            "state": sid,  # sid passed via state to preserve it through OAuth redirect
             "code_challenge": challenge,
             "code_challenge_method": "s256",
         }
@@ -143,29 +145,33 @@ def build_google_url() -> str:
 
 
 # ============================================================
-# PROCESS OAUTH CALLBACK (?code=...&sid=...) OR ?error=...
+# PROCESS OAUTH CALLBACK (?code=...&state=...) OR ?error=...
 # ============================================================
 
 callback_error = None
-# Safely parse query parameters across Streamlit versions
-query_params = st.query_params.to_dict() if hasattr(st.query_params, "to_dict") else dict(st.query_params)
+query_params = (
+    st.query_params.to_dict()
+    if hasattr(st.query_params, "to_dict")
+    else dict(st.query_params)
+)
 
 if "code" in query_params:
     code = query_params.get("code")
     if isinstance(code, list):
         code = code[0]
-        
-    sid = query_params.get("sid")
+
+    # Look up sid from the OAuth state parameter (or fallback to sid)
+    sid = query_params.get("state") or query_params.get("sid")
     if isinstance(sid, list):
         sid = sid[0]
-        
+
     verifier = _get_verifier(sid)
-    
-    # Clear query parameters to prevent code reuse loops
+
+    # Clear query parameters immediately
     st.query_params.clear()
 
     if not verifier:
-        callback_error = "That Google sign-in link expired or session was lost. Please try again."
+        callback_error = "Google sign-in session expired or state lost. Please try again."
     else:
         try:
             auth_response = supabase.auth.exchange_code_for_session(
@@ -173,7 +179,6 @@ if "code" in query_params:
             )
             if auth_response and auth_response.session and auth_response.user:
                 _store_login(auth_response)
-                # Force immediate rerun so session state applies cleanly
                 st.rerun()
             else:
                 callback_error = "Google sign-in did not return a valid session. Please try again."
@@ -388,7 +393,9 @@ if submit:
             if "invalid login credentials" in message.lower():
                 st.error("Invalid email or password.")
             elif "email not confirmed" in message.lower():
-                st.error("Please confirm your email first. Check your inbox for the confirmation link.")
+                st.error(
+                    "Please confirm your email first. Check your inbox for the confirmation link."
+                )
             else:
                 st.error(f"Login failed: {message}")
 
