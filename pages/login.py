@@ -28,27 +28,22 @@ st.set_page_config(
 # ============================================================
 
 SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key, never service_role
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key
 
-# APP_URL is the site root, e.g. https://clutchtennis.streamlit.app
-# (a trailing "/login" is tolerated and stripped)
 _app_base = st.secrets.get("APP_URL", "http://localhost:8501").rstrip("/")
 if _app_base.endswith("/login"):
     _app_base = _app_base[: -len("/login")]
 APP_URL = _app_base
 
-# Google must send the user straight back to THIS page. If it lands on the
-# home page (app.py) instead, app.py bounces logged-out users to the login
-# page and the ?code=... is lost.
 LOGIN_URL = f"{APP_URL}/login"
 
 PLAYER_DASHBOARD_PAGE = "pages/player_dashboard.py"
 COACH_DASHBOARD_PAGE = "pages/coach_dashboard.py"
 
-VERIFIER_TTL_SECONDS = 24 * 60 * 60  # how long a Google login link stays valid
+VERIFIER_TTL_SECONDS = 24 * 60 * 60  # 24 hours
 
 # ============================================================
-# SESSION STATE + SUPABASE CLIENT (one client per browser session)
+# SESSION STATE + SUPABASE CLIENT
 # ============================================================
 
 st.session_state.setdefault("logged_in", False)
@@ -56,9 +51,6 @@ st.session_state.setdefault("user", None)
 st.session_state.setdefault("supabase_session", None)
 st.session_state.setdefault("role", None)
 
-# Keeping the client in session_state means the signed-in session stays attached
-# to it (and auto-refreshes). Other pages can reuse it:
-#     supabase = st.session_state["supabase"]
 if "supabase" not in st.session_state:
     st.session_state["supabase"] = create_client(SUPABASE_URL, SUPABASE_KEY)
 supabase = st.session_state["supabase"]
@@ -69,12 +61,9 @@ supabase = st.session_state["supabase"]
 
 
 def resolve_role(user) -> str:
-    """Return "coach" or "player".
-
-    The coach Google Sheet is the source of truth (works for Google sign-ins,
-    which have no signup-time metadata). If the sheet can't be read, fall back
-    to the role saved in user_metadata at signup.
-    """
+    """Return 'coach' or 'player'."""
+    if not user:
+        return "player"
     email = (getattr(user, "email", "") or "").strip().lower()
     metadata = getattr(user, "user_metadata", None) or {}
 
@@ -95,14 +84,14 @@ def _store_login(auth_response) -> None:
     st.session_state["role"] = resolve_role(auth_response.user)
 
 
+# Early exit if user is already authenticated
+if st.session_state.get("logged_in") and st.session_state.get("user"):
+    role = st.session_state.get("role") or resolve_role(st.session_state.get("user"))
+    st.session_state["role"] = role
+    st.switch_page(dashboard_for(role))
+
 # ============================================================
 # PKCE HELPERS
-#
-# Why this exists: Google sign-in opens in a new tab, so the callback arrives
-# in a brand-new Streamlit session with a brand-new Supabase client that never
-# saw the PKCE code verifier. We generate the verifier ourselves, keep it in
-# server memory under a random ID (sid), and pass the sid through the redirect
-# URL so the callback can look the verifier up again.
 # ============================================================
 
 
@@ -125,8 +114,6 @@ def _save_verifier(sid: str, verifier: str) -> None:
 
 
 def _get_verifier(sid: str):
-    # Not removed on read: the auth code itself is single-use, and keeping the
-    # verifier lets an old login tab (or a logout + login again) keep working.
     if not sid:
         return None
     store = _verifier_store()
@@ -138,7 +125,7 @@ def _get_verifier(sid: str):
 
 def build_google_url() -> str:
     sid = uuid.uuid4().hex
-    verifier = secrets.token_urlsafe(64)  # 86 chars, within PKCE's 43-128 limit
+    verifier = secrets.token_urlsafe(64)
     challenge = (
         base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
         .decode()
@@ -160,37 +147,45 @@ def build_google_url() -> str:
 # ============================================================
 
 callback_error = None
-params = st.query_params
+# Safely parse query parameters across Streamlit versions
+query_params = st.query_params.to_dict() if hasattr(st.query_params, "to_dict") else dict(st.query_params)
 
-if "code" in params:
-    code = params.get("code", "")
-    verifier = _get_verifier(params.get("sid", ""))
-    st.query_params.clear()  # never re-submit the same one-time code
+if "code" in query_params:
+    code = query_params.get("code")
+    if isinstance(code, list):
+        code = code[0]
+        
+    sid = query_params.get("sid")
+    if isinstance(sid, list):
+        sid = sid[0]
+        
+    verifier = _get_verifier(sid)
+    
+    # Clear query parameters to prevent code reuse loops
+    st.query_params.clear()
 
     if not verifier:
-        callback_error = "That Google sign-in link expired. Please try again."
+        callback_error = "That Google sign-in link expired or session was lost. Please try again."
     else:
         try:
             auth_response = supabase.auth.exchange_code_for_session(
                 {"auth_code": code, "code_verifier": verifier}
             )
-            if auth_response and auth_response.session:
+            if auth_response and auth_response.session and auth_response.user:
                 _store_login(auth_response)
+                # Force immediate rerun so session state applies cleanly
+                st.rerun()
             else:
-                callback_error = "Google sign-in did not return a session. Please try again."
+                callback_error = "Google sign-in did not return a valid session. Please try again."
         except Exception as err:
             callback_error = f"Google sign-in failed: {err}"
 
-elif "error" in params:
-    callback_error = params.get("error_description") or params.get("error")
+elif "error" in query_params:
+    err_desc = query_params.get("error_description") or query_params.get("error")
+    if isinstance(err_desc, list):
+        err_desc = err_desc[0]
+    callback_error = err_desc
     st.query_params.clear()
-
-# Already logged in (or just finished the OAuth callback): go to the right dashboard.
-# switch_page is called outside any try/except on purpose.
-if st.session_state["logged_in"]:
-    role = st.session_state.get("role") or resolve_role(st.session_state.get("user"))
-    st.session_state["role"] = role
-    st.switch_page(dashboard_for(role))
 
 # ============================================================
 # CUSTOM STYLING
@@ -355,7 +350,6 @@ if callback_error:
     st.error(callback_error)
 
 # ---- Google ----
-# The link is built once per browser session and can be reused (see _get_verifier).
 if "google_url" not in st.session_state:
     st.session_state["google_url"] = build_google_url()
 
@@ -398,7 +392,5 @@ if submit:
             else:
                 st.error(f"Login failed: {message}")
 
-# switch_page outside the try/except so Streamlit's internal control-flow exception isn't swallowed
 if login_ok:
     st.switch_page(dashboard_for(st.session_state["role"]))
-
