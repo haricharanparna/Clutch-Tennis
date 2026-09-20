@@ -30,9 +30,10 @@ st.set_page_config(
 SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]  # must be the ANON key
 
-_app_base = st.secrets.get("APP_URL", "http://localhost:8501").rstrip("/")
+# Defaults strictly to your production domain so OAuth callbacks match
+_app_base = st.secrets.get("APP_URL", "https://clutchtennis.streamlit.app").rstrip("/")
 if _app_base.endswith("/login"):
-    _app_base = _app_base[: -len("/login")]
+    _app_base = _app_base[:-6]
 APP_URL = _app_base
 
 LOGIN_URL = f"{APP_URL}/login"
@@ -137,7 +138,7 @@ def build_google_url() -> str:
         {
             "provider": "google",
             "redirect_to": LOGIN_URL,
-            "state": sid,  # sid passed via state to preserve it through OAuth redirect
+            "state": sid,  # sid passed safely via state parameter
             "code_challenge": challenge,
             "code_challenge_method": "s256",
         }
@@ -160,7 +161,7 @@ if "code" in query_params:
     if isinstance(code, list):
         code = code[0]
 
-    # Look up sid from the OAuth state parameter (or fallback to sid)
+    # Look up sid from state parameter (or fallback to sid)
     sid = query_params.get("state") or query_params.get("sid")
     if isinstance(sid, list):
         sid = sid[0]
